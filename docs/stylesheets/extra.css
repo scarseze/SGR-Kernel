@@ -1,0 +1,47 @@
+/* docs/stylesheets/extra.css */
+
+:root {
+  --md-primary-fg-color: #4f46e5;
+  --md-primary-fg-color--light: #818cf8;
+  --md-primary-fg-color--dark: #3730a3;
+}
+
+.md-header {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+.md-banner {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+}
+
+/* Custom callout boxes */
+.philosophy-box {
+  border-left: 4px solid #4f46e5;
+  padding: 1rem;
+  background: rgba(79, 70, 229, 0.1);
+  margin: 1rem 0;
+}
+
+.compliance-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.compliance-152fz {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.compliance-gdpr {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.compliance-hipaa {
+  background: #fef3c7;
+  color: #92400e;
+}

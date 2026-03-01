@@ -1,250 +1,150 @@
 # System Overview
 
 **Project**: SGR Kernel  
-**Version**: 1.0.0-rc1 (Stable v1.x)  
+**Version**: 2.0.0-rc1 (Multi-Agent Swarm)  
 **Status**: Production-Ready  
 **License**: MIT  
 
 ```text
 ┌──────────────────────────────────────────────┐
 │                  USER / CLI                  │
-│        experiment.yaml / run command         │
+│               Chainlit WebUI                 │
 └──────────────────────┬───────────────────────┘
-                       │
+                       │ Chat Context
                        ▼
 ┌──────────────────────────────────────────────┐
-│                 AGENT KERNEL                 │
+│                 SWARM ENGINE                 │
 │                                              │
-│  • Step Executor                             │
-│  • Skill Router                              │
-│  • State Store                               │
-│  • WAL Trace                                 │
-│  • Retry / Timeout                           │
+│  • Agent Handoff / Transfer                  │
+│  • Context & Memory Retention                │
+│  • LLM Tool Calling (Skills)                 │
 └───────────────┬──────────────────────────────┘
-                │ skill call
+                │ delegates to
+                ▼
+┌──────────────────────────────────────────────┐
+│             SPECIALIZED AGENTS               │
+│                                              │
+│  • RouterAgent (Triage)                      │
+│  • KnowledgeAgent (RAG / DBs)                │
+│  • PeftAgent (ML / Tuning)                   │
+│  • DataAgent (Analytics)                     │
+│  • WriterAgent (Docs)                        │
+└───────────────┬──────────────────────────────┘
+                │ executes
                 ▼
 ┌──────────────────────────────────────────────┐
 │                 SKILL LAYER                  │
 │                                              │
-│ dataset_skill                                │
-│ config_skill                                 │
-│ training_skill                               │
-│ eval_skill                                   │
-│ hpo_skill                                    │
-│ merge_skill                                  │
-│ artifact_skill                               │
-│ protocols/*                                  │
-└───────────────┬──────────────────────────────┘
-                │ job spec
-                ▼
-┌──────────────────────────────────────────────┐
-│                DISPATCHER                    │
-│                                              │
-│  LocalDispatcher                             │
-│  SSHDispatcher                               │
-│  (extensible)                                │
-└───────────────┬──────────────────────────────┘
-                │
-      ┌─────────┴─────────┐
-      ▼                   ▼
-┌───────────────┐   ┌────────────────┐
-│ GPU WORKER    │   │ EVAL WORKER    │
-│ training run  │   │ eval suite     │
-└───────┬───────┘   └───────┬────────┘
-        │                   │
-        └──────────┬────────┘
-                   ▼
-┌──────────────────────────────────────────────┐
-│            ARTIFACT & METRIC STORE           │
-│                                              │
-│ adapters/                                    │
-│ metrics/                                     │
-│ manifests/                                   │
-│ traces/ (WAL)                                │
-│ reports/                                     │
+│ knowledge_base (Lazy loads VectorDB)         │
+│ peftlab (Lazy loads Optuna/Torch)            │
+│ data_analyst                                 │
+│ gost_writer                                  │
 └──────────────────────────────────────────────┘
 ```
 
 ## 🎯 Purpose (Зачем это нужно)
 
-The **SGR Kernel** is a specialized Agentic Operating System designed for **automated AI research and engineering**. It bridges the gap between high-level reasoning (LLMs) and low-level execution (training, coding, deployment).
+The **SGR Kernel** is a specialized Agentic Operating System. Originally a legacy DAG step-executor, it has evolved into a full **Multi-Agent Swarm Architecture**. It bridges the gap between high-level reasoning (LLMs) and specialized execution (training, RAG, coding).
 
 ### Primary Goals
-1.  **Autonomous ML Engineering**: End-to-end automation of model training, fine-tuning (LoRA/PEFT), and evaluation.
-2.  **Reproducible Science**: Ensuring every experiment is tracked, deterministic, and reproducible via strict manifests.
-3.  **Enterprise Security**: Sandboxing code execution and enforcing strict policy/budget constraints.
-4.  **Scalability**: Distributed execution of heavy workloads (training, rendering, deep research) across remote workers.
+1.  **Multi-Agent Orchestration**: Autonomous collaboration between specialized Agent personas (Router, Analyst, ML Engineer) that dynamically hand off tasks to one another.
+2.  **Decoupled & Lightweight Core**: Skills lazily load heavy dependencies (like `chromadb`, `optuna`). If the environment lacks them, the skill sleeps, but the Kernel never crashes.
+3.  **Reproducible Science**: Ensuring every machine learning experiment (PEFT) is tracked and reproducible.
 
 ### Target Audience
-*   **AI Researchers**: To run ablation studies, curriculum learning, and ensemble experiments without boilerplate.
-*   **LLM Engineers**: To fine-tune models on custom data with production-grade monitoring and artifacts.
-*   **Agent Developers**: To build complex autonomous workflows using the Kernel's DAG and Skill primitives.
+*   **AI Researchers**: To run ablation studies and hyperparameter tuning (HPO) conversationally via the `PeftAgent`.
+*   **LLM Engineers**: To query massive documentation via the decoupled `KnowledgeAgent` (RAG).
+*   **Agent Developers**: To build new Agent Personas and integrate them into the Swarm.
 
 ---
 
 ## 🧱 System Scope
 
 ### ✅ What is in Scope (Что входит)
-*   **Kernel Core**: DAG orchestration, state management, tracing, policy enforcement.
-*   **Skill Ecosystem**: Modular tools for Coding (Docker), Training (PEFT), Research, and Analysis.
-*   **PEFT Lab**: Specialized stack for LoRA training, merging, and evaluation.
-*   **Distributed Layer**: Unified dispatcher for remote job execution (SSH, Cloud).
-*   **Observability**: Full trace history (WAL), metric dashboards, and cost tracking.
+*   **Swarm Core**: Conversational orchestration, LLM interfacing, and `TransferToAgent` mechanisms.
+*   **Agent Ecosystem**: Pre-configured Personas armed with specific capabilities.
+*   **PEFT Lab**: Specialized stack for LoRA training, HPO, and exotic backends (Mamba/RWKV).
+*   **Knowledge Base**: Decoupled RAG implementations.
 
 ### ❌ What is NOT in Scope (Что НЕ входит)
-*   **General Purpose OS**: It is not a replacement for Linux/Windows; it runs *on top* of them.
-*   **Web UI**: The kernel provides APIs and artifacts; it is UI-agnostic (though includes a CLI dashboard).
-*   **Raw Hardware Management**: It relies on existing drivers (CUDA) and platforms (Docker, SSH); it does not manage bare metal directly.
+*   **Global Dependency Bloat**: We do NOT force `torch` or `chromadb` on a user who just wants to run a simple text-parsing agent.
 
 ---
 
 ## 🧩 Subsystems
 
-### 1. Agent Kernel (`core/`)
+### 1. Swarm Engine (`core/swarm.py`)
 The brain of the system. Responsibilities:
-*   **Dispatcher**: Unified transport for remote execution.
-*   **Lifecycle**: Formal 7-phase step execution.
-*   **Reliability**: Semantic failure engine and recovery.
-*   **Replay**: Deterministic record/replay inter-layer.
-*   **Artifact Store**: Content-addressed immutability.
+*   **Loop Management**: Turns, tool calls, LLM history.
+*   **Handoff**: Intercepts `TransferToAgent` signals and swaps the active persona's system prompt transparently.
 
-### 2. Skill Layer (`skills/`)
-The hands of the system. Key modules:
-*   `code_interpreter`: Sandboxed Python execution.
-*   `lora_trainer`: Fine-tuning orchestration.
-*   `research_agent`: Deep web research.
-*   `file_system`: Workspace management.
+### 2. Specialized Agents (`ui_app.py`, `core/agent.py`)
+The Personas.
+*   `RouterAgent`: The gateway. Greets the user, triages the intent, and transfers control.
+*   `KnowledgeAgent`: Decoupled RAG. Has exclusive access to internal manuals and databases.
+*   `PeftAgent`: ML Engineer. Runs sensitivity analysis and orchestrates training via PEFTlab.
 
-### 3. Dispatcher (`core/dispatcher.py`)
-The nervous system for remote actions.
-*   Abstracts **where** code runs (Local vs SSH vs Cloud).
-*   Handles job submission, polling, and result collection.
-*   Ensures asynchronous execution of long-running tasks.
-
-### 4. PEFT Lab (`skills/lora_trainer/`)
-A specialized research environment embedded in the kernel.
-*   **TrainingSkill**: QLoRA/LoRA fine-tuning.
-*   **HPOSkill**: Hyperparameter optimization (Optuna-like).
-*   **MergeSkill**: Adapter fusion and export (GGUF, Safetensors).
-
-### 5. Research Protocols (`protocols/`)
-Higher-order logic for scientific rigor.
-*   `ablation`: Systematic parameter sweeping.
-*   `curriculum`: Difficulty-based training stages.
-*   `ensemble`: Diversity-driven model training.
-
-### 6. Reproducibility (`reproducibility.py`)
-The "Black Box" recorder.
-*   Captures environment snapshots (pip, cuda).
-*   Hashes all inputs (data, config) and outputs (models).
-*   Generates `manifest.json` for every experiment.
+### 3. Skill Layer (`skills/`)
+The hands of the system.
+*   `knowledge_base`: Lazy-loads VectorDB operations.
+*   `peftlab`: Fine-tuning operations and Optuna HPO.
+*   `handoff`: The dynamic `TransferSkill` that allows LLMs to "call" other agents.
 
 ---
 
 ## 🔁 Execution Flow (Как это работает)
 
-1.  **Request**: User sends a goal (e.g., "Fine-tune Llama 3 on dataset X").
-2.  **Planning**: Kernel generates a `ExecutionPlan` (DAG of steps).
-3.  **Orchestration**:
-    *   Kernel executes steps sequentially or in parallel.
-    *   **Trace**: Every step is logged to `RequestTrace`.
-    *   **Checkpoint**: State is saved to disk (WAL) after each step.
-4.  **Skill Execution**:
-    *   If `remote=True`, Dispatcher sends job to Worker.
-    *   If `job`, Worker runs training/analysis.
-5.  **Artifacts**: Results (adapters, logs, metrics) are stored in `artifacts/`.
-6.  **Loop**: Kernel replans if errors occur (Self-Correction).
+1.  **Request**: User messages the UI ("Fix the learning rate on my Lora adapter").
+2.  **Triage**: `RouterAgent` interprets the request and triggers `transfer_to_peftagent()`.
+3.  **Handoff**: `SwarmEngine` catches the transfer, swaps the Active Agent to `PeftAgent`, and prepends the Peft instructions to the LLM context.
+4.  **Execution**: `PeftAgent` calls `tune_hyperparameters` skill.
+5.  **Completion**: `PeftAgent` formats the HPO report and transfers control back to the `RouterAgent` or waits for the user.
 
----
-
-
----
 ---
 
 # Обзор Системы (System Overview)
 
 **Проект**: SGR Kernel  
-**Версия**: 1.2 (Enterprise/Research)  
+**Версия**: 2.0 (Multi-Agent Swarm)  
 **Статус**: Production-Ready  
 
 ## 🎯 Назначение (Purpose)
 
-**SGR Kernel** — это специализированная Агентная Операционная Система, разработанная для **автоматизированных научных исследований и ML-инжиниринга**. Она устраняет разрыв между высокоуровневыми рассуждениями (LLM) и низкоуровневым исполнением (тренировка, кодинг, деплой).
+**SGR Kernel** — это Агентная Операционная Система. Эволюционировав из монолитного DAG-оркестратора, теперь это полноценный **Рой Агентов (Swarm)**.
 
 ### Основные Цели
-1.  **Автономный ML-инжиниринг**: End-to-end автоматизация тренировки моделей, файн-тюнинга (LoRA/PEFT) и оценки.
-2.  **Воспроизводимая Наука**: Гарантия того, что каждый эксперимент отслеживается, детерминирован и воспроизводим через строгие манифесты.
-3.  **Enterprise Безопасность**: Изоляция исполнения кода (Sandbox) и соблюдение строгих политик/бюджетов.
-4.  **Масштабируемость**: Распределенное выполнение тяжелых задач (тренировка, рендеринг) на удаленных воркерах.
+1.  **Мультиагентность**: Узкоспециализированные агенты (Роутер, Аналитик, ML-инженер) общаются и динамически передают друг другу задачи.
+2.  **Декаплинг (Легковесность)**: Тяжелые зависимости (VectorDB, PyTorch, Optuna) грузятся лениво (Lazy Load). Кернел стал молниеносным.
+3.  **ML и RAG "Из коробки"**: Интегрированная база знаний и Лаборатория PEFT (Файн-тюнинг).
 
 ---
 
 ## 🧱 Границы Системы (System Scope)
 
 ### ✅ Что Входит (In Scope)
-*   **Ядро (Kernel Core)**: Оркестрация DAG, управление состоянием, трейсинг, политики.
-*   **Экосистема Скиллов**: Модульные инструменты для Кодинга, Тренировки, Ресерча.
-*   **PEFT Lab**: Специализированный стек для LoRA тренировок и мержинга.
-*   **Распределенный Слой**: Унифицированный диспетчер для удаленных задач.
-*   **Наблюдаемость**: Полная история трейсов (WAL), дашборды, метрики.
-
-### ❌ Что НЕ Входит (Out of Scope)
-*   **OS Общего Назначения**: Это не замена Linux/Windows; работает поверх них.
-*   **Web UI**: Ядро предоставляет API и артефакты; не зависит от UI.
-*   **Управление Железом**: Полагается на существующие драйверы (CUDA) и платформы.
+*   **Swarm Ядро**: Движок передачи контекста (`TransferToAgent`) и ведения истории.
+*   **Персоналии Агентов**: Готовые Агенты с настроенными системными промптами.
+*   **PEFT Lab**: Стек для LoRA файн-тюнинга, HPO и работы с Mamba/RWKV.
 
 ---
 
 ## 🧩 Подсистемы (Subsystems)
 
-### 1. Agent Kernel (`core/`)
+### 1. Swarm Engine (`core/swarm.py`)
 Мозг системы.
-*   **Planner**: Превращает запросы в план (DAG).
-*   **Executor**: Запускает скиллы, обрабатывает ретраи.
-*   **Memory**: Управляет контекстом (Vector DB/SQL).
-*   **Middleware**: Безопасность, Политики, Апрувы.
+*   **Оркестрация**: Крутит цикл LLM и обрабатывает вызовы функций (Tool Calling).
+*   **Передача контекста (Handoff)**: Бесшовно меняет активного агента, если был вызван скилл `transfer_to_X`.
 
-### 2. Skill Layer (`skills/`)
-Руки системы.
-*   `code_interpreter`: Python в песочнице.
-*   `lora_trainer`: Оркестрация файн-тюнинга.
-*   `file_system`: Работа с файлами.
+### 2. Специализированные Агенты
+Сформированная команда экспертов:
+*   `RouterAgent`: Встречает пользователя, классифицирует интент и отправляет к специалисту.
+*   `KnowledgeAgent`: Библиотекарь. Единолично владеет тяжелым RAG-поиском.
+*   `PeftAgent`: ML-Инженер. Тюнит гиперпараметры через Optuna.
+*   `DataAgent`: Аналитик. Работает с данными и браузером.
 
-### 3. Dispatcher (`core/dispatcher.py`)
-Нервная система для удаленных действий.
-*   Абстрагирует **где** выполняется код (Local vs SSH vs Cloud).
-*   Управляет отправкой задач и сбором результатов.
-
-### 4. PEFT Lab (`skills/lora_trainer/`)
-Встроенная исследовательская среда.
-*   **TrainingSkill**: QLoRA/LoRA.
-*   **HPOSkill**: Оптимизация гиперпараметров.
-*   **MergeSkill**: Слияние адаптеров.
-
-### 5. Research Protocols (`protocols/`)
-Высокоуровневая логика для научной строгости.
-*   `ablation`: Абаляции (sweep).
-*   `curriculum`: Обучение по сложности.
-*   `ensemble`: Ансамблирование.
-
-### 6. Reproducibility (`reproducibility.py`)
-"Черный ящик" самописца.
-*   Снимки окружения (pip, cuda).
-*   Хеширование всех входов и выходов.
-*   Генерация `manifest.json`.
-
----
-
-## 🔁 Поток Выполнения (Execution Flow)
-
-1.  **Request**: Пользователь ставит цель (напр. "Файн-тюн Llama 3").
-2.  **Planning**: Кернел генерирует `ExecutionPlan` (DAG шагов).
-3.  **Orchestration**:
-    *   Кернел выполняет шаги.
-    *   **Trace**: Каждый шаг логируется.
-    *   **Checkpoint**: Состояние сохраняется на диск (WAL).
-4.  **Skill Execution**:
-    *   Если `remote=True`, Диспетчер шлет задачу Воркеру.
-5.  **Artifacts**: Результаты сохраняются в `artifacts/`.
-6.  **Loop**: Кернел перепланирует при ошибках (Self-Correction).
+### 3. Слой Навыков (`skills/`)
+Инструменты агентов.
+*   `knowledge_base`: Изолированный векторный поиск.
+*   `peftlab`: Конфигурация и запуск обучения моделей.
+*   `handoff`: Механизм передачи мяча между агентами.
 

@@ -1,19 +1,23 @@
-from pydantic import BaseModel, Field
-from typing import Any, Dict, List, Optional, Union
 import json
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
+
 from core.types import StepStatus
+
 
 class StepResult(BaseModel):
     """
     Standard result object for a skill execution step.
     Allows passing structured data between steps.
     """
-    data: Any = Field(..., description="The main output (str, dict, list, model)")
+
+    data: Any = Field(..., description="The main output (str, dict[str, Any], list, model)")
     artifacts: List[str] = Field(default_factory=list, description="Paths to generated files")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Execution stats/meta")
     output_text: Optional[str] = Field(None, description="Human-readable summary or full text output")
     status: StepStatus = Field(default=StepStatus.COMPLETED, description="Execution status")
-    
+
     def __str__(self):
         """
         String representation for logging or simple string-based consumers.
@@ -21,7 +25,7 @@ class StepResult(BaseModel):
         """
         if self.output_text:
             return self.output_text
-            
+
         if isinstance(self.data, str):
             return self.data
         return str(self.data)
@@ -36,7 +40,7 @@ class StepResult(BaseModel):
                 return self.data[:max_len]
             elif isinstance(self.data, (dict, list)):
                 return json.dumps(self.data, ensure_ascii=False, default=str)[:max_len]
-            elif hasattr(self.data, 'model_dump'):
+            elif hasattr(self.data, "model_dump"):
                 return json.dumps(self.data.model_dump(), ensure_ascii=False, default=str)[:max_len]
             else:
                 return str(self.data)[:max_len]

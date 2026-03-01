@@ -1,5 +1,7 @@
 import re
-from typing import List, Tuple
+from typing import Any, List, Tuple
+
+from core.pii_classifier import PIIClassifier
 
 class SecurityGuardian:
     """
@@ -15,7 +17,6 @@ class SecurityGuardian:
         (r"(?i)\bod\b", "Detected 'od' (Octal dump)"),
         (r"(?i)\bopenssl\s+enc\b", "Detected 'openssl enc' (Encryption/Exfiltration)"),
         (r"(?i)\bgpg\b", "Detected 'gpg' (Encryption)"),
-        
         # --- 2. Network & Reverse Shells ---
         (r"(?i)\bnc\s+", "Detected 'nc' (Netcat)"),
         (r"(?i)\bnetcat\b", "Detected 'netcat'"),
@@ -28,7 +29,6 @@ class SecurityGuardian:
         (r"(?i)\bcurl\s+--upload-file", "Detected 'curl upload'"),
         (r"(?i)/dev/tcp/", "Detected '/dev/tcp' (Bash socket)"),
         (r"(?i)/dev/udp/", "Detected '/dev/udp' (Bash socket)"),
-
         # --- 3. Secrets Access ---
         (r"(?i)\benv\b", "Detected 'env' (Environment dumping)"),
         (r"(?i)\bprintenv\b", "Detected 'printenv'"),
@@ -38,7 +38,6 @@ class SecurityGuardian:
         (r"(?i)credentials", "Detected 'credentials' file access"),
         (r"(?i)id_rsa", "Detected SSH key access"),
         (r"(?i)\.ssh", "Detected .ssh directory"),
-        
         # --- 4. Dangerous System Commands ---
         (r"(?i)\brm\s+-[rRf]*\s+/", "Detected 'rm -rf /' (System destruction)"),
         (r"(?i):(){:|:&};:", "Detected Fork Bomb"),
@@ -48,12 +47,10 @@ class SecurityGuardian:
         (r"(?i)\bchown\b", "Detected 'chown'"),
         (r"(?i)\bshutdown\b", "Detected 'shutdown'"),
         (r"(?i)\breboot\b", "Detected 'reboot'"),
-        
         # --- 5. Package Managers (Heavy/DoS) ---
         (r"(?i)\bpip\s+install", "Detected pip install (Unauthorized package)"),
         (r"(?i)\bnpm\s+install", "Detected npm install"),
         (r"(?i)\bapt(-get)?\s+install", "Detected apt install"),
-        
         # --- 6. Path Traversal & Sensitive Files ---
         (r"(?i)\.\./\.\./", "Detected Deep Path Traversal"),
         (r"(?i)/etc/passwd", "Detected /etc/passwd access"),
@@ -64,7 +61,7 @@ class SecurityGuardian:
     def __init__(self):
         # 241+ Regex Patterns (Consolidated)
         # Categories: Secrets, Exfiltration, DoS, Network, Malicious Files
-        pass
+        self.pii_classifier = PIIClassifier(compliance_level="rf_152fz")
 
     def validate(self, input_text: str) -> None:
         """
@@ -74,7 +71,8 @@ class SecurityGuardian:
         for pattern, reason in self.BLOCK_PATTERNS:
             if re.search(pattern, input_text):
                 raise SecurityViolationError(f"Security Alert: {reason}. Action blocked.")
-    def validate_params(self, params: dict) -> None:
+
+    def validate_params(self, params: dict[str, Any]) -> None:
         """
         Validate resolved parameters before skill execution.
         Detects injection via template resolution (e.g., user input → param → command).
@@ -84,10 +82,11 @@ class SecurityGuardian:
             if isinstance(value, str):
                 self.validate(value)
 
-    def validate_output(self, output: str) -> None:
+    def validate_output(self, output: str) -> str:
         """
         Validate skill output before exposing to user.
         Detects leaked secrets, paths, or sensitive data patterns.
+        Returns sanitized string.
         """
         OUTPUT_LEAK_PATTERNS = [
             (r"(?i)api[_-]?key\s*[:=]\s*\S+", "Potential API key leak in output"),
@@ -97,8 +96,16 @@ class SecurityGuardian:
             (r"-----BEGIN\s+(RSA\s+)?PRIVATE\s+KEY-----", "Private key detected in output"),
         ]
         for pattern, reason in OUTPUT_LEAK_PATTERNS:
-            if re.search(pattern, output):
-                raise SecurityViolationError(f"Output Security Alert: {reason}. Output sanitized.")
+            if re.search(pattern, output): 
+                # Instead of crashing, we redact the output
+                # raise SecurityViolationError(f"Output Security Alert: {reason}. Output sanitized.")
+                output = re.sub(pattern, "[REDACTED SECRET]", output)
+                
+        # Deep PII inspection
+        if self.pii_classifier:
+            output = self.pii_classifier.anonymize(output)
+            
+        return output
 
     def _flatten_values(self, obj, depth: int = 0) -> list:
         """Recursively extract string values from nested dicts/lists (max depth 5)."""
@@ -114,6 +121,7 @@ class SecurityGuardian:
         elif isinstance(obj, str):
             values.append(obj)
         return values
+
 
 class SecurityViolationError(Exception):
     pass

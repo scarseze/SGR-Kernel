@@ -1,36 +1,51 @@
-import os
-import json
-import re
-from typing import Type, TypeVar, Optional, Any, Dict
-from pydantic import BaseModel, ValidationError
-from openai import AsyncOpenAI, APITimeoutError, APIConnectionError, RateLimitError, InternalServerError
 import asyncio
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+import json
+import os
+import re
+from typing import Any, Dict, Type, TypeVar
+
+from openai import APIConnectionError, APITimeoutError, AsyncOpenAI, InternalServerError, RateLimitError
+from pydantic import BaseModel, ValidationError
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+from core.chaos import with_chaos, ChaosException
 
 T = TypeVar("T", bound=BaseModel)
 
+
 class LLMService:
-    def __init__(self, base_url: str = None, api_key: str = None, model: str = "deepseek-chat", timeout: float = 60.0, replay_engine: Any = None):
+    def __init__(
+        self,
+        base_url: str | None = None,
+        api_key: str | None = None,
+        model: str | None = None,
+        timeout: float = 60.0,
+        replay_engine: Any = None,
+    ):
         self.api_key = api_key or os.getenv("LLM_API_KEY") or os.getenv("DEEPSEEK_API_KEY")
         self.client = AsyncOpenAI(
-            base_url=base_url or os.getenv("LLM_BASE_URL", "https://api.deepseek.com"),
+            base_url=base_url or os.getenv("LLM_BASE_URL"),
             api_key=self.api_key,
-            timeout=timeout
+            timeout=timeout,
         )
-        self.model = model or os.getenv("LLM_MODEL", "deepseek-chat")
+        self.model = model or os.getenv("LLM_MODEL")
+        if not self.model:
+            raise ValueError("LLM_MODEL must be provided either via arguments or environment variables.")
         self.replay_engine = replay_engine
 
     @retry(
-        retry=retry_if_exception_type((APITimeoutError, APIConnectionError, RateLimitError, InternalServerError)),
+        retry=retry_if_exception_type((APITimeoutError, APIConnectionError, RateLimitError, InternalServerError, ChaosException, ValueError, ValidationError)),
         stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10)
+        wait=wait_exponential(multiplier=1, min=2, max=10),
     )
-    async def generate_structured(self, system_prompt: str, user_prompt: str, response_model: Type[T], temperature: float = 0.0) -> tuple[T, dict]:
+    @with_chaos
+    async def generate_structured(
+        self, system_prompt: str, user_prompt: str, response_model: Type[T], temperature: float = 0.0
+    ) -> tuple[T, dict[str, Any]]:
         """
         Generates a response... returns (model_instance, usage_dict)
         """
         schema_json = json.dumps(response_model.model_json_schema(), indent=2)
-        
+
         # Enhanced system prompt
         full_system_prompt = (
             f"{system_prompt}\n\n"
@@ -51,27 +66,24 @@ class LLMService:
             start_t = asyncio.get_event_loop().time()
             response = await self.client.chat.completions.create(
                 model=self.model,
-                messages=[
-                    {"role": "system", "content": full_system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                response_format={"type": "json_object"}, 
-                temperature=temperature
+                messages=[{"role": "system", "content": full_system_prompt}, {"role": "user", "content": user_prompt}],
+                response_format={"type": "json_object"},
+                temperature=temperature,
             )
             latency = (asyncio.get_event_loop().time() - start_t) * 1000
-            
-            if not response or not hasattr(response, 'choices') or not response.choices:
+
+            if not response or not hasattr(response, "choices") or not response.choices:
                 raise ValueError(f"Invalid LLM response: {response}")
 
             content = response.choices[0].message.content
-            
+
             # Extract Usage
             usage = {
                 "prompt_tokens": response.usage.prompt_tokens if response.usage else 0,
                 "completion_tokens": response.usage.completion_tokens if response.usage else 0,
                 "total_tokens": response.usage.total_tokens if response.usage else 0,
                 "latency_ms": latency,
-                "model": self.model
+                "model": self.model,
             }
 
             # RECORD (Release Gate v1)
@@ -80,10 +92,10 @@ class LLMService:
                 self.replay_engine.record_call(prompt_key, self.model, temperature, content, usage)
 
             return self._parse_json(content, response_model), usage
-            
-        except Exception as e:
+
+        except Exception:
             # Tenacity will handle specified exceptions, but we log others
-            # print(f"LLM Error: {e}") 
+            # print(f"LLM Error: {e}")
             raise
 
     def _parse_json(self, content: str, model: Type[T]) -> T:
@@ -101,60 +113,59 @@ class LLMService:
             else:
                 # 3. Last ditch: try to find start/end of json object
                 try:
-                    start = content.find('{')
-                    end = content.rfind('}') + 1
+                    start = content.find("{")
+                    end = content.rfind("}") + 1
                     if start != -1 and end != -1:
                         data = json.loads(content[start:end])
                         return model.model_validate(data)
-                except:
+                except Exception:
                     pass
-                
-                raise ValueError(f"Could not parse JSON from LLM response: {content[:100]}...")
+
+                raise ValueError(f"Could not parse JSON from LLM response: {content[:100]}...") from None
 
 
 class ModelPool:
     """
     Manages a pool of LLM services for different tiers.
     """
+
     def __init__(self, config: Dict[str, Any], replay_engine: Any = None):
         # Default fallback: if specific tier model not set, use default 'model' from config
-        default_model = config.get("model", "deepseek-chat")
-        
+        default_model = config.get("model") or os.getenv("LLM_MODEL")
+        if not default_model:
+            raise ValueError("Model must be provided in config or as LLM_MODEL in environment.")
+
         # Fast Tier: cheap, fast, good for extraction/simple tasks
         self.fast = LLMService(
             base_url=config.get("base_url"),
             api_key=config.get("api_key"),
             model=config.get("fast_model", default_model),
             timeout=config.get("fast_timeout", 60.0),
-            replay_engine=replay_engine
+            replay_engine=replay_engine,
         )
-        
+
         # Mid Tier: balanced, good for standard coding/summary
         self.mid = LLMService(
             base_url=config.get("base_url"),
             api_key=config.get("api_key"),
             model=config.get("mid_model", default_model),
             timeout=config.get("mid_timeout", 300.0),
-            replay_engine=replay_engine
+            replay_engine=replay_engine,
         )
-        
+
         # Heavy Tier: expensive, smart, good for planning/reasoning/critic
         self.heavy = LLMService(
             base_url=config.get("base_url"),
             api_key=config.get("api_key"),
             model=config.get("heavy_model", default_model),
             timeout=config.get("heavy_timeout", 900.0),
-            replay_engine=replay_engine
+            replay_engine=replay_engine,
         )
-        
+
         # Mapping for easy lookup
         from core.router import ModelTier
-        self._tiers = {
-            ModelTier.FAST: self.fast,
-            ModelTier.MID: self.mid,
-            ModelTier.HEAVY: self.heavy
-        }
 
-    def get(self, tier: 'ModelTier') -> LLMService:
+        self._tiers = {ModelTier.FAST: self.fast, ModelTier.MID: self.mid, ModelTier.HEAVY: self.heavy}
+
+    def get(self, tier: "ModelTier") -> LLMService:
         return self._tiers.get(tier, self.mid)
-

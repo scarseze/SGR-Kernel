@@ -1,21 +1,25 @@
 import os
+from typing import Any, Dict
+
 import structlog
-from typing import Dict, Any, List
+
 # Import libraries inside methods or try/except to avoid crashing if not installed yet
 try:
     from docx import Document
     from docx.shared import Pt
     from pptx import Presentation
-    from pptx.util import Inches, Pt as PptPt
+    from pptx.util import Inches
+    from pptx.util import Pt as PptPt
 except ImportError:
-    pass # Will be installed in Docker
+    pass  # Will be installed in Docker
 
 from skills.base import BaseSkill, SkillMetadata
-from skills.office_suite.schema import GenerateDocument, DocumentElement
+from skills.office_suite.schema import GenerateDocument
 
 logger = structlog.get_logger(__name__)
 
-class OfficeSkill(BaseSkill):
+
+class OfficeSkill(BaseSkill[Any]):
     name = "office_suite"
     description = "Generates professional Office documents (Word .docx, PowerPoint .pptx)."
 
@@ -28,7 +32,7 @@ class OfficeSkill(BaseSkill):
             idempotent=True,
             requires_network=False,
             requires_filesystem=True,
-            cost_class="medium"
+            cost_class="medium",
         )
 
     def get_system_prompt(self) -> str:
@@ -59,14 +63,14 @@ class OfficeSkill(BaseSkill):
     async def execute(self, params: Any, state: Any = None) -> str:
         try:
             # Handle both Dict and Pydantic object
-            if isinstance(params, dict):
+            if isinstance(params, dict[str, Any]):
                 req = GenerateDocument(**params)
             else:
                 req = params
-            
+
             output_dir = "generated_files"
             os.makedirs(output_dir, exist_ok=True)
-            
+
             filename = f"{req.file_name}.{req.doc_type}"
             filepath = os.path.join(output_dir, filename)
 
@@ -76,7 +80,7 @@ class OfficeSkill(BaseSkill):
                 self._generate_pptx(req, filepath)
             else:
                 return f"Error: Unsupported doc_type: {req.doc_type}"
-                
+
             return f"✅ Document generated successfully: [{filename}](file:///{filepath.replace(os.sep, '/')})"
 
         except Exception as e:
@@ -85,63 +89,65 @@ class OfficeSkill(BaseSkill):
 
     def _generate_docx(self, req: GenerateDocument, filepath: str):
         from docx import Document
+
         doc = Document()
-        
+
         # Title
         doc.add_heading(req.title, 0)
-        
+
         for el in req.elements:
             if el.type == "heading":
                 doc.add_heading(el.content, level=1)
             elif el.type == "title":
-                 doc.add_heading(el.content, level=0)
+                doc.add_heading(el.content, level=0)
             elif el.type == "bullet_list":
-                doc.add_paragraph(el.content, style='List Bullet')
+                doc.add_paragraph(el.content, style="List Bullet")
             elif el.type == "numbered_list":
-                doc.add_paragraph(el.content, style='List Number')
+                doc.add_paragraph(el.content, style="List Number")
             elif el.type == "code_block":
                 p = doc.add_paragraph(el.content)
-                p.style = 'Quote' # Fallback style for code
+                p.style = "Quote"  # Fallback style for code
             elif el.type == "image":
-                 # Check if file exists, or check in generated_files
-                 img_path = el.content
-                 if not os.path.exists(img_path):
-                     candidate = os.path.join("generated_files", img_path)
-                     if os.path.exists(candidate):
-                         img_path = candidate
-                 
-                 if os.path.exists(img_path):
-                     try:
-                         doc.add_picture(img_path, width=Inches(6.0))
-                     except Exception as e:
-                         doc.add_paragraph(f"[Image Error: {el.content} - {str(e)}]")
-                 else:
-                     doc.add_paragraph(f"[Image not found: {el.content}]")
+                # Check if file exists, or check in generated_files
+                img_path = el.content
+                if not os.path.exists(img_path):
+                    candidate = os.path.join("generated_files", img_path)
+                    if os.path.exists(candidate):
+                        img_path = candidate
+
+                if os.path.exists(img_path):
+                    try:
+                        doc.add_picture(img_path, width=Inches(6.0))
+                    except Exception as e:
+                        doc.add_paragraph(f"[Image Error: {el.content} - {str(e)}]")
+                else:
+                    doc.add_paragraph(f"[Image not found: {el.content}]")
             else:
                 # Default paragraph
                 doc.add_paragraph(el.content)
-                
+
         doc.save(filepath)
 
     def _generate_pptx(self, req: GenerateDocument, filepath: str):
         from pptx import Presentation
+
         prs = Presentation()
-        
+
         # Title Slide
         title_slide_layout = prs.slide_layouts[0]
         slide = prs.slides.add_slide(title_slide_layout)
         title = slide.shapes.title
         subtitle = slide.placeholders[1]
-        
+
         title.text = req.title
         subtitle.text = "Generated by SGR Core Agent"
-        
+
         # Content Slides
         bullet_slide_layout = prs.slide_layouts[1]
-        
+
         current_slide = None
         current_body = None
-        
+
         for el in req.elements:
             # Logic: Heading starts a new slide
             if el.type in ["heading", "title"] or current_slide is None:
@@ -150,7 +156,7 @@ class OfficeSkill(BaseSkill):
                 title_shape = shapes.title
                 title_shape.text = el.content if el.type in ["heading", "title"] else "Slide"
                 current_body = shapes.placeholders[1].text_frame
-                
+
                 # If the element was just a heading, we are done for this iteration
                 if el.type in ["heading", "title"]:
                     continue
@@ -168,9 +174,9 @@ class OfficeSkill(BaseSkill):
                 # Check if file exists, or check in generated_files
                 img_path = el.content
                 if not os.path.exists(img_path):
-                     candidate = os.path.join("generated_files", img_path)
-                     if os.path.exists(candidate):
-                         img_path = candidate
+                    candidate = os.path.join("generated_files", img_path)
+                    if os.path.exists(candidate):
+                        img_path = candidate
 
                 if os.path.exists(img_path):
                     try:
@@ -181,12 +187,12 @@ class OfficeSkill(BaseSkill):
                         left = Inches(1)
                         height = Inches(4)
                         current_slide.shapes.add_picture(img_path, left, top, height=height)
-                    except Exception as e:
-                         # Fallback if image fails
-                         p = current_body.add_paragraph()
-                         p.text = f"[Image Error: {el.content}]"
+                    except Exception:
+                        # Fallback if image fails
+                        p = current_body.add_paragraph()
+                        p.text = f"[Image Error: {el.content}]"
                 else:
-                     p = current_body.add_paragraph()
-                     p.text = f"[Image not found: {el.content}]"
+                    p = current_body.add_paragraph()
+                    p.text = f"[Image not found: {el.content}]"
 
         prs.save(filepath)

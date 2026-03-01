@@ -1,0 +1,20 @@
+# Development overrides for SGR-Kernel
+# Run with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+services:
+  sgr-core:
+    # Use chainlit's built-in watch mode (-w) for hot reloading the UI
+    command: [ "chainlit", "run", "ui_app.py", "--port", "8501", "--host", "0.0.0.0", "-w" ]
+    volumes:
+      # In development, mount source code to enable hot reloading.
+      # To prevent overwriting the Docker image's installed packages, 
+      # we mount specific source directories instead of the root './:/app',
+      # or we just mount ./ but assume you don't use a local venv inside the same folder named 'venv'
+      - ./:/app
+
+  sgr-worker:
+    # Use watchfiles to restart the worker on code changes (requires watchfiles installed in dev environment)
+    # We prefix with python -m watchfiles to enable hot-reloading
+    command: [ "python", "-m", "watchfiles", "python run_worker.py", "/app/core", "/app/skills", "/app/interfaces" ]
+    volumes:
+      - ./:/app

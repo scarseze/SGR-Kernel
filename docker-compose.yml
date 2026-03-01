@@ -1,26 +1,26 @@
 services:
-#   sgr_proxy:
-#     build: ./proxy
-#     container_name: sgr_proxy
-#     env_file:
-#       - ../.env
-#     environment:
-#       - PYTHONUNBUFFERED=1
-#     ports:
-#       - "8000:8000"
-#     restart: always
+  sgr_proxy:
+    build: ./proxy
+    container_name: sgr_proxy
+    env_file:
+      - ../.env
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8000:8000"
+    restart: always
 
-  sgr-core:
+  sgr-kernel:
     build: .
-    container_name: sgr_core
+    container_name: sgr_kernel
     depends_on:
       - sgr_redis
       - sgr_qdrant
-      # - sgr_proxy
+      - sgr_proxy
     env_file:
       - ../.env # Connect to parent .env
     environment:
-      # - PROXY_URL=http://sgr_proxy:8000
+      - PROXY_URL=http://sgr_proxy:8000
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - QDRANT_HOST=sgr_qdrant
       - QDRANT_PORT=6333
@@ -30,7 +30,6 @@ services:
       - PYTHONIOENCODING=utf-8
       - LANG=C.UTF-8
     volumes:
-      - .:/app # Developer Mode (Enabled)
       - ./memory.db:/app/memory.db
       - ./generated_files:/app/generated_files
       - ../refs:/app/refs # Mount references directory
@@ -40,6 +39,13 @@ services:
       - "host.docker.internal:host-gateway" # Access host localhost for Ollama
     ports:
       - "8501:8501"
+      - "8001:8001" # Prometheus metrics port
+    # logging:
+    #   driver: "fluentd"
+    #   options:
+    #     fluentd-address: "127.0.0.1:24224"
+    #     fluentd-async-connect: "true"
+    #     tag: "sgr.kernel"
     command: [ "chainlit", "run", "ui_app.py", "--port", "8501", "--host", "0.0.0.0" ]
     restart: always
     tty: true
@@ -54,6 +60,8 @@ services:
     env_file:
       - ../.env
     environment:
+      - REDIS_HOST=sgr_redis
+      - REDIS_PORT=6379
       - REDIS_URL=redis://sgr_redis:6379/0
       - QDRANT_HOST=sgr_qdrant
       - QDRANT_PORT=6333
@@ -62,7 +70,6 @@ services:
       - PYTHONUNBUFFERED=1
       - LANG=C.UTF-8
     volumes:
-      - .:/app
       - ./memory.db:/app/memory.db
       - ./generated_files:/app/generated_files
       - ../refs:/app/refs
@@ -70,6 +77,12 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: always
+    # logging:
+    #   driver: "fluentd"
+    #   options:
+    #     fluentd-address: "127.0.0.1:24224"
+    #     fluentd-async-connect: "true"
+    #     tag: "sgr.worker"
     command: [ "python", "run_worker.py" ]
 
   sgr_qdrant:
@@ -96,5 +109,73 @@ services:
       - "4317:4317" # OTLP gRPC
     restart: always
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    container_name: sgr_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    restart: always
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.10
+    container_name: sgr_kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    restart: always
+
+  fluent-bit:
+    image: fluent/fluent-bit:latest
+    container_name: sgr_fluent_bit
+    volumes:
+      - ./config/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    restart: always
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    depends_on:
+      - elasticsearch
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sgr_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: sgr_grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: always
+
+  optuna-dashboard:
+    image: ghcr.io/optuna/optuna-dashboard:latest
+    container_name: sgr_optuna_dashboard
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./generated_files:/app/generated_files
+    # Optuna will monitor the SQLite DB that PEFTlab creates in generated_files
+    command: [ "sqlite:////app/generated_files/peftlab.db", "--host", "0.0.0.0", "--port", "8080" ]
+    restart: always
+
 volumes:
   qdrant_data:
+  es_data:
+  prometheus_data:
+  grafana_data:

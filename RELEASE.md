@@ -1,36 +1,53 @@
-# SGR Kernel Release Information
+# SGR Kernel v3.0 (Gold Master) & PEFTlab v2.9.0 Enterprise
 
-## 📦 Supported Versions
-*   **Python**: 3.10, 3.11, 3.12
-*   **OS**: Linux (Production), Windows/macOS (Dev)
-*   **Docker**: 20.10+ (Required for Sandboxing)
+---
 
-## ⚖️ Guarantees
-1.  **Idempotency**: Re-running a completed step within the same `request_id` and unchanged step inputs is a no-op properly handled by the state machine.
-2.  **Sandboxing**: If a Skill declares `sandboxed=True` (default), it WILL be executed via the configured sandbox backend (Docker by default). Sandboxing backend support currently targets Linux Docker environments. If no backend is available, execution FAILS CLOSED (blocked).
-3.  **Determinism**: Replay Mode guarantees bit-for-bit identical execution of kernel decisions and recorded outputs when LLM/tool traces are captured.
-4.  **Capability Enforcement**: A Skill CANNOT execute actions outside its declared capability set. Violations are blocked by the Kernel and recorded as `CAPABILITY_VIOLATION`. Capabilities are enforced at step execution time by the Kernel.
-5.  **Resource Governance**: Token, cost, and time budgets are enforced at runtime according to Kernel accounting and configured budget policies. Budget overflow results in controlled abort — never silent degradation. Budget and capability violations are always recorded in execution telemetry.
+## 🇷🇺 Русский (Russian)
 
-## 🚫 Non-Goals
-*   **Web UI**: The Kernel is a backend library. Use `sgr-core` or Chainlit for UI.
-*   **Cloud Hosting**: We provide the runtime; you provide the infrastructure (Kubernetes/Borg).
-*   **Model Serving**: We orchestrate LLMs, we don't host them. Use Ollama/vLLM.
+### Обзор релиза v3.0: "Swarm of Swarms"
+**SGR Kernel v3.0** — это крупнейший корпоративный релиз, вводящий иерархическую оркестрацию агентов и полное соответствие нормативным требованиям РФ и мира.
 
-## ⚠️ Known Limitations (v1.0.0-rc1)
-*   **Parallelism**: Parallel execution model is defined but not yet enabled by default (limited to `max_workers=1` for safety).
-*   **Streaming**: Token streaming is supported but not yet fully integrated into the `StepResult` history.
-*   **Replay**: Replaying non-deterministic tools (e.g., `requests.get` to a changing URL) without a captured trace will diverge.
-*   **External Side Effects**: The Kernel cannot automatically roll back external side effects (emails, API writes, shell commands). Use approval gates and capabilities.
+### Ключевые нововведения
+*   **Иерархические Рои**: Агенты могут порождать под-рои для бесконечной глубины рассуждений.
+*   **Комплаенс (152-ФЗ, GDPR, HIPAA)**: Маскировка персональных данных (PII) в реальном времени.
+*   **Локализация данных**: Жесткая проверка физического расположения баз данных.
+*   **Мультимодальность**: Нативная поддержка изображений и аудио.
 
-## 🐛 Reporting Issues
-Please use the [GitHub Issue Tracker](https://github.com/sgr/kernel/issues) with the tag `v1.0.0-rc1`.
+### Миграция с v2
+1. **Lazy Loading**: Убедитесь, что тяжелые зависимости скиллов загружаются динамически.
+2. **PostgreSQL**: Версии для продакшена теперь требуют PostgreSQL (вместо SQLite).
 
-Please include:
-- kernel version
-- Python version
-- OS
-- replay manifest (if available)
-- step trace id
+---
 
-If reporting replay issues — attach replay manifest and checkpoint metadata if available.
+## 🇺🇸 English
+
+### Release v3.0 Overview: "Swarm of Swarms"
+**SGR Kernel v3.0** is a major Enterprise release, introducing hierarchical agent orchestration and full regulatory compliance for global and domestic data processing.
+
+### Key Features
+*   **Hierarchical Swarms**: Agents can now spawn sub-swarms for infinite reasoning depth.
+*   **Compliance (GDPR, HIPAA, 152-FZ)**: Real-time PII redaction and masking.
+*   **Data Localization**: Strict enforcement of database residency for sensitive jurisdictions.
+*   **Multimodal**: Native support for LLM vision and audio context.
+
+### Migration from v2
+1. **Lazy Loading**: Ensure heavy skill dependencies are strictly lazy-loaded.
+2. **Postgres Required**: Shift from experimental SQLite to PostgreSQL for production environments.
+
+---
+
+## Deployment / Развертывание
+
+### 152-FZ (Russia Production)
+```bash
+export COMPLIANCE_LEVEL=rf_152fz
+export DATABASE_HOST=postgres.ru-central1.internal
+docker-compose up -d
+```
+
+### GDPR (EU Production)
+```bash
+export COMPLIANCE_LEVEL=gdpr
+export DATA_RETENTION_DAYS=90
+docker-compose up -d
+```

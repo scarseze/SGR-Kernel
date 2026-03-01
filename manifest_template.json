@@ -1,0 +1,22 @@
+{
+    "sgr_kernel_version": "v2.0.0-rc1",
+    "orchestration_mode": "swarm",
+    "agents": [
+        "RouterAgent",
+        "KnowledgeAgent",
+        "PeftAgent",
+        "DataAgent",
+        "WriterAgent"
+    ],
+    "swarm_config": {
+        "max_transfers_per_session": 5,
+        "context_sanitization_enabled": true,
+        "audit_logging": true
+    },
+    "quad_versioning": {
+        "major": 2,
+        "minor": 0,
+        "patch": 0,
+        "build": "rc1"
+    }
+}

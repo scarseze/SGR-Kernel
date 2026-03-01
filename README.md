@@ -1,56 +1,57 @@
-# SGR Kernel (Agentic OS) 🧠
+# SGR Kernel (Agentic OS)
 
-> **Enterprise-Grade Agentic Kernel for Automated Research & Engineering**
+> **Enterprise-Grade Agentic Kernel for Automated Research & Engineering / Ядро корпоративного уровня для автоматизированных исследований и инжиниринга**
 
-![Status](https://img.shields.io/badge/Status-Production%20Ready-green)
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
-![Coverage](https://img.shields.io/badge/Tests-46%20Passing-brightgreen)
-
-> [!WARNING]
-> **Release Candidate (v1.0.0-rc1)**
-> This is a stable release candidate for the v1.x series.
-> *   **Production Policy**: Use allowed with supervision.
-> *   **API Stability**: Public API (`CoreEngine`, `Skill`) is stable. Internal implementations (`_fsm_impl`) may evolve.
-> *   **Feedback**: Please report issues to the core team.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/Release-v1.0.0--rc1-green)](https://github.com/sgr/kernel/releases)
-
-**Agentic Operating System for Automated Machine Learning Research**
-> Kernel runtime is stable.
-> Plugin ABI may evolve in v1.x minors.
-
-## 📖 Documentation Index (Artifact Pack)
-
-| Document | Purpose | Audience |
-| :--- | :--- | :--- |
-| **[Standard Overview](docs/system_overview.md)** | 🎯 Purpose, Scope, Subsystems | All |
-| **[Architecture](docs/architecture.md)** | 🧩 Diagrams & Component Flow | Engineers |
-| **[Execution Model](docs/execution_model.md)** | ⚙️ Deterministic FSM & Core Loop | Core Devs |
-| **[Skill Development](docs/skill_development.md)** | 🤝 Interface, Context, & Registration | Skill Devs |
-| **[Security Model](docs/security_model.md)** | 🛡️ ACLs, Capabilities, & Sandboxing | Security |
-| **[Reliability Engine](docs/reliability.md)** | 💥 Fault Classification & Recovery | SREs |
-| **[Replay Model](docs/replay_model.md)** | 📼 Deterministic Replay & Tapes | Engineers |
-| **[Artifact Store](docs/artifact_store.md)** | 📦 Content-Addressed Storage (CAS) | SREs |
-| **[Lifecycle State](docs/lifecycle.md)** | 🔄 7-Phase Execution Workflow | Core Devs |
-| **[Experiment Spec](docs/experiment_spec.md)** | 🧪 DSL & Config Reference | Researchers |
-| **[Deployment Guide](docs/deployment.md)** | 🚀 Setup & Production Staging | DevOps |
-| **[Reproducibility](docs/reproducibility.md)** | 🔬 Manifests & Hashing | Scientists |
-| **[Charts](docs/diagrams/)** | 📊 Editable Draw.io files | Architects |
-
+![Version](https://img.shields.io/badge/version-v3.0--gold-green)
+![Compliance](https://img.shields.io/badge/compliance-GDPR%7CHIPAA%7C152--FZ-blue)
+![Tests](https://img.shields.io/badge/tests-151%20PASSED-brightgreen)
 
 ---
 
-## 🏗️ Architecture High-Level
+## 🇷🇺 Русский (Russian)
 
-The SGR Kernel acts as an operating system for AI Agents. It provides:
-1.  **Orchestration**: DAG-based planning and execution.
-2.  **Safety**: Sandboxed code execution (Docker) and policy enforcement.
-3.  **Observability**: Full trace history (WAL) and metrics.
-4.  **Distribution**: Unified dispatching of heavy jobs (Training, Rendering).
+### Обзор
+SGR Kernel — это операционная система для AI Агентов, построенная на концепции **Multi-Agent Swarm**. Ядро обеспечивает детерминированное выполнение, безопасность и соблюдение регуляторных требований (152-ФЗ, GDPR).
 
-## 🚀 Quick Start
+### Архитектура
+1.  **Swarm Orchestration**: Легковесный цикл, передающий контекст между агентами: `RouterAgent`, `KnowledgeAgent`, `DataAgent`, `PeftAgent`, `WriterAgent`.
+2.  **Декаплинг**: Тяжелые зависимости (VectorDB, PyTorch) подгружаются только внутри скиллов (Lazy Load).
+3.  **Безопасность**: Изоляция исполнения, ACL-контроль скиллов и санирование вывода в реальном времени.
 
+### Быстрый старт
+```bash
+# 1. Установка
+pip install -r requirements.txt
+
+# 2. Запуск тестов
+pytest tests/
+
+# 3. Запуск ядра (CLI)
+python main.py
+
+# 4. Запуск WebUI
+chainlit run ui_app.py
+```
+
+### Экосистема Скиллов
+*   **Knowledge Base (RAG)**: Поиск по внутренним документам.
+*   **PEFTlab**: Настройка и дообучение моделей (Mamba, RWKV).
+*   **Logic-RL**: Продвинутые рассуждения и логика.
+*   **Data Analyst**: Визуализация и анализ данных.
+
+---
+
+## 🇺🇸 English
+
+### Overview
+SGR Kernel is an Agentic Operating System built on the **Multi-Agent Swarm** concept. The kernel provides deterministic execution, security, and regulatory compliance (GDPR, HIPAA, 152-FZ).
+
+### Architecture
+1.  **Swarm Orchestration**: A lightweight loop that routes tasks between specialized agents: `RouterAgent`, `KnowledgeAgent`, `DataAgent`, `PeftAgent`, `WriterAgent`.
+2.  **Decoupling**: Heavy dependencies (VectorDBs, PyTorch) are strictly lazy-loaded within their respective Skills.
+3.  **Safety & Security**: Execution isolation, Skill ACL enforcement, and output sanitization at every turn.
+
+### Quick Start
 ```bash
 # 1. Install
 pip install -r requirements.txt
@@ -58,52 +59,34 @@ pip install -r requirements.txt
 # 2. Run Tests
 pytest tests/
 
-# 3. Start Kernel
+# 3. Start Kernel (CLI)
 python main.py
+
+# 4. Start WebUI
+chainlit run ui_app.py
 ```
 
-## 🧯 Safety & Responsibility
-> **Warning**: SGR Kernel is an agent execution runtime. Skills may cause real-world side effects.
-> *   Always use **Capability Enforcement** (ACLs).
-> *   Enable **Approval Gates** for sensitive actions (WRITE, DELETE).
-> *   Run in **Dockerized Sandboxes** whenever possible.
-
-## ⚖️ Guarantees
-*   **Idempotency**: Safe to retry.
-*   **Reproducibility**: `manifest.json` guarantees exact replay.
-*   **Security**: No code runs outside the sandbox.
-
-## 🛡️ Compatibility / Совместимость
-*   **v1.x**: Backward compatible API (Strict Semantic Versioning).
-*   **v2.0**: Reserved only for breaking changes in the **Execution Model**.
+### Skills Ecosystem
+*   **Knowledge Base (RAG)**: Decoupled vector search for internal manuals.
+*   **PEFTlab**: Integrated HPO and model fine-tuning (Mamba, RWKV).
+*   **Logic-RL**: Advanced reasoning and rule-based reinforcement learning.
+*   **Data Analyst**: Automatic dataset charting and statistical summaries.
 
 ---
 
-# Russian Section / Русская Секция 🇷🇺
+## Documentation Index / Индекс Документации
 
-## 📖 Индекс Документации
+| Document | Purpose / Назначение |
+| :--- | :--- |
+| **[KERNEL_SPEC.md](KERNEL_SPEC.md)** | Technical Protocol / Технический протокол |
+| **[RELEASE.md](RELEASE.md)** | Release Notes & Migration / Заметки к релизу |
+| **[SKILL_DEVELOPMENT.md](SKILL_DEVELOPMENT.md)** | Manual for Developers / Руководство разработчика |
+| **[Architecture](docs/architecture.md)** | Diagrams & Flow / Схемы и потоки данных |
+| **[CHANGELOG.md](CHANGELOG.md)** | Version History / История версий |
 
-| Документ | Назначение | Аудитория |
-| :--- | :--- | :--- |
-| **[Обзор Системы](docs/system_overview.md)** | 🎯 Цели, Границы, Подсистемы | Все |
-| **[Архитектура](docs/architecture.md)** | 🧩 Диаграммы и Потоки | Инженеры |
-| **[Модель Исполнения](docs/execution_model.md)** | ⚙️ FSM и Основной Цикл | Core Devs |
-| **[Разработка Скиллов](docs/skill_development.md)** | 🤝 Интерфейс, Контекст, Регистрация | Skill Devs |
-| **[Модель Безопасности](docs/security_model.md)** | 🛡️ ACL, Права и Песочницы | Security |
-| **[Reliability Engine](docs/reliability.md)** | 💥 Классификация сбоев и Ретраи | SRE |
-| **[Replay Model](docs/replay_model.md)** | 📼 Детерминированный Реплей | Engineers |
-| **[Хранилище Артефактов](docs/artifact_store.md)** | 📦 Content-Addressed Storage (CAS) | SRE |
-| **[Жизненный Цикл](docs/lifecycle.md)** | 🔄 7 Фаз Выполнения Шага | Core Devs |
-| **[Спецификация Эксперимента](docs/experiment_spec.md)** | 🧪 DSL и Конфиги | Researchers |
-| **[Руководство по Развертыванию](docs/deployment.md)** | 🚀 Установка и Production | DevOps |
-| **[Воспроизводимость](docs/reproducibility.md)** | 🔬 Манифесты и Хеширование | Ученые |
-| **[Диаграммы](docs/diagrams/)** | 📊 Исходники Draw.io (.xml) | Архитекторы |
+---
 
-
-## 🏗️ Архитектура (Кратко)
-SGR Kernel — это операционная система для AI Агентов.
-1.  **Оркестрация**: Планирование DAG.
-2.  **Безопасность**: Изоляция кода в Docker.
-3.  **Наблюдаемость**: Полная история (WAL).
-4.  **Распределение**: Унифицированный диспетчер.
-
+## 🛡️ Compliance / Комплаенс
+*   **152-FZ (RU)**: Data localization and logging.
+*   **GDPR (EU)**: Right to be forgotten and PII masking.
+*   **HIPAA (US)**: Secure audit trails for medical data.

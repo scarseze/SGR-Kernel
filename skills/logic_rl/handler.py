@@ -1,23 +1,35 @@
-import asyncio
 import os
 import re
-import json
-import httpx
-from typing import Optional, List, Dict, Any, Type
-from pydantic import BaseModel
+from typing import List, Type
 
+import httpx
+
+from core.execution import ExecutionState
+from core.types import SkillMetadata, Capability, RiskLevel, CostClass
 from skills.base import BaseSkill
-from skills.logic_rl.schema import LogicRLInput
 from skills.code_interpreter.handler import CodeInterpreterSkill
 from skills.code_interpreter.schema import CodeExecutionRequest
-from core.state import AgentState
+from skills.logic_rl.schema import LogicRLInput
 
-class LogicRLSkill(BaseSkill):
+
+class LogicRLSkill(BaseSkill[LogicRLInput]):
     name: str = "logic_rl"
     description: str = (
         "Solves complex logic puzzles and reasoning tasks using a 'Reason-Act-Refine' loop. "
         "It proposes solutions and verifies them by running Python code in a sandbox."
     )
+
+    @property
+    def metadata(self) -> SkillMetadata:
+        return SkillMetadata(
+            name=self.name,
+            description=self.description,
+            capabilities=[Capability.REASONING, Capability.CODE],
+            risk_level=RiskLevel.HIGH,
+            cost_class=CostClass.EXPENSIVE,
+            requires_network=True,
+            requires_sandbox=True,
+        )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -29,11 +41,11 @@ class LogicRLSkill(BaseSkill):
     def input_schema(self) -> Type[LogicRLInput]:
         return LogicRLInput
 
-    async def execute(self, params: LogicRLInput, state: AgentState) -> str:
+    async def execute(self, params: LogicRLInput, state: ExecutionState) -> str:
         problem = params.problem
         max_retries = params.max_retries
         history = []
-        
+
         api_key = os.environ.get("DEEPSEEK_API_KEY")
         if not api_key:
             return "Error: DEEPSEEK_API_KEY is not set. Cannot perform Logic-RL."
@@ -43,16 +55,16 @@ class LogicRLSkill(BaseSkill):
         for attempt in range(max_retries):
             # 1. Generate Solution & Verification Code
             response = await self._query_llm(problem, history, api_key)
-            
+
             # Extract explanation and code
             code_match = re.search(r"```python\n(.*?)\n```", response, re.DOTALL)
             code = code_match.group(1) if code_match else None
-            
+
             if not code:
-                history.append(f"Attempt {attempt+1}: Failed to generate code. LLM Response: {response[:200]}...")
+                history.append(f"Attempt {attempt + 1}: Failed to generate code. LLM Response: {response[:200]}...")
                 continue
 
-            print(f"[{self.name}] Attempt {attempt+1}: Verifying candidate solution...")
+            print(f"[{self.name}] Attempt {attempt + 1}: Verifying candidate solution...")
 
             # 2. Verify in Sandbox
             # We wrap the code to print "SUCCESS" if verification passes
@@ -62,20 +74,17 @@ try:
 except Exception as e:
     print(f"RUNTIME_ERROR: {{e}}")
 """
-            exec_result = await self.sandbox.execute(
-                CodeExecutionRequest(code=wrapped_code), 
-                state
-            )
+            exec_result = await self.sandbox.execute(CodeExecutionRequest(code=wrapped_code), state)
 
             output = exec_result.stdout + exec_result.stderr
-            
+
             # 3. Analyze Result
             if "SUCCESS" in output:
-                return f"✅ **Solved in {attempt+1} iterations!**\n\n**Solution:**\n{self._extract_non_code(response)}\n\n**Verification:**\n```python\n{code}\n```\n\n**Output:**\n{output}"
+                return f"✅ **Solved in {attempt + 1} iterations!**\n\n**Solution:**\n{self._extract_non_code(response)}\n\n**Verification:**\n```python\n{code}\n```\n\n**Output:**\n{output}"
             else:
                 # RL Step: Feedback
                 error_msg = f"Verification Failed. Output:\n{output}"
-                history.append(f"Attempt {attempt+1} Code:\n{code}\n\nResult:\n{error_msg}")
+                history.append(f"Attempt {attempt + 1} Code:\n{code}\n\nResult:\n{error_msg}")
                 print(f"[{self.name}] Retrying... ({error_msg.strip()[:100]}...)")
 
         return f"❌ Failed to solve after {max_retries} attempts.\n\nHistory:\n" + "\n".join(history[-3:])
@@ -92,29 +101,23 @@ except Exception as e:
             "6. NO EXTERNAL LIBRARIES allowed (e.g. numpy, scipy). Use only standard Python libraries (math, random, itertools).\n"
             "7. Wrap code in ```python blocks.\n"
         )
-        
+
         user_prompt = f"Problem: {problem}\n"
         if history:
             user_prompt += "\nPrevious Attempts/Errors:\n" + "\n".join(history)
             user_prompt += "\n\nAnalyze the errors and try a different approach."
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ]
+        messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
 
         try:
             response = await self.http_client.post(
                 "https://api.deepseek.com/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json"
-                },
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
                 json={
-                    "model": "deepseek-chat", # or "deepseek-reasoner" if available
+                    "model": "deepseek-chat",  # or "deepseek-reasoner" if available
                     "messages": messages,
-                    "max_tokens": 4096
-                }
+                    "max_tokens": 4096,
+                },
             )
             response.raise_for_status()
             return response.json()["choices"][0]["message"]["content"]

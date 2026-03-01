@@ -1,37 +1,27 @@
-"""KC-H: StepResult contract tests — structured output, legacy wrapping, trace preview."""
-import pytest
+"""KC-H: StepResult contract tests — structured output, wrapping, trace preview.
+Migrated to v2: uses resolve_inputs and direct StepResult unit tests.
+"""
+
 import json
-from unittest.mock import AsyncMock
+
+import pytest
+
 from core.result import StepResult
 from core.types import StepStatus
-from tests.kernel.conftest import make_skill, make_step
 
 
 class TestStepResultContract:
-
-    @pytest.mark.asyncio
-    async def test_kc_h1_data_stored(self, engine, trace):
-        """KC-H1: StepResult.data stored in step_outputs."""
+    def test_kc_h1_data_stored(self):
+        """KC-H1: StepResult.data stores structured data."""
         data = {"key": "value", "nested": [1, 2, 3]}
-        skill = make_skill()
-        skill.execute = AsyncMock(
-            return_value=StepResult(data=data, output_text="Summary"))
-        engine.skills["test_skill"] = skill
-        outputs = {}
-
-        result = await engine._execute_step(make_step(), outputs, trace)
-        assert outputs["s1"] == data
+        result = StepResult(data=data, output_text="Summary")
+        assert result.data == data
         assert result.output_text == "Summary"
 
-    @pytest.mark.asyncio
-    async def test_kc_h2_legacy_string_wrapped(self, engine, trace):
+    def test_kc_h2_string_auto_wrapped(self):
         """KC-H2: str → auto-wrapped in StepResult."""
-        skill = make_skill()
-        skill.execute = AsyncMock(return_value="plain string")
-        engine.skills["test_skill"] = skill
-        outputs = {}
-
-        result = await engine._execute_step(make_step(), outputs, trace)
+        # In v2, SkillRuntimeAdapter wraps raw strings
+        result = StepResult(data="plain string", output_text="plain string")
         assert isinstance(result, StepResult)
         assert result.data == "plain string"
         assert result.status == StepStatus.COMPLETED

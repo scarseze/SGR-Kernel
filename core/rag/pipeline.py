@@ -1,11 +1,13 @@
-from typing import List, Tuple, Dict, Any, Optional
 import time
+from typing import Any, Dict, List, Optional, Tuple
+
+from core.rag.components import DocFilter, DomainRouter, QueryExpander, QueryRewriter, ScoreReranker
+from core.rag.context import RAGContextBuilder, RAGDocument
 from core.rag.interface import RAGInterface
-from core.rag.context import RAGDocument, RAGContextBuilder
-from core.rag.retriever import RAGRetriever
-from core.rag.components import QueryRewriter, QueryExpander, DomainRouter, ScoreReranker, DocFilter
 from core.rag.repair import AnswerCritic, RepairStrategy
-from core.trace import current_step_trace, RAGQueryTrace
+from core.rag.retriever import RAGRetriever
+from core.trace import RAGQueryTrace, current_step_trace
+
 
 class RAGPipeline(RAGInterface):
     def __init__(
@@ -24,7 +26,7 @@ class RAGPipeline(RAGInterface):
         max_retries: int = 2,
         min_score: float = 0.6,
         rerank_threshold: float = 0.0,
-        model_pool: Optional[Any] = None # Avoid circular import type hint
+        model_pool: Optional[Any] = None,  # Avoid circular import type hint
     ):
         self.retriever = retriever
         self.rewriter = rewriter
@@ -35,7 +37,7 @@ class RAGPipeline(RAGInterface):
         self.context_builder = context_builder
         self.max_docs = max_docs
         self.max_tokens = max_tokens
-        
+
         # Repair Loop
         self.critic = critic
         self.repair_strategy = repair_strategy
@@ -48,20 +50,20 @@ class RAGPipeline(RAGInterface):
 
     async def run(self, query: str, domain: str = "default") -> Tuple[str, List[RAGDocument]]:
         start_time = time.time()
-        
+
         # Repair Loop State
         current_query = query
         attempt = 1
-        
+
         rewritten_query = None
         used_domains = []
         found_docs_count = 0
         final_context = ""
         final_docs = []
-        
+
         critique_passed = None
         strategy_used = None
-        
+
         while attempt <= (self.max_retries + 1):
             try:
                 # 1. Rewrite (Escalate if attempt > 1)
@@ -71,25 +73,25 @@ class RAGPipeline(RAGInterface):
                     # If we have a model pool, switch to mid tier for better rewriting
                     # We assume rewriter acts on FAST tier by default
                     rewrite_llm = self.model_pool.mid
-                
+
                 rewritten_query = await self.rewriter.rewrite(current_query, llm=rewrite_llm)
-                
+
                 # 2. Expand
                 queries = await self.expander.expand(rewritten_query)
-                
+
                 # 3. Route
                 routed = self.router.route(rewritten_query)
                 if domain != "default" and domain not in routed:
-                     routed.append(domain)
+                    routed.append(domain)
                 used_domains = routed
-                
+
                 # 4. Multi-Retrieve
                 all_docs = []
                 for q in queries:
                     for d in used_domains:
                         docs = await self.retriever.retrieve(q, collection=d)
                         all_docs.extend(docs)
-                        
+
                 found_docs_count = len(all_docs)
 
                 # Deduplicate
@@ -100,17 +102,17 @@ class RAGPipeline(RAGInterface):
                     if h not in seen:
                         seen.add(h)
                         unique_docs.append(d)
-                
+
                 # 5. Rerank (with Policy Threshold)
                 reranked = self.reranker.rerank(unique_docs, threshold=self.rerank_threshold)
-                
+
                 # 6. Filter (with Policy Threshold)
                 filtered = self.filterer.filter(reranked, min_score=self.min_score)
-                
+
                 # 7. Compress/Format
                 compressed = self.context_builder.compress(filtered, max_tokens=self.max_tokens)
                 formatted_context = self.context_builder.format(compressed)
-                
+
                 # 8. CRITIQUE (Repair Loop)
                 if self.critic and self.repair_strategy and attempt <= self.max_retries:
                     is_good = await self.critic.critique(query, formatted_context)
@@ -118,20 +120,20 @@ class RAGPipeline(RAGInterface):
                         critique_passed = True
                         final_context = formatted_context
                         final_docs = compressed
-                        break # Good enough
+                        break  # Good enough
                     else:
-                         critique_passed = False
-                         # Apply Repair
-                         current_query = self.repair_strategy.suggest_fix(query, attempt)
-                         strategy_used = current_query
-                         attempt += 1
-                         continue
-                
+                        critique_passed = False
+                        # Apply Repair
+                        current_query = self.repair_strategy.suggest_fix(query, attempt)
+                        strategy_used = current_query
+                        attempt += 1
+                        continue
+
                 # Default success or max retries reached
                 final_context = formatted_context
                 final_docs = compressed
                 break
-                
+
             except Exception as e:
                 # If error, maybe break or log?
                 # For now, let's break to avoid infinite loops on error
@@ -141,18 +143,20 @@ class RAGPipeline(RAGInterface):
         try:
             trace = current_step_trace.get()
             if trace:
-                trace.rag_queries.append(RAGQueryTrace(
-                    query=query,
-                    rewritten_query=rewritten_query,
-                    domains=used_domains,
-                    latency_ms=(time.time() - start_time) * 1000,
-                    found_docs=found_docs_count,
-                    used_docs=len(final_docs),
-                    sources=[d.source for d in final_docs],
-                    attempt=attempt,
-                    critique_passed=critique_passed,
-                    repair_strategy=strategy_used
-                ))
+                trace.rag_queries.append(
+                    RAGQueryTrace(
+                        query=query,
+                        rewritten_query=rewritten_query,
+                        domains=used_domains,
+                        latency_ms=(time.time() - start_time) * 1000,
+                        found_docs=found_docs_count,
+                        used_docs=len(final_docs),
+                        sources=[d.source for d in final_docs],
+                        attempt=attempt,
+                        critique_passed=critique_passed,
+                        repair_strategy=strategy_used,
+                    )
+                )
         except Exception:
             pass
 
@@ -167,28 +171,23 @@ class RAGPipeline(RAGInterface):
         try:
             # We can route this through the retriever directly
             docs = await self.retriever.retrieve(query, collection=collection_name, limit=limit)
-            
+
             # Convert to dict for legacy compatibility
-            return [
-                {
-                    "content": d.content,
-                    "score": d.score,
-                    "metadata": d.metadata
-                }
-                for d in docs
-            ]
+            return [{"content": d.content, "score": d.score, "metadata": d.metadata} for d in docs]
         finally:
-             try:
+            try:
                 trace = current_step_trace.get()
                 if trace:
-                    trace.rag_queries.append(RAGQueryTrace(
-                        query=query,
-                        rewritten_query=None,
-                        domains=[collection_name],
-                        latency_ms=(time.time() - start_time) * 1000,
-                        found_docs=len(docs),
-                        used_docs=len(docs),
-                        sources=[d.source for d in docs]
-                    ))
-             except Exception:
+                    trace.rag_queries.append(
+                        RAGQueryTrace(
+                            query=query,
+                            rewritten_query=None,
+                            domains=[collection_name],
+                            latency_ms=(time.time() - start_time) * 1000,
+                            found_docs=len(docs),
+                            used_docs=len(docs),
+                            sources=[d.source for d in docs],
+                        )
+                    )
+            except Exception:
                 pass

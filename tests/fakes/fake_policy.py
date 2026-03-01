@@ -1,6 +1,7 @@
 """FakePolicy — controllable policy engine for tests."""
-from core.types import PolicyStatus
+
 from core.policy import PolicyDecision
+from core.types import PolicyStatus
 
 
 class FakePolicy:
@@ -15,7 +16,6 @@ class FakePolicy:
         """Policy gate — always ALLOW in tests."""
         return PolicyDecision(status=PolicyStatus.ALLOW, reason="test allow")
 
-
     def check_budget(self, estimated_cost=0.0):
         return self.budget_ok
 
@@ -25,7 +25,8 @@ class FakePolicy:
 
     def record_step_cost(self, step_id, skill_name, cost):
         self.step_costs[step_id] = {
-            "skill": skill_name, "cost": cost,
+            "skill": skill_name,
+            "cost": cost,
             "cumulative_spend": self.current_spend + cost,
         }
         self.current_spend += cost

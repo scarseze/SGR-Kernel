@@ -31,9 +31,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 import httpx
-from pydantic import BaseModel
 from rich.console import Console
-from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.syntax import Syntax
@@ -43,6 +41,7 @@ console = Console()
 # ============================================================================
 # Configuration
 # ============================================================================
+
 
 class ProviderType(str, Enum):
     OLLAMA = "ollama"
@@ -55,11 +54,12 @@ class ProviderType(str, Enum):
 @dataclass
 class OllamaConfig:
     """Configuration for an Ollama server."""
+
     host: str = "localhost"
     port: int = 11434
     model: str = "qwen2.5-coder:32b"
     name: str = "local"
-    
+
     @property
     def base_url(self) -> str:
         return f"http://{self.host}:{self.port}"
@@ -68,6 +68,7 @@ class OllamaConfig:
 @dataclass
 class DeepSeekConfig:
     """Configuration for DeepSeek API."""
+
     api_key: str = field(default_factory=lambda: os.environ.get("DEEPSEEK_API_KEY", ""))
     base_url: str = "https://api.deepseek.com"
     model: str = "deepseek-chat"
@@ -76,6 +77,7 @@ class DeepSeekConfig:
 @dataclass
 class OpenAICompatibleConfig:
     """Configuration for OpenAI-compatible APIs (including local llama.cpp)."""
+
     base_url: str = "http://localhost:8080"
     api_key: Optional[str] = None
     model: str = "gpt-3.5-turbo"  # Or local model name
@@ -84,6 +86,7 @@ class OpenAICompatibleConfig:
 @dataclass
 class ClaudeConfig:
     """Configuration for Claude API."""
+
     api_key: str = field(default_factory=lambda: os.environ.get("ANTHROPIC_API_KEY", ""))
     model: str = "claude-sonnet-4-20250514"
 
@@ -91,17 +94,18 @@ class ClaudeConfig:
 @dataclass
 class RLMConfig:
     """Main RLM configuration."""
+
     max_iterations: int = 30
     max_output_chars: int = 50000
     timeout_seconds: int = 300
     sub_call_limit: int = 100
-    
+
     # Provider configs
     ollama_servers: list[OllamaConfig] = field(default_factory=list)
     deepseek: Optional[DeepSeekConfig] = None
     openai_compatible: Optional[OpenAICompatibleConfig] = None
     claude: Optional[ClaudeConfig] = None
-    
+
     # Which provider to use for root vs sub calls
     root_provider: ProviderType = ProviderType.OLLAMA
     sub_provider: ProviderType = ProviderType.OLLAMA
@@ -111,19 +115,20 @@ class RLMConfig:
 # LLM Providers
 # ============================================================================
 
+
 class LLMProvider(ABC):
     """Abstract base class for LLM providers."""
-    
+
     @abstractmethod
     async def query(self, prompt: str, system: Optional[str] = None) -> str:
         """Query the LLM and return the response text."""
         pass
-    
+
     @abstractmethod
     async def health_check(self) -> bool:
         """Check if the provider is available."""
         pass
-    
+
     @property
     @abstractmethod
     def name(self) -> str:
@@ -133,11 +138,11 @@ class LLMProvider(ABC):
 
 class OllamaProvider(LLMProvider):
     """Ollama API provider."""
-    
+
     def __init__(self, config: OllamaConfig):
         self.config = config
         self.client = httpx.AsyncClient(timeout=300.0)
-    
+
     async def query(self, prompt: str, system: Optional[str] = None) -> str:
         payload = {
             "model": self.config.model,
@@ -146,24 +151,18 @@ class OllamaProvider(LLMProvider):
         }
         if system:
             payload["system"] = system
-        
-        response = await self.client.post(
-            f"{self.config.base_url}/api/generate",
-            json=payload
-        )
+
+        response = await self.client.post(f"{self.config.base_url}/api/generate", json=payload)
         response.raise_for_status()
         return response.json()["response"]
-    
+
     async def health_check(self) -> bool:
         try:
-            response = await self.client.get(
-                f"{self.config.base_url}/api/tags",
-                timeout=5.0
-            )
+            response = await self.client.get(f"{self.config.base_url}/api/tags", timeout=5.0)
             return response.status_code == 200
         except Exception:
             return False
-    
+
     @property
     def name(self) -> str:
         return f"Ollama ({self.config.name}: {self.config.model})"
@@ -171,43 +170,40 @@ class OllamaProvider(LLMProvider):
 
 class DeepSeekProvider(LLMProvider):
     """DeepSeek API provider."""
-    
+
     def __init__(self, config: DeepSeekConfig):
         self.config = config
         self.client = httpx.AsyncClient(timeout=120.0)
-    
+
     async def query(self, prompt: str, system: Optional[str] = None) -> str:
         messages = []
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
-        
+
         response = await self.client.post(
             f"{self.config.base_url}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {self.config.api_key}",
-                "Content-Type": "application/json"
-            },
+            headers={"Authorization": f"Bearer {self.config.api_key}", "Content-Type": "application/json"},
             json={
                 "model": self.config.model,
                 "messages": messages,
                 "max_tokens": 4096,
-            }
+            },
         )
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
-    
+
     async def health_check(self) -> bool:
         try:
             response = await self.client.get(
                 f"{self.config.base_url}/models",
                 headers={"Authorization": f"Bearer {self.config.api_key}"},
-                timeout=5.0
+                timeout=5.0,
             )
             return response.status_code == 200
         except Exception:
             return False
-    
+
     @property
     def name(self) -> str:
         return f"DeepSeek ({self.config.model})"
@@ -215,42 +211,39 @@ class DeepSeekProvider(LLMProvider):
 
 class OpenAICompatibleProvider(LLMProvider):
     """OpenAI-compatible API provider (works with llama.cpp server, vLLM, etc.)."""
-    
+
     def __init__(self, config: OpenAICompatibleConfig):
         self.config = config
         self.client = httpx.AsyncClient(timeout=300.0)
-    
+
     async def query(self, prompt: str, system: Optional[str] = None) -> str:
         messages = []
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
-        
+
         headers = {"Content-Type": "application/json"}
         if self.config.api_key:
             headers["Authorization"] = f"Bearer {self.config.api_key}"
-        
+
         response = await self.client.post(
             f"{self.config.base_url}/v1/chat/completions",
             headers=headers,
             json={
                 "model": self.config.model,
                 "messages": messages,
-            }
+            },
         )
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
-    
+
     async def health_check(self) -> bool:
         try:
-            response = await self.client.get(
-                f"{self.config.base_url}/v1/models",
-                timeout=5.0
-            )
+            response = await self.client.get(f"{self.config.base_url}/v1/models", timeout=5.0)
             return response.status_code == 200
         except Exception:
             return False
-    
+
     @property
     def name(self) -> str:
         return f"OpenAI-Compatible ({self.config.base_url})"
@@ -258,36 +251,32 @@ class OpenAICompatibleProvider(LLMProvider):
 
 class ClaudeProvider(LLMProvider):
     """Claude API provider."""
-    
+
     def __init__(self, config: ClaudeConfig):
         self.config = config
         self.client = httpx.AsyncClient(timeout=120.0)
-    
+
     async def query(self, prompt: str, system: Optional[str] = None) -> str:
-        payload = {
-            "model": self.config.model,
-            "max_tokens": 4096,
-            "messages": [{"role": "user", "content": prompt}]
-        }
+        payload = {"model": self.config.model, "max_tokens": 4096, "messages": [{"role": "user", "content": prompt}]}
         if system:
             payload["system"] = system
-        
+
         response = await self.client.post(
             "https://api.anthropic.com/v1/messages",
             headers={
                 "x-api-key": self.config.api_key,
                 "content-type": "application/json",
-                "anthropic-version": "2023-06-01"
+                "anthropic-version": "2023-06-01",
             },
-            json=payload
+            json=payload,
         )
         response.raise_for_status()
         return response.json()["content"][0]["text"]
-    
+
     async def health_check(self) -> bool:
         # Claude doesn't have a simple health endpoint
         return bool(self.config.api_key)
-    
+
     @property
     def name(self) -> str:
         return f"Claude ({self.config.model})"
@@ -297,9 +286,11 @@ class ClaudeProvider(LLMProvider):
 # RLM Core
 # ============================================================================
 
+
 @dataclass
 class IterationRecord:
     """Record of a single RLM iteration."""
+
     step: int
     code: Optional[str]
     output: str
@@ -310,6 +301,7 @@ class IterationRecord:
 @dataclass
 class RLMResult:
     """Result of an RLM query."""
+
     answer: str
     iterations: int
     history: list[IterationRecord]
@@ -321,32 +313,27 @@ class RLMResult:
 class RLMOrchestrator:
     """
     Recursive Language Model Orchestrator.
-    
+
     Implements the RLM pattern from the paper:
     1. Load context as a variable in a REPL environment
     2. Let the LLM write code to examine/transform the context
     3. Provide llm_query() for recursive sub-LM calls
     4. Iterate until FINAL() answer is produced
     """
-    
+
     CODE_PATTERN = re.compile(r"```(?:repl|python)\n([\s\S]*?)```")
     FINAL_PATTERN = re.compile(r"FINAL\(([\s\S]*?)\)")
     FINAL_VAR_PATTERN = re.compile(r"FINAL_VAR\((\w+)\)")
-    
-    def __init__(
-        self,
-        config: RLMConfig,
-        root_provider: LLMProvider,
-        sub_provider: LLMProvider
-    ):
+
+    def __init__(self, config: RLMConfig, root_provider: LLMProvider, sub_provider: LLMProvider):
         self.config = config
         self.root_provider = root_provider
         self.sub_provider = sub_provider
-        
+
         # REPL state
         self.context_store: dict[str, Any] = {}
         self.sub_call_count = 0
-    
+
     def _build_system_prompt(self, context_len: int, context_type: str = "text") -> str:
         """Build the RLM system prompt."""
         return f"""You are an RLM (Recursive Language Model) agent tasked with answering queries over large contexts.
@@ -403,14 +390,10 @@ FINAL(final_answer)
 Or if the answer is in a variable:
 FINAL_VAR(final_answer)"""
 
-    def _build_iteration_prompt(
-        self,
-        query: str,
-        history: list[IterationRecord]
-    ) -> str:
+    def _build_iteration_prompt(self, query: str, history: list[IterationRecord]) -> str:
         """Build the prompt for this iteration."""
         prompt_parts = [f"QUERY: {query}\n"]
-        
+
         if history:
             prompt_parts.append("PREVIOUS STEPS:")
             # Show last 5 iterations to avoid context overflow
@@ -422,18 +405,19 @@ FINAL_VAR(final_answer)"""
                     prompt_parts.append(f"Error: {record.error}")
                 else:
                     prompt_parts.append(f"Output:\n{record.output}")
-        
+
         prompt_parts.append("\nWhat's your next step? Write code in ```repl blocks, or provide FINAL(answer).")
         return "\n".join(prompt_parts)
-    
+
     def _create_llm_query_function(self) -> Callable[[str], str]:
         """Create the llm_query function for the REPL."""
+
         async def _async_query(prompt: str) -> str:
             self.sub_call_count += 1
             if self.sub_call_count > self.config.sub_call_limit:
                 return f"ERROR: Sub-call limit ({self.config.sub_call_limit}) exceeded"
             return await self.sub_provider.query(prompt)
-        
+
         def llm_query(prompt: str) -> str:
             """Query a sub-LLM with the given prompt."""
             try:
@@ -441,19 +425,17 @@ FINAL_VAR(final_answer)"""
                 if loop.is_running():
                     # We're in an async context, need to run in executor
                     import concurrent.futures
+
                     with concurrent.futures.ThreadPoolExecutor() as pool:
-                        future = pool.submit(
-                            asyncio.run,
-                            _async_query(prompt)
-                        )
+                        future = pool.submit(asyncio.run, _async_query(prompt))
                         return future.result(timeout=self.config.timeout_seconds)
                 else:
                     return loop.run_until_complete(_async_query(prompt))
             except Exception as e:
                 return f"ERROR in llm_query: {e}"
-        
+
         return llm_query
-    
+
     def _execute_code(self, code: str) -> tuple[str, Optional[str]]:
         """Execute Python code in the REPL environment."""
         # Build execution environment
@@ -464,38 +446,45 @@ FINAL_VAR(final_answer)"""
             "json": __import__("json"),
             "collections": __import__("collections"),
             "itertools": __import__("itertools"),
-            **self.context_store
+            **self.context_store,
         }
-        
+
         stdout_capture = StringIO()
         error = None
-        
+
         try:
             with redirect_stdout(stdout_capture):
                 exec(code, env)
-            
+
             # Update context store with new variables
             for key, value in env.items():
-                if not key.startswith("_") and key not in ("context", "llm_query", "re", "json", "collections", "itertools"):
+                if not key.startswith("_") and key not in (
+                    "context",
+                    "llm_query",
+                    "re",
+                    "json",
+                    "collections",
+                    "itertools",
+                ):
                     self.context_store[key] = value
-                    
+
         except Exception as e:
             error = str(e)
-        
+
         output = stdout_capture.getvalue()
         return output, error
-    
+
     def _extract_code(self, response: str) -> Optional[str]:
         """Extract code from ```repl or ```python blocks."""
         match = self.CODE_PATTERN.search(response)
         return match.group(1) if match else None
-    
+
     def _extract_final(self, response: str) -> Optional[str]:
         """Check for FINAL() or FINAL_VAR() answer."""
         # Check for FINAL(answer)
         if match := self.FINAL_PATTERN.search(response):
             return match.group(1).strip()
-        
+
         # Check for FINAL_VAR(variable_name)
         if match := self.FINAL_VAR_PATTERN.search(response):
             var_name = match.group(1).strip()
@@ -503,38 +492,28 @@ FINAL_VAR(final_answer)"""
                 value = self.context_store[var_name]
                 return str(value) if not isinstance(value, str) else value
             return f"Variable '{var_name}' not found"
-        
+
         return None
-    
+
     def _truncate_output(self, output: str) -> str:
         """Truncate output to configured maximum."""
         max_chars = self.config.max_output_chars
         if len(output) <= max_chars:
             return output
-        
+
         half = max_chars // 2
-        return (
-            f"{output[:half]}\n"
-            f"... [TRUNCATED {len(output) - max_chars:,} chars] ...\n"
-            f"{output[-half:]}"
-        )
-    
-    async def process(
-        self,
-        query: str,
-        context: str,
-        context_type: str = "text",
-        verbose: bool = True
-    ) -> RLMResult:
+        return f"{output[:half]}\n... [TRUNCATED {len(output) - max_chars:,} chars] ...\n{output[-half:]}"
+
+    async def process(self, query: str, context: str, context_type: str = "text", verbose: bool = True) -> RLMResult:
         """
         Process an RLM query.
-        
+
         Args:
             query: The question to answer
             context: The input context (can be huge)
             context_type: Description of context type
             verbose: Whether to print progress
-        
+
         Returns:
             RLMResult with the answer and execution history
         """
@@ -542,33 +521,35 @@ FINAL_VAR(final_answer)"""
         self.context_store = {"context": context}
         self.sub_call_count = 0
         history: list[IterationRecord] = []
-        
+
         system_prompt = self._build_system_prompt(len(context), context_type)
-        
+
         if verbose:
-            console.print(Panel(
-                f"[bold]Query:[/bold] {query}\n"
-                f"[bold]Context:[/bold] {len(context):,} chars ({context_type})\n"
-                f"[bold]Root LLM:[/bold] {self.root_provider.name}\n"
-                f"[bold]Sub LLM:[/bold] {self.sub_provider.name}",
-                title="RLM Starting",
-                border_style="blue"
-            ))
-        
+            console.print(
+                Panel(
+                    f"[bold]Query:[/bold] {query}\n"
+                    f"[bold]Context:[/bold] {len(context):,} chars ({context_type})\n"
+                    f"[bold]Root LLM:[/bold] {self.root_provider.name}\n"
+                    f"[bold]Sub LLM:[/bold] {self.sub_provider.name}",
+                    title="RLM Starting",
+                    border_style="blue",
+                )
+            )
+
         for iteration in range(self.config.max_iterations):
             if verbose:
                 console.print(f"\n[bold cyan]━━━ Iteration {iteration + 1} ━━━[/bold cyan]")
-            
+
             # Build prompt for this iteration
             prompt = self._build_iteration_prompt(query, history)
-            
+
             # Query root LLM
             try:
                 with Progress(
                     SpinnerColumn(),
                     TextColumn("[progress.description]{task.description}"),
                     console=console,
-                    transient=True
+                    transient=True,
                 ) as progress:
                     if verbose:
                         progress.add_task("Querying root LLM...", total=None)
@@ -580,9 +561,9 @@ FINAL_VAR(final_answer)"""
                     history=history,
                     total_sub_calls=self.sub_call_count,
                     success=False,
-                    error=f"Root LLM query failed: {e}"
+                    error=f"Root LLM query failed: {e}",
                 )
-            
+
             # Extract code first - only check for FINAL if no code block
             code = self._extract_code(response)
 
@@ -590,58 +571,53 @@ FINAL_VAR(final_answer)"""
             if not code:
                 if final_answer := self._extract_final(response):
                     if verbose:
-                        console.print(Panel(
-                            final_answer,
-                            title="[bold green]FINAL ANSWER[/bold green]",
-                            border_style="green"
-                        ))
+                        console.print(
+                            Panel(final_answer, title="[bold green]FINAL ANSWER[/bold green]", border_style="green")
+                        )
                     return RLMResult(
                         answer=final_answer,
                         iterations=iteration + 1,
                         history=history,
                         total_sub_calls=self.sub_call_count,
-                        success=True
+                        success=True,
                     )
-            
+
             if code:
                 if verbose:
                     console.print(Syntax(code, "python", theme="monokai", line_numbers=True))
-                
+
                 sub_calls_before = self.sub_call_count
                 output, error = self._execute_code(code)
                 sub_calls_made = self.sub_call_count - sub_calls_before
-                
+
                 truncated_output = self._truncate_output(output)
-                
+
                 if verbose:
                     if error:
                         console.print(f"[bold red]Error:[/bold red] {error}")
                     else:
-                        console.print(Panel(
-                            truncated_output or "(no output)",
-                            title=f"Output (sub-calls: {sub_calls_made})",
-                            border_style="yellow"
-                        ))
-                
-                history.append(IterationRecord(
-                    step=iteration + 1,
-                    code=code,
-                    output=truncated_output,
-                    sub_calls=sub_calls_made,
-                    error=error
-                ))
+                        console.print(
+                            Panel(
+                                truncated_output or "(no output)",
+                                title=f"Output (sub-calls: {sub_calls_made})",
+                                border_style="yellow",
+                            )
+                        )
+
+                history.append(
+                    IterationRecord(
+                        step=iteration + 1, code=code, output=truncated_output, sub_calls=sub_calls_made, error=error
+                    )
+                )
             else:
                 if verbose:
                     console.print("[yellow]No code block found in response[/yellow]")
                     console.print(Panel(response[:1000], title="Raw Response"))
-                
-                history.append(IterationRecord(
-                    step=iteration + 1,
-                    code=None,
-                    output="No code block found",
-                    sub_calls=0
-                ))
-        
+
+                history.append(
+                    IterationRecord(step=iteration + 1, code=None, output="No code block found", sub_calls=0)
+                )
+
         # Max iterations reached
         return RLMResult(
             answer="",
@@ -649,7 +625,7 @@ FINAL_VAR(final_answer)"""
             history=history,
             total_sub_calls=self.sub_call_count,
             success=False,
-            error=f"Max iterations ({self.config.max_iterations}) reached without FINAL answer"
+            error=f"Max iterations ({self.config.max_iterations}) reached without FINAL answer",
         )
 
 
@@ -657,28 +633,29 @@ FINAL_VAR(final_answer)"""
 # CLI Interface
 # ============================================================================
 
+
 def create_default_config() -> RLMConfig:
     """Create a default configuration from environment."""
     config = RLMConfig()
-    
+
     # Default Ollama server
     config.ollama_servers = [
         OllamaConfig(
             host=os.environ.get("OLLAMA_HOST", "localhost"),
             port=int(os.environ.get("OLLAMA_PORT", "11434")),
             model=os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:32b"),
-            name="local"
+            name="local",
         )
     ]
-    
+
     # DeepSeek if API key is set
     if os.environ.get("DEEPSEEK_API_KEY"):
         config.deepseek = DeepSeekConfig()
-    
+
     # Claude if API key is set
     if os.environ.get("ANTHROPIC_API_KEY"):
         config.claude = ClaudeConfig()
-    
+
     return config
 
 
@@ -688,46 +665,42 @@ def get_provider(config: RLMConfig, provider_type: ProviderType) -> LLMProvider:
         if not config.ollama_servers:
             raise ValueError("No Ollama servers configured")
         return OllamaProvider(config.ollama_servers[0])
-    
+
     elif provider_type == ProviderType.DEEPSEEK:
         if not config.deepseek:
             raise ValueError("DeepSeek not configured (set DEEPSEEK_API_KEY)")
         return DeepSeekProvider(config.deepseek)
-    
+
     elif provider_type == ProviderType.OPENAI_COMPATIBLE:
         if not config.openai_compatible:
             config.openai_compatible = OpenAICompatibleConfig()
         return OpenAICompatibleProvider(config.openai_compatible)
-    
+
     elif provider_type == ProviderType.CLAUDE:
         if not config.claude:
             raise ValueError("Claude not configured (set ANTHROPIC_API_KEY)")
         return ClaudeProvider(config.claude)
-    
+
     else:
         raise ValueError(f"Unknown provider type: {provider_type}")
 
 
 async def main_async(
-    query: str,
-    context_file: Path,
-    provider: str = "ollama",
-    sub_provider: Optional[str] = None,
-    verbose: bool = True
+    query: str, context_file: Path, provider: str = "ollama", sub_provider: Optional[str] = None, verbose: bool = True
 ) -> RLMResult:
     """Main async entry point."""
     # Load context
     context = context_file.read_text()
-    
+
     # Create config and providers
     config = create_default_config()
-    
+
     root = get_provider(config, ProviderType(provider))
     sub = get_provider(config, ProviderType(sub_provider or provider))
-    
+
     # Create orchestrator
     rlm = RLMOrchestrator(config, root, sub)
-    
+
     # Process query
     return await rlm.process(query, context, verbose=verbose)
 
@@ -735,57 +708,42 @@ async def main_async(
 def main():
     """CLI entry point."""
     import argparse
-    
-    parser = argparse.ArgumentParser(
-        description="RLM - Recursive Language Model for processing large contexts"
-    )
+
+    parser = argparse.ArgumentParser(description="RLM - Recursive Language Model for processing large contexts")
+    parser.add_argument("--query", "-q", required=True, help="Query to answer")
+    parser.add_argument("--context-file", "-c", type=Path, required=True, help="Path to context file")
     parser.add_argument(
-        "--query", "-q",
-        required=True,
-        help="Query to answer"
-    )
-    parser.add_argument(
-        "--context-file", "-c",
-        type=Path,
-        required=True,
-        help="Path to context file"
-    )
-    parser.add_argument(
-        "--provider", "-p",
+        "--provider",
+        "-p",
         choices=["ollama", "deepseek", "openai", "claude"],
         default="ollama",
-        help="Root LLM provider (default: ollama)"
+        help="Root LLM provider (default: ollama)",
     )
     parser.add_argument(
-        "--sub-provider", "-s",
+        "--sub-provider",
+        "-s",
         choices=["ollama", "deepseek", "openai", "claude"],
-        help="Sub-LLM provider (default: same as root)"
+        help="Sub-LLM provider (default: same as root)",
     )
-    parser.add_argument(
-        "--quiet", "-Q",
-        action="store_true",
-        help="Suppress verbose output"
-    )
-    parser.add_argument(
-        "--json",
-        action="store_true",
-        help="Output result as JSON"
-    )
-    
+    parser.add_argument("--quiet", "-Q", action="store_true", help="Suppress verbose output")
+    parser.add_argument("--json", action="store_true", help="Output result as JSON")
+
     args = parser.parse_args()
-    
+
     if not args.context_file.exists():
         console.print(f"[red]Error: Context file not found: {args.context_file}[/red]")
         sys.exit(1)
-    
-    result = asyncio.run(main_async(
-        query=args.query,
-        context_file=args.context_file,
-        provider=args.provider,
-        sub_provider=args.sub_provider,
-        verbose=not args.quiet
-    ))
-    
+
+    result = asyncio.run(
+        main_async(
+            query=args.query,
+            context_file=args.context_file,
+            provider=args.provider,
+            sub_provider=args.sub_provider,
+            verbose=not args.quiet,
+        )
+    )
+
     if args.json:
         output = {
             "success": result.success,
@@ -799,10 +757,10 @@ def main():
                     "code": h.code,
                     "output": h.output[:500] if h.output else None,
                     "sub_calls": h.sub_calls,
-                    "error": h.error
+                    "error": h.error,
                 }
                 for h in result.history
-            ]
+            ],
         }
         print(json.dumps(output, indent=2))
     else:
@@ -814,7 +772,7 @@ def main():
         else:
             console.print("\n[bold red]═══ FAILED ═══[/bold red]")
             console.print(f"Error: {result.error}")
-    
+
     sys.exit(0 if result.success else 1)
 
 

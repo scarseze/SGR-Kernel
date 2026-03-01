@@ -1,14 +1,24 @@
 # Core
 openai>=1.0.0
+litellm>=1.0.0
 docker>=7.0.0
 pydantic>=2.0.0
 python-dotenv>=1.0.0
 requests
 httpx
 
+# Database
+sqlalchemy
+aiosqlite
+redis>=5.0.0
+
 # RAG & Memory
 qdrant-client
-# ollama (not using python lib, just HTTP requests)
+
+# Local LLM Support (Ollama)
+# Note: Local LLMs like qwen2.5:1.5b are run via the external Ollama service.
+# The `litellm` package handles the HTTP abstraction automatically. No `ollama` pip
+# package is required for the kernel to function.
 
 # Skills
 duckduckgo-search>=2.0.0 # DuckDuckGo Search (WebSearchSkill)
@@ -29,10 +39,6 @@ matplotlib
 seaborn
 tabulate
 
-# Optional/Testing
-pytest
-rich
-
 # UI
 chainlit>=1.0.0
 fastapi
@@ -43,3 +49,18 @@ aiogram>=3.0.0
 opentelemetry-api
 opentelemetry-sdk
 opentelemetry-exporter-otlp
+fluent-logger>=0.10.0
+
+# Documentation & Site
+mkdocs-material>=9.5.0
+mkdocs-material-extensions>=1.3.0
+mkdocs-static-i18n>=1.0.0
+mkdocs-minify-plugin>=0.7.0
+mike>=2.0.0
+
+# Development
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
+rich
+watchfiles

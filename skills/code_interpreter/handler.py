@@ -1,22 +1,24 @@
 import asyncio
-import docker
-import tarfile
 import io
 import os
+import tarfile
 from typing import Type
+
+import docker
 from pydantic import BaseModel
 
-from core.state import AgentState
+from core.execution import ExecutionState
 from skills.base import BaseSkill, SkillMetadata
 from skills.code_interpreter.schema import CodeExecutionRequest, CodeExecutionResult
 
-class CodeInterpreterSkill(BaseSkill):
+
+class CodeInterpreterSkill(BaseSkill[BaseModel]):
     name: str = "code_interpreter"
     description: str = (
         "Executes Python code in a secure sandboxed environment. "
         "Use this for data analysis, math, or testing code snippets."
     )
-    
+
     @property
     def metadata(self) -> SkillMetadata:
         return SkillMetadata(
@@ -26,13 +28,13 @@ class CodeInterpreterSkill(BaseSkill):
             idempotent=True,
             requires_network=False,
             requires_filesystem=True,
-            cost_class="expensive"
+            cost_class="expensive",
         )
-    
+
     # Docker configuration
     IMAGE_NAME = "sgr-sandbox:latest"
     CONTAINER_NAME = "sgr-sandbox-instance"
-    
+
     def __init__(self, **data):
         super().__init__(**data)
         try:
@@ -41,9 +43,7 @@ class CodeInterpreterSkill(BaseSkill):
         except (docker.errors.DockerException, Exception) as e:
             # Re-raise with a user-friendly message
             raise RuntimeError(
-                f"[{self.name}] Failed to connect to Docker. "
-                "Please ensure Docker Desktop is running. "
-                f"Error: {e}"
+                f"[{self.name}] Failed to connect to Docker. Please ensure Docker Desktop is running. Error: {e}"
             ) from e
         self._ensure_image_exists()
         self._start_sandbox()
@@ -76,57 +76,47 @@ class CodeInterpreterSkill(BaseSkill):
                 mem_limit="512m",  # Limit memory
                 nano_cpus=500000000,  # Limit CPU (0.5 CPU)
                 # network_disabled=True # ENABLE NETWORK for RLM Proxy
-                extra_hosts={"host.docker.internal": "host-gateway"} # Allow access to host
+                extra_hosts={"host.docker.internal": "host-gateway"},  # Allow access to host
             )
 
-    async def execute(self, params: CodeExecutionRequest, state: AgentState) -> CodeExecutionResult:
+    async def execute(self, params: CodeExecutionRequest, state: ExecutionState) -> CodeExecutionResult:
         container = self.client.containers.get(self.CONTAINER_NAME)
-        
+
         # Prepare code script
-        script_content = params.code.encode('utf-8')
-        
+        script_content = params.code.encode("utf-8")
+
         # We need to copy the script into the container
         # Docker API put_archive needs a tar stream
         tar_stream = io.BytesIO()
-        with tarfile.open(fileobj=tar_stream, mode='w') as tar:
-            tar_info = tarfile.TarInfo(name='script.py')
+        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
+            tar_info = tarfile.TarInfo(name="script.py")
             tar_info.size = len(script_content)
             tar.addfile(tar_info, io.BytesIO(script_content))
         tar_stream.seek(0)
-        
-        container.put_archive('/home/sanduser', tar_stream)
-        
+
+        container.put_archive("/home/sanduser", tar_stream)
+
         # Execute the script
         # We wrap it in python execution
-        exec_cmd = f"python /home/sanduser/script.py"
-        
+        exec_cmd = "python /home/sanduser/script.py"
+
         try:
             # Running with timeout mechanism needs careful handling with docker exec
             # docker-py exec_run is synchronous usually, so we run it in thread pool or use async adapter
             # For MVP we use synchronous call but verify timeout logic in future
-            
+
             # Run blocking docker exec in a separate thread to avoid freezing the async loop
             loop = asyncio.get_running_loop()
             exec_result = await loop.run_in_executor(
-                None, 
-                lambda: container.exec_run(
-                    exec_cmd,
-                    workdir="/home/sanduser",
-                    user="sanduser"
-                )
+                None, lambda: container.exec_run(exec_cmd, workdir="/home/sanduser", user="sanduser")
             )
-            
+
             return CodeExecutionResult(
                 success=(exec_result.exit_code == 0),
-                stdout=exec_result.output.decode('utf-8') if exec_result.output else "",
-                stderr="", # Docker exec_run combines stdout/stderr by default unless demux used
-                exit_code=exec_result.exit_code
+                stdout=exec_result.output.decode("utf-8") if exec_result.output else "",
+                stderr="",  # Docker exec_run combines stdout/stderr by default unless demux used
+                exit_code=exec_result.exit_code,
             )
-            
+
         except Exception as e:
-            return CodeExecutionResult(
-                success=False,
-                stdout="",
-                stderr=str(e),
-                exit_code=-1
-            )
+            return CodeExecutionResult(success=False, stdout="", stderr=str(e), exit_code=-1)

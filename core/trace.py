@@ -1,20 +1,20 @@
-import os
+import contextvars
 import json
-from datetime import datetime
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
-import uuid
 import logging
+import os
+import uuid
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
 
 from core.planner import ExecutionPlan
-
-import logging
-import contextvars
 
 logger = logging.getLogger("core.trace")
 
 # Global Context for implicit tracing
 current_step_trace = contextvars.ContextVar("current_step_trace", default=None)
+
 
 class LLMCallTrace(BaseModel):
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
@@ -23,14 +23,16 @@ class LLMCallTrace(BaseModel):
     completion_tokens: int = 0
     total_tokens: int = 0
     latency_ms: float = 0.0
-    context: str = "unknown" # e.g. "planning", "skill:research"
+    context: str = "unknown"  # e.g. "planning", "skill:research"
+
 
 class PolicyEvent(BaseModel):
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
     step_id: str
     skill_name: str
-    decision: str # "ALLOW", "DENY", "REQUIRE_APPROVAL"
+    decision: str  # "ALLOW", "DENY", "REQUIRE_APPROVAL"
     reason: str
+
 
 class ApprovalEvent(BaseModel):
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
@@ -39,6 +41,7 @@ class ApprovalEvent(BaseModel):
     approved: bool
     approver: str = "user"
     reason: Optional[str] = None
+
 
 class RAGQueryTrace(BaseModel):
     query: str
@@ -52,13 +55,15 @@ class RAGQueryTrace(BaseModel):
     critique_passed: Optional[bool] = None
     repair_strategy: Optional[str] = None
 
+
 class AttemptTrace(BaseModel):
     attempt_number: int
     start_time: float
     end_time: float = 0.0
     error: Optional[str] = None
     result_snippet: Optional[str] = None
-    tier: Optional[str] = None # Log which tier was used (fast, mid, heavy)
+    tier: Optional[str] = None  # Log which tier was used (fast, mid, heavy)
+
 
 class StepTrace(BaseModel):
     step_id: str
@@ -68,7 +73,7 @@ class StepTrace(BaseModel):
     attempts: List[AttemptTrace] = Field(default_factory=list)
     start_time: float = 0.0
     duration: float = 0.0
-    status: str = "pending" # mapped to StepStatus values
+    status: str = "pending"  # mapped to StepStatus values
     error: Optional[str] = None
     policy_events: List[PolicyEvent] = Field(default_factory=list)
     approval_events: List[ApprovalEvent] = Field(default_factory=list)
@@ -77,25 +82,27 @@ class StepTrace(BaseModel):
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
     policy_required: bool = False
 
+
 class RequestTrace(BaseModel):
     request_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_request: str
     plan: Optional[ExecutionPlan] = None
     steps: List[StepTrace] = Field(default_factory=list)
-    llm_calls: List[LLMCallTrace] = Field(default_factory=list) # Planner LLM calls
+    llm_calls: List[LLMCallTrace] = Field(default_factory=list)  # Planner LLM calls
     total_duration: float = 0.0
-    execution_order: List[str] = Field(default_factory=list) # Trace of actual execution sequence
-    plan_hash: str = "" # SHA256 of the initial plan for drift detection
+    execution_order: List[str] = Field(default_factory=list)  # Trace of actual execution sequence
+    plan_hash: str = ""  # SHA256 of the initial plan for drift detection
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
-    status: str = "running" # running, completed, error, security_error
+    status: str = "running"  # running, completed, error, security_error
     error: Optional[str] = None
+
 
 class TraceManager:
     def __init__(self, trace_dir: str = "traces"):
         # Ensure absolute path relative to project root (approx)
         base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.trace_dir = os.path.join(base_path, trace_dir)
-        
+
         if not os.path.exists(self.trace_dir):
             os.makedirs(self.trace_dir, exist_ok=True)
 
@@ -105,13 +112,13 @@ class TraceManager:
             date_str = datetime.now().strftime("%Y-%m-%d")
             day_dir = os.path.join(self.trace_dir, date_str)
             os.makedirs(day_dir, exist_ok=True)
-            
+
             filename = f"{trace.request_id}.json"
             filepath = os.path.join(day_dir, filename)
-            
-            with open(filepath, 'w', encoding='utf-8') as f:
+
+            with open(filepath, "w", encoding="utf-8") as f:
                 f.write(trace.model_dump_json(indent=2))
-                
+
             logger.info(f"Trace saved: {filepath}")
         except Exception as e:
             logger.error(f"Failed to save trace: {e}")
@@ -122,30 +129,30 @@ class TraceManager:
             # 1. Find latest day directory
             if not os.path.exists(self.trace_dir):
                 return None
-                
+
             days = sorted([d for d in os.listdir(self.trace_dir) if os.path.isdir(os.path.join(self.trace_dir, d))])
             if not days:
                 return None
-                
+
             latest_day = days[-1]
             day_path = os.path.join(self.trace_dir, latest_day)
-            
+
             # 2. Find latest file in that directory
             files = sorted([f for f in os.listdir(day_path) if f.endswith(".json")])
             if not files:
                 return None
-                
-            latest_file = files[-1] # Assuming standard sorting works for UUIDs/Time or we rely on OS creation time?
+
+            latest_file = files[-1]  # Assuming standard sorting works for UUIDs/Time or we rely on OS creation time?
             # Actually UUIDs are random. We need to check file modification time or content.
             # Better: Sort by modification time.
-            
+
             full_paths = [os.path.join(day_path, f) for f in files]
             latest_path = max(full_paths, key=os.path.getmtime)
-            
-            with open(latest_path, 'r', encoding='utf-8') as f:
+
+            with open(latest_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 return RequestTrace(**data)
-                
+
         except Exception as e:
             logger.error(f"Failed to load last trace: {e}")
             return None

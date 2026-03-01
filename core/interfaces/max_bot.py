@@ -3,15 +3,18 @@ SGR Core - Max Messenger Interface
 Adapts the "Max" Bot API (REST) to SGR Core's Logic Engine.
 """
 
-import os
 import asyncio
 import logging
+import os
+from typing import Dict, List
+
 import httpx
-from typing import Optional, Dict, Any, List
-from core.engine import CoreEngine
+
 from core.models import UserMessage
+from core.runtime import CoreEngine
 
 logger = logging.getLogger(__name__)
+
 
 class MaxBotInterface:
     def __init__(self, engine: CoreEngine):
@@ -19,7 +22,7 @@ class MaxBotInterface:
         self.token = os.getenv("MAX_BOT_TOKEN")
         # Default API endpoint (placeholder, update with real one from docs)
         self.api_url = os.getenv("MAX_API_URL", "https://api.max.ru/bot/v1")
-        
+
         self.client = httpx.AsyncClient(timeout=30.0)
         self.is_running = False
         self.offset = 0  # For polling
@@ -41,8 +44,8 @@ class MaxBotInterface:
             except Exception as e:
                 logger.error(f"Error in Max polling loop: {e}")
                 await asyncio.sleep(5)  # Backoff on error
-            
-            await asyncio.sleep(1.0) # Polling interval
+
+            await asyncio.sleep(1.0)  # Polling interval
 
     async def stop(self):
         """Stops the polling loop."""
@@ -55,13 +58,14 @@ class MaxBotInterface:
         # Note: This is a hypothetical API structure based on standard Bot API patterns
         # Real MAX API might differ slightly (e.g. /events or /updates)
         url = f"{self.api_url}/updates?token={self.token}&offset={self.offset}"
-        
+
         try:
             resp = await self.client.get(url)
             if resp.status_code == 200:
                 data = resp.json()
-                if not data: return []
-                
+                if not data:
+                    return []
+
                 # Assume standard structure: {"result": [...], "ok": true}
                 items = data.get("result", [])
                 if items:
@@ -79,24 +83,21 @@ class MaxBotInterface:
         """Converts Max Update -> SGR UserMessage -> Core Engine."""
         # Extract message data (Hypothetical structure)
         message = update.get("message", {})
-        if not message: return
+        if not message:
+            return
 
         text = message.get("text")
         chat_id = message.get("chat", {}).get("id")
         user_id = message.get("from", {}).get("id")
 
-        if not text or not chat_id: return
+        if not text or not chat_id:
+            return
 
         # Log incoming
         logger.info(f"📩 [MAX] New message from {user_id}: {text[:50]}...")
 
         # 1. Adapt to Internal Schema
-        user_msg = UserMessage(
-            text=text,
-            user_id=str(user_id),
-            platform="max",
-            meta={"chat_id": chat_id}
-        )
+        user_msg = UserMessage(text=text, user_id=str(user_id), platform="max", meta={"chat_id": chat_id})
 
         # 2. Send to Brain (Core Engine)
         response_text = await self.engine.process_message(user_msg)
@@ -113,11 +114,10 @@ class MaxBotInterface:
             "text": text,
             # "parse_mode": "Markdown" # Assuming Markdown support
         }
-        
+
         try:
             resp = await self.client.post(url, json=payload)
             if resp.status_code != 200:
                 logger.error(f"❌ Failed to send Max message: {resp.text}")
         except Exception as e:
             logger.error(f"❌ Network error sending Max message: {e}")
-

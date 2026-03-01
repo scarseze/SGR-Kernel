@@ -10,20 +10,21 @@ Usage:
     result = await rig.run("test query")
     rig.assert_skill_calls("fake", 3)
 """
-import asyncio
-from typing import List, Optional, Any
-from unittest.mock import MagicMock, AsyncMock
 
-from core.engine import CoreEngine
-from core.planner import ExecutionPlan, PlanStep
-from core.trace import RequestTrace, TraceManager
-from core.state import AgentState
-from core.security import SecurityGuardian
+from typing import Any, List, Optional
+from unittest.mock import AsyncMock, MagicMock
+
 from core.middleware import (
-    TraceMiddleware, PolicyMiddleware,
-    ApprovalMiddleware, TimeoutMiddleware,
+    ApprovalMiddleware,
+    PolicyMiddleware,
+    TimeoutMiddleware,
+    TraceMiddleware,
 )
-
+from core.planner import ExecutionPlan, PlanStep
+from core.runtime import CoreEngine
+from core.security import SecurityGuardian
+from core.execution import ExecutionState
+from core.trace import RequestTrace
 from tests.fakes.fake_llm import FakeLLM
 from tests.fakes.fake_planner import FakePlanner
 from tests.fakes.fake_policy import FakePolicy
@@ -31,6 +32,7 @@ from tests.fakes.fake_policy import FakePolicy
 
 class _NoOpTraceManager:
     """TraceManager that doesn't write to filesystem."""
+
     def save_trace(self, trace: RequestTrace):
         self._last = trace
 
@@ -42,19 +44,44 @@ class KernelTestRig:
     """Fluent builder for kernel test scenarios."""
 
     def __init__(self):
-        # Bypass __init__ — no DB, no Qdrant, no Ollama
-        eng = object.__new__(CoreEngine)
-
+        import os
+        from core.container import Container
+        from unittest.mock import MagicMock
+        
+        # Ensure fresh container for isolation
+        Container._registry = {}
+        
+        # Bypass Redis loading
+        os.environ["REDIS_HOST"] = "mock_redis"
+        
+        # Real v2 engine
+        eng = CoreEngine(llm_config={"api_key": "dummy"})
+        
+        # Mock EventStore to avoid sqlite errors in integration tests
+        eng.event_store = MagicMock()
+        eng.event_store.save_event = AsyncMock()
+        eng.events.event_store = eng.event_store
+        
+        # Override Redis to force local execution
+        eng.redis = None
+        Container.register("redis", None)
+        
         # --- Wire minimal attributes needed by run() ---
         eng.user_id = "test_user"
         eng.approval_callback = None
-        eng.state = AgentState(user_request="")
-        eng.context_loaded = True  # skip _ensure_initialized
-
+        eng.state = ExecutionState(request_id="rig_test", input_payload="")
+        
         # Subsystems — fakes
         eng.llm = FakeLLM()
-        eng.planner = FakePlanner()
+        
+        # Re-wire Planner locally
+        from tests.fakes.fake_planner import FakePlanner
+        eng.planner = FakePlanner(engine=eng)
+        
+        # Policy is now mostly inside hooks/middlewares usually, 
+        # but we mock policy for tests
         eng.policy = FakePolicy()
+        
         eng.security = SecurityGuardian()
         eng.tracer = _NoOpTraceManager()
 
@@ -62,31 +89,47 @@ class KernelTestRig:
         eng.db = MagicMock()
         eng.db.session = MagicMock(return_value=_AsyncCtx())
 
-        # No-op memory
+        # No-op memory manager
         eng.memory_manager = MagicMock()
         eng.memory_manager.augment_with_semantic_search = AsyncMock()
 
-        # Skills
+        # Skills (via v2 skill adapter)
         eng.skills = {}
-        eng.cap_index = {}
-        eng.rag = None
-        eng._skill_semaphores = {}
+        eng.skill_adapter.registry = eng.skills
+        
+        # Missing from some v2 tests: engine._resolve_string_template used by rig
+        # V2 uses execution.resolution for this, so we bind it for compat
+        from core.execution.resolution import resolve_inputs
+        eng._resolve_string_template = lambda template, context: resolve_inputs({"v": template}, {"s1": {"output": context.get("s1", {}).get("x", {}).get("y", context.get("s1", {}))}}).get("v", template)
+        # Note: The above lambda is still a bit hacky, but let's make it better:
+        def _resolve_compat(template, context):
+            # In rig tests, context is often {'s1': {'x': {'y': 7}}}
+            # resolve_inputs expects state.skill_outputs as context
+            return resolve_inputs({"v": template}, context).get("v", template)
+        eng._resolve_string_template = _resolve_compat
 
-        # Task queue
-        eng.task_queue = MagicMock()
-        eng.task_handlers = {}
-
-        # Middleware — production ordering
-        eng.middlewares = [
-            TraceMiddleware(),
-            PolicyMiddleware(eng.policy),
-            ApprovalMiddleware(eng.approval_callback),
-            TimeoutMiddleware(),
-        ]
-
-        # No-op message saving
-        eng._save_message = AsyncMock()
-        eng._ensure_initialized = AsyncMock()
+        # Missing engine._execute_step used by rig (legacy test run_step)
+        async def _execute_step(step_def, outputs, trace):
+            # Shim run_step for v2
+            from core.scheduler import TaskPayload
+            payload = TaskPayload(
+                step_id=step_def.id if hasattr(step_def, 'id') else step_def.step_id,
+                skill_name=step_def.skill_name,
+                inputs=step_def.params,
+                request_id="test_step",
+                attempt=1,
+                trace_context={"trace_id": "test", "span_id": "test"},
+                timeout=float(getattr(step_def, 'timeout_seconds', getattr(step_def, 'timeout_sec', 300.0)) or 300.0)
+            )
+            res = await eng.lifecycle.execute_task(payload)
+            # Find the output event
+            from core.events import EventType
+            for e in res.events:
+                if e.type == EventType.STEP_COMPLETED:
+                    return e.payload.get("output")
+            return None
+            
+        eng._execute_step = _execute_step
 
         self.engine = eng
         self._skills = []
@@ -125,8 +168,17 @@ class KernelTestRig:
         return self
 
     def with_middlewares(self, mws: List) -> "KernelTestRig":
-        """Replace middleware stack."""
-        self.engine.middlewares = mws
+        """Replace middleware stack (bridged to HOOKS)."""
+        from core.governance import HOOK_BEFORE_STEP, HOOK_AFTER_STEP
+        # Clear existing
+        self.engine.lifecycle.hooks.hooks[HOOK_BEFORE_STEP] = []
+        self.engine.lifecycle.hooks.hooks[HOOK_AFTER_STEP] = []
+        
+        for mw in mws:
+            if hasattr(mw, 'before_execute'):
+                 self.engine.lifecycle.hooks.register(HOOK_BEFORE_STEP, mw.before_execute)
+            if hasattr(mw, 'after_execute'):
+                 self.engine.lifecycle.hooks.register(HOOK_AFTER_STEP, mw.after_execute)
         return self
 
     def without_security(self) -> "KernelTestRig":
@@ -144,8 +196,7 @@ class KernelTestRig:
         """Execute full run() pipeline."""
         return await self.engine.run(text)
 
-    async def run_step(self, step_def: PlanStep,
-                       outputs: dict = None) -> Any:
+    async def run_step(self, step_def: PlanStep, outputs: dict[str, Any] | None = None) -> Any:
         """Execute a single step directly (bypass planner/DAG)."""
         trace = RequestTrace(user_request="direct_step")
         outputs = outputs or {}
@@ -176,28 +227,26 @@ class KernelTestRig:
 
     def assert_skill_calls(self, skill, expected: int):
         """Assert a FakeSkill was called N times."""
-        assert skill.calls == expected, \
-            f"{skill.name}: expected {expected} calls, got {skill.calls}"
+        assert skill.calls == expected, f"{skill.name}: expected {expected} calls, got {skill.calls}"
 
     def assert_step_status(self, expected_status):
         """Assert last step trace has expected status."""
         step = self.last_step
         assert step is not None, "No step trace found"
-        assert step.status == expected_status, \
-            f"Expected {expected_status}, got {step.status}"
+        assert step.status == expected_status, f"Expected {expected_status}, got {step.status}"
 
     def assert_planner_not_called(self):
-        assert self.planner_calls == 0, \
-            f"Planner was called {self.planner_calls} time(s)"
+        assert self.planner_calls == 0, f"Planner was called {self.planner_calls} time(s)"
 
     def assert_planner_called(self, times: int = 1):
-        assert self.planner_calls == times, \
-            f"Expected {times} planner call(s), got {self.planner_calls}"
+        assert self.planner_calls == times, f"Expected {times} planner call(s), got {self.planner_calls}"
 
 
 class _AsyncCtx:
     """Fake async context manager for db.session()."""
+
     async def __aenter__(self):
         return self
+
     async def __aexit__(self, *a):
         pass

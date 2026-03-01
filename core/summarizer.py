@@ -1,9 +1,17 @@
-from typing import List
-from core.state import Message
-from core.llm import LLMService
 import logging
+from typing import List
+
+from core.llm import LLMService
+from pydantic import BaseModel
+from typing import Optional
+
+class Message(BaseModel):
+    role: str = "user"
+    content: str = ""
+    name: Optional[str] = None
 
 logger = logging.getLogger("core.memory.summarizer")
+
 
 class ConversationSummarizer:
     def __init__(self, llm: LLMService):
@@ -17,7 +25,7 @@ class ConversationSummarizer:
             return ""
 
         conversation_text = "\n".join([f"{m.role}: {m.content}" for m in messages])
-        
+
         prompt = f"""
         Please summarize the following conversation history into a concise but informative paragraph.
         Focus on key facts, user preferences, and important decisions made.
@@ -28,7 +36,7 @@ class ConversationSummarizer:
         
         Summary:
         """
-        
+
         try:
             summary = await self.llm.generate(prompt)
             return summary.strip()

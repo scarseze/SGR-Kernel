@@ -1,10 +1,9 @@
 """KC-J: Budget enforcement tests."""
-import pytest
+
 from core.policy import PolicyEngine
 
 
 class TestBudgetEnforcement:
-
     def test_kc_j1_budget_stops_on_overspend(self):
         """Budget check returns False when spent > limit."""
         policy = PolicyEngine()

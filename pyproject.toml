@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sgr-kernel"
-version = "0.2.0"
+version = "1.0.0-rc2"
 description = "Schema-Guided Reasoning Kernel (RFC v2 Reference Implementation)"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -24,6 +24,8 @@ classifiers = [
 dependencies = [
     "pydantic>=2.0.0",
     "aiohttp>=3.8.0",
+    "httpx>=0.24.0",
+    "tenacity>=8.2.0",
     "typer>=0.9.0",
 ]
 
@@ -40,3 +42,30 @@ sgr-kernel = "main:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["core", "interfaces", "skills"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "C4"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["core"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402"]
+"interfaces/*" = ["E402"]
+"test_sgr.py" = ["E402"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+ignore_missing_imports = true
+exclude = ["tests/", "proxy/", "examples/"]
+disable_error_code = ["import-untyped"]
+
+[[tool.mypy.overrides]]
+module = ["requests", "qdrant_client"]
+ignore_missing_imports = true

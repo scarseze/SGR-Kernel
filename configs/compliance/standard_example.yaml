@@ -1,0 +1,13 @@
+# Standard (no extra compliance) Configuration
+# Default if COMPLIANCE_LEVEL is not set
+
+compliance_level: standard
+pii_patterns:
+  email: "[\\w.-]+@[\\w.-]+\\.\\w+"
+  phone: "\\+?\\d[\\d\\s\\-\\(\\)]{7,}\\d"
+  api_key: "(sk-[a-zA-Z0-9]{20,})"
+
+memory:
+  db_url: "sqlite:///swarm_chat_history.db"
+  session_ttl_days: 30
+  auto_summarization: false

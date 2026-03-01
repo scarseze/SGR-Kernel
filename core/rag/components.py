@@ -1,6 +1,8 @@
 from typing import List, Optional
-from core.rag.context import RAGDocument
+
 from core.llm import LLMService
+from core.rag.context import RAGDocument
+
 
 class QueryRewriter:
     def __init__(self, llm: LLMService):
@@ -9,7 +11,7 @@ class QueryRewriter:
     async def rewrite(self, query: str, llm: Optional[LLMService] = None) -> str:
         # Use provided LLM (e.g. escalated tier) or default
         model = llm or self.llm
-        
+
         # Improved Prompt with Zero-Shot CoT
         prompt = f"""
         Act as an expert search engineer. Your goal is to rewrite the user's query to maximize retrieval quality for a semantic vector search engine.
@@ -27,14 +29,12 @@ class QueryRewriter:
         response = await model.complete(prompt)
         return response.strip().strip('"')
 
+
 class QueryExpander:
     async def expand(self, query: str) -> List[str]:
         # Simple expansion strategy
-        return [
-            query,
-            f"detailed explanation of {query}",
-            f"technical description of {query}"
-        ]
+        return [query, f"detailed explanation of {query}", f"technical description of {query}"]
+
 
 class DomainRouter:
     def route(self, query: str) -> List[str]:
@@ -45,6 +45,7 @@ class DomainRouter:
             return ["docs"]
         return ["default"]
 
+
 class ScoreReranker:
     def rerank(self, docs: List[RAGDocument], threshold: float = 0.0) -> List[RAGDocument]:
         # Sort by score descending
@@ -53,6 +54,7 @@ class ScoreReranker:
         if threshold > 0:
             sorted_docs = [d for d in sorted_docs if d.score >= threshold]
         return sorted_docs
+
 
 class DocFilter:
     def filter(self, docs: List[RAGDocument], min_score: float = 0.6) -> List[RAGDocument]:

@@ -1,65 +1,63 @@
-# SGR Skill Development Guide
+# SGR Skill Development Guide / Руководство по разработке скиллов SGR
 
-This document explains how to add new capabilities ("Skills") to the Core Agent using the **Schema-Guided Reasoning (SGR)** methodology.
+> Learn how to build new capabilities for the SGR Swarm. / Узнайте, как создавать новые возможности для SGR Swarm.
 
-## Philosophy: Why SGR?
-Unlike standard agents that follow text instructions (SOPs), an SGR agent follows **Data Structures**.
-- **SOP**: "Sök for user, then calculate risk." (Ambiguous)
-- **SGR**: "Fill this JSON Schema: `{ user_id: str, risk_score: int }`." (Structured)
+---
 
-## Anatomy of a Skill
-Every skill consists of 3 parts in `sgr_core/skills/<skill_name>/`:
+## 🇷🇺 Русский (Russian)
 
-1.  **`schema.py`**: The "contract". What inputs does this skill need?
-2.  **`handler.py`**: The "brain". The code that executes the logic (Python).
-3.  **`__init__.py`**: Exposes the skill class.
+### Философия: Почему SGR?
+В отличие от стандартных агентов, следующих текстовым инструкциям, SGR-агент следует **структурам данных** (Schema-Guided). Это гарантирует предсказуемость и интеграцию в сложные системы.
 
-## Step-by-Step Tutorial
+### Анатомия скилла
+Каждый скилл в `skills/` состоит из:
+1.  **`schema.py`**: Pydantic-схема (входные параметры).
+2.  **`handler.py`**: Логика выполнения на Python.
+3.  **`__init__.py`**: Регистрация скилла.
 
-### 1. Define the Schema (`schema.py`)
-Think: *What information must the LLM extract from the user to do this job?*
-
+### Пример создания
 ```python
 from pydantic import BaseModel, Field
+from core.skill_interface import SkillContext, SkillResult
+from skills.base import BaseSkill
 
-class StockAnalysisInput(BaseModel):
-    ticker: str = Field(description="The stock ticker symbol (e.g., AAPL)")
-    period: str = Field(description="Time period (1mo, 1y)", default="1mo")
+class MyInput(BaseModel):
+    query: str = Field(description="Поисковый запрос")
+
+class MySkill(BaseSkill):
+    name = "my_skill"
+    description = "Демонстрационный скилл"
+    async def execute(self, ctx: SkillContext) -> SkillResult:
+        query = ctx.params.get("query", "")
+        return SkillResult(output_text=f"Результат для: {query}")
 ```
 
-### 2. Implement the Logic (`handler.py`)
-Inherit from `BaseSkill`. Implement `execute`.
+---
 
+## 🇺🇸 English
+
+### Philosophy: Why SGR?
+Unlike standard agents that follow text instructions, SGR agents follow **data structures** (Schema-Guided). This ensures predictability and seamless integration into complex pipelines.
+
+### Anatomy of a Skill
+Every skill in `skills/` consists of:
+1.  **`schema.py`**: Pydantic schema (input parameters).
+2.  **`handler.py`**: Execution logic in Python.
+3.  **`__init__.py`**: Skill registration.
+
+### Step-by-Step
 ```python
-from typing import Type
-from ...core.state import AgentState
-from ..base import BaseSkill
-from .schema import StockAnalysisInput
+from pydantic import BaseModel, Field
+from core.skill_interface import SkillContext, SkillResult
+from skills.base import BaseSkill
 
-class StockAnalystSkill(BaseSkill):
-    name: str = "stock_analyst"
-    description: str = "Analyzes technical indicators for a given stock ticker."
+class MyInput(BaseModel):
+    query: str = Field(description="Search query")
 
-    @property
-    def input_schema(self) -> Type[BaseModel]:
-        return StockAnalysisInput
-
-    def execute(self, params: StockAnalysisInput, state: AgentState) -> str:
-        # Use params.ticker and params.period here
-        # Return a markdown string result
-        return f"Analysis for {params.ticker}: Buy (RSI < 30)"
+class MySkill(BaseSkill):
+    name = "my_skill"
+    description = "Demo skill"
+    async def execute(self, ctx: SkillContext) -> SkillResult:
+        query = ctx.params.get("query", "")
+        return SkillResult(output_text=f"Result for: {query}")
 ```
-
-### 3. Register the Skill (`main.py`)
-Add it to the Core Engine at startup.
-
-```python
-from skills.stock_analyst.handler import StockAnalystSkill
-engine.register_skill(StockAnalystSkill())
-```
-
-## Best Practices for "Experts"
-When writing requirements for a new skill:
-1.  **Be Strict with Field Descriptions**: The LLM uses the `Field(description="...")` to understand what to put there. Clear descriptions = Better performance.
-2.  **Return Markdown**: The `execute` method should return clean, readable Markdown that the user will see.
-3.  **Handle Errors**: Wrap API calls in try/except blocks and return a friendly error message string.

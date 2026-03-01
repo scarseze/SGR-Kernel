@@ -1,6 +1,5 @@
-from typing import List, Optional
 from core.llm import LLMService
-from core.rag.context import RAGDocument
+
 
 class AnswerCritic:
     def __init__(self, llm: LLMService):
@@ -25,6 +24,7 @@ class AnswerCritic:
         response = await self.llm.complete(prompt)
         return "YES" in response.upper()
 
+
 class RepairStrategy:
     def suggest_fix(self, query: str, attempt: int) -> str:
         """
@@ -34,11 +34,13 @@ class RepairStrategy:
             return f"broaden: {query}"
         elif attempt == 2:
             return f"keywords: {query}"
-        return query # Give up?
+        return query  # Give up?
+
 
 class RepairableRAG:
     """
     Mixin or Wrapper to add repair loop to RAGPipeline.
     For now, implemented as a separate logic helper.
     """
+
     pass

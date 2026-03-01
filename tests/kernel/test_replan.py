@@ -1,10 +1,9 @@
 """KC-L: Replan system tests — step_id versioning, remaining filtering."""
-import pytest
+
 from tests.kernel.conftest import make_step
 
 
 class TestReplanSystem:
-
     def test_kc_l2_step_id_versioned_on_collision(self):
         """Reused step_id gets _rN suffix."""
         completed = {"s1", "s2"}

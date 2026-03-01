@@ -1,11 +1,10 @@
 """KC-B: Planning contract tests."""
-import pytest
+
 from core.policy import PolicyEngine
 from tests.kernel.conftest import make_step
 
 
 class TestPlanning:
-
     def test_kc_b1_budget_blocks_planning(self):
         """KC-B1: Budget exceeded → planning must not proceed."""
         policy = PolicyEngine()

@@ -2,10 +2,13 @@
 FakeSkill — controllable skill for kernel tests.
 Supports configurable failures, sleep, cost, and retry policy.
 """
+
 import asyncio
+
 from pydantic import BaseModel
+
+from core.types import Capability, RetryPolicy, RiskLevel, SkillMetadata
 from skills.base import BaseSkill
-from core.types import SkillMetadata, RetryPolicy, RiskLevel, CostClass, Capability
 
 
 class FakeInput(BaseModel):
@@ -15,10 +18,18 @@ class FakeInput(BaseModel):
 class FakeSkill(BaseSkill):
     """Deterministic skill for testing. Fails `fail_times`, then succeeds."""
 
-    def __init__(self, *, name="fake", fail_times=0, sleep_sec=0,
-                 retry=RetryPolicy.STANDARD, timeout=5.0,
-                 estimated_cost=0.0, risk=RiskLevel.LOW,
-                 capabilities=None):
+    def __init__(
+        self,
+        *,
+        name="fake",
+        fail_times=0,
+        sleep_sec=0,
+        retry=RetryPolicy.STANDARD,
+        timeout=5.0,
+        estimated_cost=0.0,
+        risk=RiskLevel.LOW,
+        capabilities=None,
+    ):
         self._name = name
         self.fail_times = fail_times
         self.sleep_sec = sleep_sec
@@ -54,7 +65,7 @@ class FakeSkill(BaseSkill):
     def input_schema(self):
         return self._input_schema
 
-    async def execute(self, inp, state):
+    async def execute(self, ctx):
         self.calls += 1
 
         if self.sleep_sec:
@@ -63,4 +74,4 @@ class FakeSkill(BaseSkill):
         if self.calls <= self.fail_times:
             raise RuntimeError(f"planned failure #{self.calls}")
 
-        return f"ok:{inp.x}"
+        return f"ok:{ctx.config.get('x', 0)}"

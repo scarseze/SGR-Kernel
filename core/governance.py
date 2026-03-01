@@ -2,10 +2,10 @@
 GovernanceHooksBus for SGR Kernel.
 Side-effect isolated event bus for policy hooks.
 """
+
 import asyncio
 import logging
-from typing import Callable, List, Dict, Any, Awaitable
-from core.execution import ExecutionState
+from typing import Any, Awaitable, Callable, Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +20,12 @@ HOOK_ON_ESCALATION = "on_escalation"
 HOOK_ON_REPAIR = "on_repair"
 HOOK_ON_COMMIT = "on_commit"
 
+
 class GovernanceHooksBus:
     """
     Manages registration and dispatch of governance hooks.
     """
+
     def __init__(self):
         self.hooks: Dict[str, List[Callable[[Any], Awaitable[None]]]] = {
             HOOK_BEFORE_STEP: [],
@@ -34,7 +36,7 @@ class GovernanceHooksBus:
             HOOK_ON_RETRY: [],
             HOOK_ON_ESCALATION: [],
             HOOK_ON_REPAIR: [],
-            HOOK_ON_COMMIT: []
+            HOOK_ON_COMMIT: [],
         }
 
     def register(self, hook_type: str, handler: Callable[[Any], Awaitable[None]]):

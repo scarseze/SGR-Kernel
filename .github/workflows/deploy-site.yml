@@ -1,0 +1,73 @@
+# .github/workflows/deploy-site.yml
+name: Deploy Documentation Site
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    name: Build Documentation
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout Playbook repository
+        uses: actions/checkout@v4
+        with:
+          repository: sgr-kernel/ai_ml_playbook
+          path: ai_ml_playbook
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install mkdocs-material mkdocs-material-extensions mkdocs-static-i18n mkdocs-minify-plugin mike
+
+      - name: Generate docs from Playbook
+        run: |
+          python scripts/generate_docs.py
+
+      - name: Validate documentation
+        run: |
+          mkdocs build --strict
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site
+
+  deploy:
+    needs: build-docs
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    name: Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -4,18 +4,19 @@ Rig-based kernel compliance tests — demonstrate KernelTestRig usage.
 These tests exercise the FULL run() pipeline through FakeSkill + FakePlanner,
 proving kernel invariants at integration level (not stub level).
 """
+
 import pytest
-from core.planner import PlanStep, ExecutionPlan
-from core.types import RetryPolicy, StepStatus
+
 from core.middleware import SkillMiddleware
-
-from tests.harness.kernel_rig import KernelTestRig
+from core.planner import ExecutionPlan, PlanStep
+from core.types import RetryPolicy
 from tests.fakes.fake_skill import FakeSkill
-
+from tests.harness.kernel_rig import KernelTestRig
 
 # ============================================================================
 # E. Retry (via full pipeline)
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_rig_retry_standard():
@@ -42,6 +43,7 @@ async def test_rig_retry_none_no_retry():
 # F. Timeout (via full pipeline)
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_rig_timeout_enforced():
     """Skill exceeding timeout_sec → step fails with timeout."""
@@ -52,13 +54,15 @@ async def test_rig_timeout_enforced():
 
     # Engine wraps errors; the result should mention timeout or error
     result_lower = result.lower()
-    assert ("timeout" in result_lower or "timed out" in result_lower
-            or "error" in result_lower or "failed" in result_lower)
+    assert (
+        "timeout" in result_lower or "timed out" in result_lower or "error" in result_lower or "failed" in result_lower
+    )
 
 
 # ============================================================================
 # B. Planning
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_rig_direct_response_no_dag():
@@ -77,13 +81,13 @@ async def test_rig_budget_blocks_planner():
     rig = KernelTestRig().with_budget(False)
 
     result = await rig.run("anything")
-    assert "budget" in result.lower() or "denied" in result.lower() \
-           or rig.planner_calls == 0
+    assert "budget" in result.lower() or "denied" in result.lower() or rig.planner_calls == 0
 
 
 # ============================================================================
 # D. Middleware (via full pipeline)
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_rig_middleware_order_probe():
@@ -93,17 +97,16 @@ async def test_rig_middleware_order_probe():
     class ProbeMW(SkillMiddleware):
         async def before_execute(self, ctx):
             log.append("before")
+
         async def after_execute(self, ctx, r):
             log.append("after")
             return r
+
         async def on_error(self, ctx, e):
             log.append("error")
 
     skill = FakeSkill()
-    rig = (KernelTestRig()
-           .without_security()
-           .with_middlewares([ProbeMW()])
-           .with_skill(skill))
+    rig = KernelTestRig().without_security().with_middlewares([ProbeMW()]).with_skill(skill)
 
     await rig.run("go")
     assert log == ["before", "after"]
@@ -112,6 +115,7 @@ async def test_rig_middleware_order_probe():
 # ============================================================================
 # I. Template Resolution (direct)
 # ============================================================================
+
 
 def test_rig_template_resolution():
     """Nested template resolution via rig.engine."""
@@ -126,13 +130,17 @@ def test_rig_template_resolution():
 # H. StepResult (via run_step)
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_rig_direct_step_execution():
     """run_step bypasses planner, runs single step."""
     skill = FakeSkill()
     step = PlanStep(
-        step_id="s1", skill_name="fake",
-        description="test", params={"x": 5}, depends_on=[],
+        step_id="s1",
+        skill_name="fake",
+        description="test",
+        params={"x": 5},
+        depends_on=[],
     )
 
     rig = KernelTestRig().with_skill(skill)
@@ -146,18 +154,17 @@ async def test_rig_direct_step_execution():
 # Multi-step DAG (via full pipeline)
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_rig_multi_step_dag():
     """Two sequential steps with dependency."""
     skill = FakeSkill()
     plan = ExecutionPlan(
         steps=[
-            PlanStep(step_id="s1", skill_name="fake",
-                     description="first", params={"x": 1}, depends_on=[]),
-            PlanStep(step_id="s2", skill_name="fake",
-                     description="second", params={"x": 2}, depends_on=["s1"]),
+            PlanStep(step_id="s1", skill_name="fake", description="first", params={"x": 1}, depends_on=[]),
+            PlanStep(step_id="s2", skill_name="fake", description="second", params={"x": 2}, depends_on=["s1"]),
         ],
-        reasoning="two steps"
+        reasoning="two steps",
     )
 
     rig = KernelTestRig().with_skill(skill).with_plan(plan)

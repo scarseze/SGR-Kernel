@@ -3,13 +3,15 @@ Core Dispatcher — Unified Remote Execution.
 
 Allows ANY skill to dispatch jobs to remote environments (SSH, Modal, etc.).
 """
+
 import asyncio
+import logging
 import time
 import uuid
-import logging
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Optional, Dict, Any, TypeVar, Generic
+from typing import Any, Dict, Generic, Optional, TypeVar
+
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger("core.dispatcher")
@@ -25,6 +27,7 @@ class JobStatus(str, Enum):
 
 class RemoteJobSpec(BaseModel):
     """Base specification for any remote job."""
+
     job_type: str  # e.g. "lora_train", "deep_research"
     params: Dict[str, Any]
     resources: Dict[str, Any] = Field(default_factory=dict)  # gpu=1, ram="16gb"
@@ -63,8 +66,7 @@ class BaseDispatcher(ABC, Generic[TResult]):
     async def cancel(self, job_id: str) -> bool:
         """Cancel a running job."""
 
-    async def wait_for_completion(self, job_id: str, poll_interval: float = 5.0,
-                                  timeout: float = 7200.0) -> TResult:
+    async def wait_for_completion(self, job_id: str, poll_interval: float = 5.0, timeout: float = 7200.0) -> TResult:
         """Wait for job completion with exponential backoff polling."""
         start = time.time()
         interval = poll_interval
@@ -90,6 +92,7 @@ class LocalDispatcher(BaseDispatcher[Dict[str, Any]]):
     Runs jobs locally (in-process or subprocess substitute).
     For 'lora_train', it invokes the TrainingSkill logic directly.
     """
+
     def __init__(self):
         self._jobs: Dict[str, JobInfo] = {}
         self._results: Dict[str, Any] = {}
@@ -101,7 +104,7 @@ class LocalDispatcher(BaseDispatcher[Dict[str, Any]]):
             status=JobStatus.RUNNING,
             submitted_at=time.strftime("%Y-%m-%d %H:%M:%S"),
         )
-        
+
         # Dispatch logic based on job_type
         # In a real system, this might use a task queue or subprocess
         try:
@@ -112,30 +115,14 @@ class LocalDispatcher(BaseDispatcher[Dict[str, Any]]):
         except Exception as e:
             self._jobs[job_id].status = JobStatus.FAILED
             self._jobs[job_id].message = str(e)
-            
+
         self._jobs[job_id].completed_at = time.strftime("%Y-%m-%d %H:%M:%S")
         return job_id
 
     async def _execute_local(self, job: RemoteJobSpec) -> Dict[str, Any]:
         """Route to appropriate local handler."""
-        if job.job_type == "lora_train":
-            # Lazy import to avoid circular deps
-            from skills.lora_trainer.training_skill import TrainingSkill, TrainingInput
-            from skills.lora_trainer.experiment_spec import TrialConfig
-            
-            skill = TrainingSkill()
-            # Map generic params back to TrainingInput
-            # job.params is expected to match TrainingJobSpec fields
-            p = job.params
-            return await skill._run_training_logic(
-                config=TrialConfig(**p.get("config", {})),
-                dataset_path=p.get("dataset_path"),
-                output_dir=p.get("output_dir"),
-                resume_from=p.get("resume_from"),
-                dry_run=p.get("dry_run", False)
-            )
-        else:
-            raise ValueError(f"Unknown job_type: {job.job_type}")
+        # Generic local execution placeholder
+        raise ValueError(f"Unknown job_type or no local handler: {job.job_type}")
 
     async def poll(self, job_id: str) -> JobInfo:
         return self._jobs.get(job_id, JobInfo(job_id=job_id, status=JobStatus.FAILED))
@@ -154,7 +141,8 @@ class SSHDispatcher(BaseDispatcher[Dict[str, Any]]):
     """
     Dispatches to remote server via SSH.
     """
-    def __init__(self, host: str, user: str, remote_dir: str = "/tmp/sgr_jobs", key_path: str = None):
+
+    def __init__(self, host: str, user: str, remote_dir: str = "/tmp/sgr_jobs", key_path: str | None = None):
         self.host = host
         self.user = user
         self.remote_dir = remote_dir
@@ -167,7 +155,7 @@ class SSHDispatcher(BaseDispatcher[Dict[str, Any]]):
         job_id = f"ssh_{uuid.uuid4().hex[:8]}"
         self._jobs[job_id] = JobInfo(job_id=job_id, status=JobStatus.FAILED, message="Not fully implemented yet")
         return job_id
-        
+
     async def poll(self, job_id: str) -> JobInfo:
         return self._jobs.get(job_id, JobInfo(job_id=job_id, status=JobStatus.FAILED))
 

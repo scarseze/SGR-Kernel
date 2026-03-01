@@ -1,18 +1,19 @@
-import asyncio
-import os
 import logging
-from typing import List, Dict, Any, Optional
+import os
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 try:
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
     from mcp.types import Tool
+
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class McpToolDefinition:
@@ -20,12 +21,16 @@ class McpToolDefinition:
     description: str
     input_schema: Dict[str, Any]
 
+
 class McpClientWrapper:
     """
-    Wrapper around the official MCP Python SDK to simplify integration 
+    Wrapper around the official MCP Python SDK to simplify integration
     with SGR Core's Skill system.
     """
-    def __init__(self, server_name: str, command: str, args: List[str] = None, env: Dict[str, str] = None):
+
+    def __init__(
+        self, server_name: str, command: str, args: List[str] | None = None, env: Dict[str, str] | None = None
+    ):
         self.server_name = server_name
         self.command = command
         self.args = args or []
@@ -40,26 +45,23 @@ class McpClientWrapper:
             return
 
         logger.info(f"🔌 Connecting to MCP Server '{self.server_name}'...")
-        
-        server_params = StdioServerParameters(
-            command=self.command,
-            args=self.args,
-            env=self.env
-        )
+
+        server_params = StdioServerParameters(command=self.command, args=self.args, env=self.env)
 
         try:
             # We use the stdio_client context manager
             # In a real async app, we need to keep this context alive.
             # This is a simplified implementation; robust handling requires AsyncExitStack
             from contextlib import AsyncExitStack
+
             self._exit_stack = AsyncExitStack()
-            
+
             read, write = await self._exit_stack.enter_async_context(stdio_client(server_params))
             self.session = await self._exit_stack.enter_async_context(ClientSession(read, write))
-            
+
             await self.session.initialize()
             logger.info(f"✅ Connected to MCP Server '{self.server_name}'")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to connect to MCP Server: {e}")
             if self._exit_stack:
@@ -76,11 +78,9 @@ class McpClientWrapper:
             result = await self.session.list_tools()
             tools = []
             for t in result.tools:
-                tools.append(McpToolDefinition(
-                    name=t.name,
-                    description=t.description or "",
-                    input_schema=t.inputSchema
-                ))
+                tools.append(
+                    McpToolDefinition(name=t.name, description=t.description or "", input_schema=t.inputSchema)
+                )
             return tools
         except Exception as e:
             logger.error(f"Error listing MCP tools: {e}")
@@ -95,12 +95,12 @@ class McpClientWrapper:
             result = await self.session.call_tool(tool_name, arguments)
             # Combine text content from result
             output = []
-            if hasattr(result, 'content'):
+            if hasattr(result, "content"):
                 for content in result.content:
-                    if content.type == 'text':
+                    if content.type == "text":
                         output.append(content.text)
-                    elif content.type == 'image':
-                        output.append(f"[Image: {content.mimeType}]") # Placeholder
+                    elif content.type == "image":
+                        output.append(f"[Image: {content.mimeType}]")  # Placeholder
             return "\n".join(output)
         except Exception as e:
             logger.error(f"Error calling MCP tool '{tool_name}': {e}")

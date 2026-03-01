@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple
+
 from core.rag.context import RAGDocument
+
 
 class RAGInterface(ABC):
     @abstractmethod

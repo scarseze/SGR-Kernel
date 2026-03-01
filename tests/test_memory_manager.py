@@ -1,17 +1,19 @@
 import unittest
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timedelta
-from datetime import datetime, timedelta
-from core.state import Message, AgentState
+from unittest.mock import AsyncMock
+
 from core.memory_manager import MemoryManager
+from core.execution import ExecutionState
+from core.memory import Message
+
 
 class TestMemoryManager(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.mock_memory = AsyncMock()
         self.mock_summarizer = AsyncMock()
         self.manager = MemoryManager(self.mock_memory, self.mock_summarizer)
-        self.manager.summary_trigger_threshold = 5 # Lower threshold for testing
-        self.state = AgentState(user_request="test")
+        self.manager.summary_trigger_threshold = 5  # Lower threshold for testing
+        self.state = ExecutionState(request_id="test", input_payload="test")
 
     async def test_load_context_simple(self):
         """Test loading context without summary."""
@@ -40,10 +42,10 @@ class TestMemoryManager(unittest.IsolatedAsyncioTestCase):
     async def test_augment_with_semantic_search(self):
         """Test injecting semantic search results."""
         # Initial state
-        self.state.history = [Message(role="user", content="recent", timestamp=datetime.now())]
-        
+        self.state.history = [Message(role="user", content="recent")]
+
         # Search results
-        past_msg = Message(role="user", content="past", timestamp=datetime.now() - timedelta(hours=1))
+        past_msg = Message(role="user", content="past")
         self.mock_memory.search_history.return_value = [past_msg]
 
         await self.manager.augment_with_semantic_search("query", self.state)
@@ -53,10 +55,9 @@ class TestMemoryManager(unittest.IsolatedAsyncioTestCase):
 
     async def test_augment_semantic_search_deduplication(self):
         """Test that duplicate messages are not added."""
-        t1 = datetime.now()
-        msg1 = Message(role="user", content="msg1", timestamp=t1)
+        msg1 = Message(role="user", content="msg1")
         self.state.history = [msg1]
-        
+
         # Search returns same message
         self.mock_memory.search_history.return_value = [msg1]
 
@@ -76,10 +77,10 @@ class TestMemoryManager(unittest.IsolatedAsyncioTestCase):
 
         # Should fetch history with limit > 5
         self.mock_memory.get_history.assert_called()
-        
+
         # Should call summarizer
         self.mock_summarizer.summarize.assert_called_once()
-        
+
         # Should save summary
         self.mock_memory.save_summary.assert_called_with("user1", "New Summary")
 
@@ -94,5 +95,6 @@ class TestMemoryManager(unittest.IsolatedAsyncioTestCase):
         self.mock_summarizer.summarize.assert_not_called()
         self.mock_memory.save_summary.assert_not_called()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

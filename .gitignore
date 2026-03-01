@@ -11,3 +11,45 @@ memory.db
 .DS_Store
 .idea/
 .vscode/
+
+# MkDocs generated
+site_docs/
+site/
+VERSION
+
+# Runtime state
+traces/
+checkpoints/
+tapes/
+logs/
+memory.db/
+swarm_chat_history.db
+*.db
+
+# Dev/debug artifacts
+marker.tmp
+dummy.jsonl
+step*.txt
+test_output.*
+*.log
+verify_*.py
+verify_*.ps1
+test_code_interpreter.py
+test_litellm_timeout.py
+test_logic_rl*.py
+test_memory.py
+test_office_gen.py
+test_rlm_docker.py
+test_stages_1_to_7.py
+tmp_test_*.py
+mock_editor.py
+manual_start.py
+populate_rag.py
+sync_back.ps1
+prepare_github.ps1
+
+# Build caches
+.mypy_cache/
+.ruff_cache/
+.chainlit/
+peftlab.egg-info/

@@ -1,6 +1,7 @@
 import os
-from typing import Type
 from datetime import datetime, timedelta
+from typing import Type
+
 from pydantic import BaseModel
 
 try:
@@ -8,15 +9,15 @@ try:
 except ImportError:
     Calendar = None
 
+from core.execution import ExecutionState
 from skills.base import BaseSkill, SkillMetadata
 from skills.calendar.schema import CalendarInput
 
-from core.state import AgentState
 
-class CalendarSkill(BaseSkill):
+class CalendarSkill(BaseSkill[BaseModel]):
     name: str = "calendar_skill"
     description: str = "Manages calendar events. Can create .ics files for meetings and reminders."
-    
+
     @property
     def metadata(self) -> SkillMetadata:
         return SkillMetadata(
@@ -26,27 +27,27 @@ class CalendarSkill(BaseSkill):
             idempotent=True,
             requires_network=False,
             requires_filesystem=True,
-            cost_class="cheap"
+            cost_class="cheap",
         )
 
     @property
     def input_schema(self) -> Type[BaseModel]:
         return CalendarInput
 
-    async def execute(self, params: CalendarInput, state: AgentState) -> str:
+    async def execute(self, params: CalendarInput, state: ExecutionState) -> str:
         if not Calendar:
             return "Error: 'ics' library not installed. Please run 'pip install ics'."
 
-        if params.action == 'create_event':
+        if params.action == "create_event":
             return self._create_event(params)
-        
+
         return "Unknown action."
 
     def _create_event(self, params: CalendarInput) -> str:
         try:
             # Parse times
             dt_start = datetime.strptime(params.start_time, "%Y-%m-%d %H:%M:%S")
-            
+
             if params.end_time:
                 dt_end = datetime.strptime(params.end_time, "%Y-%m-%d %H:%M:%S")
             else:
@@ -64,15 +65,15 @@ class CalendarSkill(BaseSkill):
             # Define Output Path
             # Save to a dedicated 'files' directory in sgr_core root
             base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            output_dir = os.path.join(base_dir, 'generated_files')
+            output_dir = os.path.join(base_dir, "generated_files")
             os.makedirs(output_dir, exist_ok=True)
 
             # Sanitize filename
-            safe_summary = "".join([c for c in params.summary if c.isalnum() or c in (' ', '-', '_')]).strip()
+            safe_summary = "".join([c for c in params.summary if c.isalnum() or c in (" ", "-", "_")]).strip()
             filename = f"{safe_summary}_{dt_start.strftime('%Y%m%d_%H%M')}.ics"
             filepath = os.path.join(output_dir, filename)
 
-            with open(filepath, 'w', encoding='utf-8') as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 f.writelines(c.serialize_iter())
 
             # Return with special marker for Telegram Bot

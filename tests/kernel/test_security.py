@@ -1,10 +1,11 @@
 """KC-G: Security enforcement tests — param validation, output sanitization."""
+
 import pytest
+
 from core.security import SecurityGuardian, SecurityViolationError
 
 
 class TestSecurityEnforcement:
-
     def test_kc_g1_param_injection(self):
         """KC-G1: Dangerous value in resolved params → blocked."""
         sec = SecurityGuardian()
@@ -18,16 +19,16 @@ class TestSecurityEnforcement:
             sec.validate_params({"outer": {"inner": "rm -rf /"}})
 
     def test_kc_g2_output_api_key_leak(self):
-        """KC-G2: Leaked API key → blocked."""
+        """KC-G2: Leaked API key → blocked/redacted."""
         sec = SecurityGuardian()
-        with pytest.raises(SecurityViolationError):
-            sec.validate_output("result: api_key = sk-12345abc")
+        result = sec.validate_output("result: api_key = sk-12345abc")
+        assert "[REDACTED SECRET]" in result
 
     def test_kc_g2_output_private_key(self):
-        """KC-G2: Private key in output → blocked."""
+        """KC-G2: Private key in output → blocked/redacted."""
         sec = SecurityGuardian()
-        with pytest.raises(SecurityViolationError):
-            sec.validate_output("-----BEGIN RSA PRIVATE KEY-----\nMIIBog...")
+        result = sec.validate_output("-----BEGIN RSA PRIVATE KEY-----\nMIIBog...")
+        assert "[REDACTED SECRET]" in result
 
     def test_kc_g2_clean_output_passes(self):
         """KC-G2: Normal output passes validation."""

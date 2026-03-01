@@ -2,13 +2,15 @@
 KernelTelemetry for SGR Kernel.
 Tracks architectural metrics (not just LLM tokens).
 """
-import time
-from typing import Dict, Any
+
+from typing import Any, Dict
+
 
 class KernelTelemetry:
     """
     Tracks kernel performance and reliability metrics.
     """
+
     def __init__(self):
         self.metrics = {
             "plan_latency": [],
@@ -18,12 +20,12 @@ class KernelTelemetry:
             "escalation_count": 0,
             "skill_success_count": 0,
             "checkpoint_count": 0,
-            "resume_count": 0
+            "resume_count": 0,
         }
-    
+
     def record_latency(self, metric: str, duration: float):
         if metric in self.metrics and isinstance(self.metrics[metric], list):
-             self.metrics[metric].append(duration)
+            self.metrics[metric].append(duration)
 
     def increment(self, metric: str):
         if metric in self.metrics and isinstance(self.metrics[metric], int):

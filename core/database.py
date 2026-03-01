@@ -1,7 +1,8 @@
-import os
 import contextlib
+import os
 from contextvars import ContextVar
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -9,26 +10,25 @@ Base = declarative_base()
 # Global Context for Session
 session_context: ContextVar[AsyncSession] = ContextVar("session_context", default=None)
 
+
 class Database:
-    def __init__(self, db_url: str = None):
-        self.db_url = db_url or os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./memory.db")
-        
+    def __init__(self, db_url: str | None = None):
+        self.db_url = db_url or os.getenv("DATABASE_URL")
+        if not self.db_url:
+            raise ValueError("DATABASE_URL must be provided.")
+
         # Ensure async driver
         if "sqlite" in self.db_url and "+aiosqlite" not in self.db_url:
-             self.db_url = self.db_url.replace("sqlite://", "sqlite+aiosqlite://")
+            self.db_url = self.db_url.replace("sqlite://", "sqlite+aiosqlite://")
 
         self.engine = create_async_engine(
             self.db_url,
             echo=False,
             future=True,
-            connect_args={"check_same_thread": False} if "sqlite" in self.db_url else {}
+            connect_args={"check_same_thread": False} if "sqlite" in self.db_url else {},
         )
-        
-        self.async_session_factory = async_sessionmaker(
-            self.engine, 
-            class_=AsyncSession, 
-            expire_on_commit=False
-        )
+
+        self.async_session_factory = async_sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
 
     async def init_db(self):
         """Create tables asynchronously."""

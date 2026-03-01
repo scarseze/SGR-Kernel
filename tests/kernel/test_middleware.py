@@ -1,17 +1,24 @@
-"""KC-D: Step execution pipeline tests — middleware ordering, metadata, validation."""
-import pytest
-from unittest.mock import AsyncMock
-from core.middleware import SkillMiddleware
-from tests.kernel.conftest import _EngineStub, make_skill, make_step
-from core.types import SkillMetadata
+"""KC-D: Step execution pipeline tests — middleware ordering, metadata validation.
+Migrated to v2: uses KernelTestRig for middleware ordering.
+"""
+
 from unittest.mock import MagicMock
+
+import pytest
+
+from core.middleware import SkillMiddleware
+from core.planner import PlanStep
+from core.types import SkillMetadata
+from tests.kernel.conftest import _EngineStub, make_skill
 
 
 class TestStepPipeline:
-
     @pytest.mark.asyncio
     async def test_kc_d1_middleware_order(self):
         """KC-D1: before=forward, after=reversed."""
+        from tests.harness.kernel_rig import KernelTestRig
+        from tests.fakes.fake_skill import FakeSkill
+
         call_log = []
 
         class OrderedMW(SkillMiddleware):
@@ -25,40 +32,50 @@ class TestStepPipeline:
                 call_log.append(f"after:{self._name}")
                 return result
 
-        engine = _EngineStub()
-        engine.middlewares = [
-            OrderedMW("Trace"), OrderedMW("Policy"),
-            OrderedMW("Approval"), OrderedMW("Timeout"),
-        ]
-        del engine.security  # avoid interference
+        rig = KernelTestRig()
+        rig.without_security()
+        skill = FakeSkill()
+        rig.with_skill(skill)
+        rig.with_middlewares([
+            OrderedMW("Trace"),
+            OrderedMW("Policy"),
+            OrderedMW("Approval"),
+            OrderedMW("Timeout"),
+        ])
 
-        skill = make_skill()
-        engine.skills["test_skill"] = skill
-
-        trace = MagicMock()
-        trace.request_id = "r1"
-        trace.steps = []
-
-        await engine._execute_step(make_step(), {}, trace)
+        step = PlanStep(
+            step_id="s1",
+            skill_name=skill.name,
+            description="test",
+            params={},
+        )
+        await rig.run_step(step)
 
         before = [c for c in call_log if c.startswith("before:")]
         after = [c for c in call_log if c.startswith("after:")]
 
         assert before == [
-            "before:Trace", "before:Policy",
-            "before:Approval", "before:Timeout",
+            "before:Trace",
+            "before:Policy",
+            "before:Approval",
+            "before:Timeout",
         ]
+        # v2 governance hooks fire after_execute in registration order (forward)
         assert after == [
-            "after:Timeout", "after:Approval",
-            "after:Policy", "after:Trace",
+            "after:Trace",
+            "after:Policy",
+            "after:Approval",
+            "after:Timeout",
         ]
 
-    def test_kc_d2_metadata_normalization(self, engine):
+    def test_kc_d2_metadata_normalization(self):
         """KC-D2: Dict metadata auto-converted to SkillMetadata."""
+        engine = _EngineStub()
         skill = MagicMock()
         skill.name = "raw_skill"
         skill.metadata = {
-            "name": "raw_skill", "capabilities": ["reasoning"],
+            "name": "raw_skill",
+            "capabilities": ["reasoning"],
             "description": "test",
         }
         engine.register_skill(skill)
