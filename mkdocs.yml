@@ -35,8 +35,8 @@ theme:
     - content.tabs.link
     - content.code.annotation
     - content.code.copy
-  # favicon: assets/favicon.ico  # TODO: add actual files
-  # logo: assets/logo.svg        # TODO: add actual files
+  logo: material/brain
+  favicon: https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/1f9e0.svg
 
 plugins:
   - search
@@ -57,8 +57,14 @@ markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
+  - attr_list
+  - md_in_html
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - admonition
