@@ -6,6 +6,7 @@
 
 ### 🚦 G0: Модель сбоев системы
 Прежде чем определять инварианты, мы четко заявляем границы нашей области сбоев:
+
 * **Сбои типа Crash-Stop:** Узлы выходят из строя путем полной остановки. Мы не допускаем «византийских» воркеров (вредоносных или произвольно изменяющих состояние).
 * **Предположения об оборудовании:** Подсистема хранения (БД, S3) обеспечивает долговечное, упорядоченное по записи хранение, но может иметь неопределенные задержки.
 * **Конечное восстановление сети:** Разделение сети может происходить, но в конечном итоге будет устранено, позволяя компонентам восстановить связь в ограниченные сроки.
@@ -15,6 +16,7 @@
 
 ### 📉 G1: Стабильность очереди (λ < μ) под обратным давлением
 Система обеспечивает ограниченную глубину очередей для поддержания математического инварианта стабильности очереди, где скорость поступления (λ) должна оставаться строго меньше скорости обслуживания (μ).
+
 * **Инвариант:** Система будет проактивно сбрасывать избыточную нагрузку до того, как локальные очереди или пулы памяти будут исчерпаны.
 * **Обеспечение:** Достигается через многомерный Admission Control (см. Приложение).
 
@@ -22,6 +24,7 @@
 
 ### 🔄 G2: Гарантия конечного прогресса (Предотвращение Livelock)
 При изоляции `SERIALIZABLE` в БД уровня данных частота прерывания транзакций может резко возрастать при высокой конкуренции (конфликты CAS).
+
 * **Угроза Livelock:** «Горячий» раздел или непрерывный приток задач могут теоретически помешать успеху любой конкретной задачи, что означает стремление конкуренции $C$ к $\infty$.
 * **Гарантия инварианта:** Конечный прогресс обеспечивается при ограниченной конкуренции, контролируемой через допуск (admission control) по конфликтующим ключам.
 * **Обеспечение:**
@@ -33,6 +36,7 @@
 
 ### 🔌 G3: Декомпозиция уровня данных (Независимость уровня выполнения)
 Домены сбоев между Control Plane (БД/Оркестратор) и Execution Plane (воркеры) строго разделены.
+
 * **Инвариант:** Уровень выполнения не зависит от БД во время работы. Независимость выполнения достигается ценой требования глобально идемпотентных побочных эффектов.
 * **Объяснение:** Сбои БД не вызовут мгновенного отказа или краха выполняющихся задач. Однако при восстановлении БД задачи могут завершить вычисления, но не суметь записать состояние `COMPLETED`, что приведет к их последующему повторному выполнению через `BackgroundReconciler`.
 * **Ограничение границ:** Поскольку дублирование выполнения ограничено, но возможно, ВСЕ побочные эффекты, инициируемые воркером (например, записи в хранилище, вызовы внешних API, биллинг, обратные вызовы), должны быть по своей природе **идемпотентными** ИЛИ явно защищены **внешними ключами идемпотентности**.
@@ -41,6 +45,7 @@
 
 ### 📦 G4: Протокол атомарного хранения S3 (Видимость «ровно один раз»)
 Мы отвергаем идею атомарного `rename` в объектном хранилище S3 (так как `rename` в S3 — это фундаментально ошибочная операция `COPY` + `DELETE`, допускающая частичную видимость).
+
 * **Инвариант:** Данные, опубликованные в S3, должны быть атомарно видимы всем потребителям без промежуточных или дублирующихся состояний. Сохраняется только последняя зафиксированная версия.
 * **Обеспечение:** Мы применяем **Шаблон маркера коммита** с версионными объектами и очисткой мусора:
   * Воркеры записывают артефакты по уникальному версионному префиксному пути: `/job_id/v_<attempt_id>/data.bin`
@@ -57,6 +62,7 @@ This document formalizes the rigorous invariants, operational boundaries, and ma
 
 ### 🚦 G0: System Failure Model
 Before defining system invariants, we explicitly state the boundaries of our failure domain:
+
 *   **Crash-Stop Failures:** Nodes fail by halting completely. We do not tolerate Byzantine (malicious or arbitrary state mutating) workers.
 *   **Hardware Assumptions:** Storage subsystem (DB, S3) provides durable, write-ordered persistence but can experience indeterminate latency.
 *   **Eventual Network Recovery:** Network partitions may occur but will eventually heal, allowing components to reconnect boundedly.
@@ -64,11 +70,13 @@ Before defining system invariants, we explicitly state the boundaries of our fai
 
 ### 📉 G1: Queue Stability ($\lambda < \mu$) under Backpressure
 The system enforces bounded queue depths to maintain the mathematical invariant of queue stability, where the arrival rate ($\lambda$) must remain strictly less than the service rate ($\mu$).
+
 *   **Invariant:** The system will shed excess load proactively before local queues or memory pools are exhausted.
 *   **Enforcement:** Achieved via multi-dimensional Admission Control (see Annex).
 
 ### 🔄 G2: Eventual Progress Guarantee (Livelock Prevention)
 Under `SERIALIZABLE` isolation in the Data Plane DB, transaction abort rates can spike under high contention (CAS conflicts). 
+
 *   **The Livelock Threat:** A hot partition or continuous inflow could theoretically prevent a single job from ever succeeding, meaning contention $C$ goes to $\infty$.
 *   **Invariant Guarantee:** Eventual progress holds under bounded contention enforced via admission control on conflicting keys.
 *   **Enforcement:**
@@ -78,12 +86,14 @@ Under `SERIALIZABLE` isolation in the Data Plane DB, transaction abort rates can
 
 ### 🔌 G3: Data-Plane Decoupling (Execution Plane Independence)
 Failure domains between the Control Plane (DB/Orchestrator) and the Execution Plane (Workers) are strictly decoupled.
+
 *   **Invariant:** Execution plane is DB-independent during runtime. Execution independence is achieved at the cost of requiring globally idempotent side-effects.
 *   **Explanation:** DB outages will not cause running executions to instantly fail or crash. However, during a database recovery, jobs may complete their computation but fail to write the `COMPLETED` state, leading to later re-execution by the `BackgroundReconciler`. 
 *   **Boundary Constraint:** Because execution duplication is bounded but possible, ALL side-effects triggered by a worker (e.g., storage writes, external API calls, billing, callbacks) must be inherently **idempotent** OR explicitly guarded by **external idempotency keys**.
 
 ### 📦 G4: Atomic S3 Storage Protocol (Exactly-Once Visibility)
 We reject the premise of atomic `rename` on S3 object storage (as S3 `rename` is a fundamentally flawed `COPY` + `DELETE` operation exposing partial visibility).
+
 *   **Invariant:** Data published to S3 must be atomically visible to all consumers without intermediate or duplicated states. Only the latest committed version is retained.
 *   **Enforcement:** We enforce a **Commit Marker Pattern** with Versioned Objects and Garbage Collection:
     *   Workers write artifacts to a uniquely versioned prefix path: `/job_id/v_<attempt_id>/data.bin`
