@@ -44,6 +44,7 @@ MAPPINGS = {
     "ONBOARDING.md":                          "getting-started/installation.md",
     "README.md":                              "getting-started/quickstart.md",
     "docs/architecture.md":                   "docs/architecture.md",
+    "docs/why_sgr.md":                        "docs/why_sgr.md",
     "docs/l8_distinguished_invariants.md":    "docs/l8_distinguished_invariants.md",
     "docs/L8_ARCHITECTURE_ANNEX.md":          "docs/L8_ARCHITECTURE_ANNEX.md",
     "docs/swarm_protocol.md":                 "docs/swarm-protocol.md",
@@ -250,6 +251,33 @@ description: "Correctness is a Basic Right"
 | Память | PostgreSQL + WAL |
 | Мониторинг | Prometheus + Grafana |
 
+## 💡 Why SGR?
+
+Потому что «работает на моей машине» — это не гарантия.
+Современные системы оркестрации решают задачи **планирования** и **транспорта**. SGR Kernel — это **слой корректности** (Correctness Layer), который добавляет формальные гарантии:
+
+| Гарантия | Что это значит |
+|----------|---------------|
+| ✅ Execution Exclusivity | Задачу выполняет только один воркер |
+| ✅ Bounded Duplication | Дублирование ≤ 1 попытки на цикл аренды |
+| ✅ Atomic Visibility | Результаты видны только после полного коммита |
+| ✅ Eventual Progress | Задача завершится, даже если воркер упал |
+
+Это не «ещё один оркестратор». Это **формальная граница доверия** между намерением и выполнением.
+
+```mermaid
+graph LR
+    A[Задача] --> B{SGR Kernel}
+    B -->|I1: Exclusivity| C[Один воркер]
+    B -->|I3: Bounded Dup| D[≤ 1 дубль]
+    B -->|I4: Atomic Vis| E[Коммит-маркер]
+    B -->|I5: Progress| F[Гарантия завершения]
+    C & D & E & F --> G[Корректный результат]
+    
+    style B fill:#2563eb,stroke:#1e40af,color:white
+    style G fill:#16a34a,stroke:#15803d,color:white
+```
+
 ## Быстрый старт
 
 ```bash
@@ -260,7 +288,7 @@ docker-compose up -d
 
 > **Философия:** Безопасность, аудируемость и корректность AI-систем должны быть доступны каждому — не как Enterprise-фича за $199/мес, а как базовое право.
 
-[Начать работу](getting-started/installation.md) | [Документация](docs/architecture.md) | [Комплаенс](compliance/152fz.md)
+[Начать работу](getting-started/installation.md) | [Узнать больше: Почему SGR?](docs/why_sgr.md) | [Комплаенс](compliance/152fz.md)
 """,
         "en": """\
 ---
@@ -282,6 +310,33 @@ description: "Correctness is a Basic Right"
 | Memory | PostgreSQL + WAL |
 | Monitoring | Prometheus + Grafana |
 
+## 💡 Why SGR?
+
+Because "it works on my machine" is not a guarantee.
+Modern orchestration systems solve **planning** and **transport** problems. SGR Kernel is a **Correctness Layer** that adds formal execution guarantees:
+
+| Guarantee | Meaning |
+|-----------|---------|
+| ✅ Execution Exclusivity | Task is executed by exactly one worker |
+| ✅ Bounded Duplication | Duplications ≤ 1 attempt per lease cycle |
+| ✅ Atomic Visibility | Results are visible only after a full commit |
+| ✅ Eventual Progress | The task will finish, even if the worker crashes |
+
+It's not "just another orchestrator". It's the **formal trust boundary** between intent and execution.
+
+```mermaid
+graph LR
+    A[Task] --> B{SGR Kernel}
+    B -->|I1: Exclusivity| C[One Worker]
+    B -->|I3: Bounded Dup| D[≤ 1 duplicate]
+    B -->|I4: Atomic Vis| E[Commit Marker]
+    B -->|I5: Progress| F[Completion Guarantee]
+    C & D & E & F --> G[Correct Result]
+    
+    style B fill:#2563eb,stroke:#1e40af,color:white
+    style G fill:#16a34a,stroke:#15803d,color:white
+```
+
 ## Quick Start
 
 ```bash
@@ -292,7 +347,7 @@ docker-compose up -d
 
 > **Philosophy:** Security, auditability, and correctness of AI systems should be available to everyone — not as an Enterprise feature for $199/mo, but as a basic right.
 
-[Get Started](getting-started/installation.md) | [Documentation](docs/architecture.md) | [Compliance](compliance/152fz.md)
+[Get Started](getting-started/installation.md) | [Read more: Why SGR?](docs/why_sgr.md) | [Compliance](compliance/152fz.md)
 """,
     }
 
