@@ -1,16 +1,16 @@
 import os
 import traceback
 import uuid
-from typing import Any, Dict
+from typing import Any
 
 import httpx
 import structlog
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from core.circuit_breaker import CircuitBreakerOpenException, rag_circuit_breaker
 from core.types import Capability, CostClass, RiskLevel, SkillMetadata
 from skills.base import BaseSkill
 from skills.knowledge_base.schema import SearchKnowledgeBase
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 logger = structlog.get_logger(__name__)
 

@@ -151,7 +151,7 @@ class StepLifecycleEngine:
         
         try:
             # Governance: Before Step
-            from core.governance import HOOK_BEFORE_STEP, HOOK_AFTER_STEP
+            from core.governance import HOOK_AFTER_STEP, HOOK_BEFORE_STEP
             await self.hooks.emit(HOOK_BEFORE_STEP, payload)
 
             # Context Setup

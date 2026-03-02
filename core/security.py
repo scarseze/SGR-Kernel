@@ -3,6 +3,7 @@ from typing import Any, List, Tuple
 
 from core.pii_classifier import PIIClassifier
 
+
 class SecurityGuardian:
     """
     Enterprise Security Module for SGR Core Agent.
@@ -95,7 +96,7 @@ class SecurityGuardian:
             (r"(?i)secret\s*[:=]\s*\S+", "Potential secret leak in output"),
             (r"-----BEGIN\s+(RSA\s+)?PRIVATE\s+KEY-----", "Private key detected in output"),
         ]
-        for pattern, reason in OUTPUT_LEAK_PATTERNS:
+        for pattern, _reason in OUTPUT_LEAK_PATTERNS:
             if re.search(pattern, output): 
                 # Instead of crashing, we redact the output
                 # raise SecurityViolationError(f"Output Security Alert: {reason}. Output sanitized.")

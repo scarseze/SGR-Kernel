@@ -14,16 +14,10 @@ Usage:
 from typing import Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from core.middleware import (
-    ApprovalMiddleware,
-    PolicyMiddleware,
-    TimeoutMiddleware,
-    TraceMiddleware,
-)
+from core.execution import ExecutionState
 from core.planner import ExecutionPlan, PlanStep
 from core.runtime import CoreEngine
 from core.security import SecurityGuardian
-from core.execution import ExecutionState
 from core.trace import RequestTrace
 from tests.fakes.fake_llm import FakeLLM
 from tests.fakes.fake_planner import FakePlanner
@@ -45,8 +39,9 @@ class KernelTestRig:
 
     def __init__(self):
         import os
-        from core.container import Container
         from unittest.mock import MagicMock
+
+        from core.container import Container
         
         # Ensure fresh container for isolation
         Container._registry = {}
@@ -75,7 +70,6 @@ class KernelTestRig:
         eng.llm = FakeLLM()
         
         # Re-wire Planner locally
-        from tests.fakes.fake_planner import FakePlanner
         eng.planner = FakePlanner(engine=eng)
         
         # Policy is now mostly inside hooks/middlewares usually, 
@@ -169,7 +163,7 @@ class KernelTestRig:
 
     def with_middlewares(self, mws: List) -> "KernelTestRig":
         """Replace middleware stack (bridged to HOOKS)."""
-        from core.governance import HOOK_BEFORE_STEP, HOOK_AFTER_STEP
+        from core.governance import HOOK_AFTER_STEP, HOOK_BEFORE_STEP
         # Clear existing
         self.engine.lifecycle.hooks.hooks[HOOK_BEFORE_STEP] = []
         self.engine.lifecycle.hooks.hooks[HOOK_AFTER_STEP] = []

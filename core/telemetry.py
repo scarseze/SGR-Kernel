@@ -19,8 +19,6 @@ class TelemetryManager:
         try:
             from opentelemetry import metrics, trace
             from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-            from opentelemetry.sdk.metrics import MeterProvider
-            from opentelemetry.sdk.metrics.export import ConsoleMetricExporter, PeriodicExportingMetricReader
             from opentelemetry.sdk.resources import Resource
             from opentelemetry.sdk.trace import TracerProvider
             from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -72,7 +70,7 @@ class TelemetryManager:
 
         # 3. Prometheus Metrics Initialization
         try:
-            from prometheus_client import Counter, Histogram, start_http_server
+            from prometheus_client import Counter, Histogram
             
             self.token_counter = Counter(
                 "sgr_kernel_llm_tokens_total", 

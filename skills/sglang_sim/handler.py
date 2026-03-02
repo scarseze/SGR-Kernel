@@ -2,8 +2,8 @@ from typing import Type
 
 from pydantic import BaseModel
 
-from core.llm import LLMService
 from core.execution import ExecutionState
+from core.llm import LLMService
 from skills.base import BaseSkill, SkillMetadata
 from skills.sglang_sim.schema import RiskAnalysisInput
 

@@ -45,7 +45,7 @@ class SkillSandbox:
             return {"status": "skipped", "reason": "dry_run mode"}
 
         # 3. Execution with Timeout
-        start_time = time.time()
+        time.time()
 
         try:
             # SGR Kernel uses async execution
@@ -60,7 +60,7 @@ class SkillSandbox:
 
         except asyncio.TimeoutError:
             logger.error(f"Skill execution timed out for {skill_name} after {self.timeout_seconds}s")
-            raise SandboxViolation(f"Timeout: Skill {skill_name} exceeded {self.timeout_seconds}s limit")
+            raise SandboxViolation(f"Timeout: Skill {skill_name} exceeded {self.timeout_seconds}s limit") from None
 
         except SandboxViolation:
             raise

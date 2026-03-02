@@ -5,11 +5,11 @@ import structlog
 
 # Import libraries inside methods or try/except to avoid crashing if not installed yet
 try:
-    from docx import Document
-    from docx.shared import Pt
-    from pptx import Presentation
+    from docx import Document  # noqa: F401
+    from docx.shared import Pt  # noqa: F401
+    from pptx import Presentation  # noqa: F401
     from pptx.util import Inches
-    from pptx.util import Pt as PptPt
+    from pptx.util import Pt as PptPt  # noqa: F401
 except ImportError:
     pass  # Will be installed in Docker
 

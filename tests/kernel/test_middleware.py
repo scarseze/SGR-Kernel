@@ -9,15 +9,15 @@ import pytest
 from core.middleware import SkillMiddleware
 from core.planner import PlanStep
 from core.types import SkillMetadata
-from tests.kernel.conftest import _EngineStub, make_skill
+from tests.kernel.conftest import _EngineStub
 
 
 class TestStepPipeline:
     @pytest.mark.asyncio
     async def test_kc_d1_middleware_order(self):
         """KC-D1: before=forward, after=reversed."""
-        from tests.harness.kernel_rig import KernelTestRig
         from tests.fakes.fake_skill import FakeSkill
+        from tests.harness.kernel_rig import KernelTestRig
 
         call_log = []
 

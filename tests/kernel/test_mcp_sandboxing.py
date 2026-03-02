@@ -1,10 +1,11 @@
-import pytest
-import sys
 import os
-from typing import List
+import sys
+
+import pytest
 
 from core.mcp_client import MCPClient
 from skills.mcp_adapter import MCPSkillAdapter
+
 
 @pytest.mark.asyncio
 async def test_mcp_client_and_adapter():

@@ -1,6 +1,8 @@
-from jinja2.nativetypes import NativeEnvironment
+from typing import Any, Dict
+
 from jinja2 import BaseLoader
-from typing import Dict, Any
+from jinja2.nativetypes import NativeEnvironment
+
 
 def resolve_inputs(template: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
     """

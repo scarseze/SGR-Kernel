@@ -11,8 +11,8 @@ sys.path.append(os.path.dirname(__file__))
 
 import asyncio
 
-from core.runtime import CoreEngine
 from core.llm import LLMService
+from core.runtime import CoreEngine
 from skills.calendar.handler import CalendarSkill
 from skills.gost_writer.handler import GostWriterSkill
 from skills.portfolio.handler import PortfolioSkill

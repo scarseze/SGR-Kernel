@@ -2,13 +2,12 @@
 Migrated to v2: uses KernelTestRig for execution, pure unit test for SkillExecutionContext.
 """
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from core.middleware import HumanDenied, PolicyDenied
 from core.planner import PlanStep
-from core.types import RetryPolicy, SkillExecutionContext, StepStatus
+from core.types import SkillExecutionContext
 from tests.kernel.conftest import make_skill
 
 
@@ -24,8 +23,8 @@ class TestRetrySystem:
     @pytest.mark.asyncio
     async def test_kc_e1_retry_count_none(self):
         """NONE → 1 attempt."""
-        from tests.harness.kernel_rig import KernelTestRig
         from tests.fakes.fake_skill import FakeSkill
+        from tests.harness.kernel_rig import KernelTestRig
 
         skill = FakeSkill(fail_times=99)  # always fail
         rig = KernelTestRig()

@@ -8,6 +8,7 @@ from core.execution import ExecutionState
 from skills.base import BaseSkill, SkillMetadata
 from skills.database.schema import ExecuteSQLInput
 
+
 class DatabaseSkill(BaseSkill[BaseModel]):
     name: str = "database_sql"
     description: str = (

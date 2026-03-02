@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+
 def replace_in_file(filepath):
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -36,7 +37,7 @@ def main():
     extensions = {'.md', '.py', '.yml', '.yaml', '.json', '.txt', '.csv'}
     
     for d in dirs_to_process:
-        for root, dirs, files in os.walk(d):
+        for root, _dirs, files in os.walk(d):
             # skip git and generated docs
             if '.git' in root or 'site_docs' in root or 'site' in root or '__pycache__' in root:
                 continue

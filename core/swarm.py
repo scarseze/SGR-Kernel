@@ -2,13 +2,14 @@ import json
 from typing import Any, Dict, List, Optional
 
 import litellm
+
 from core.agent import Agent, TransferToAgent, TransferToSubSwarm
+from core.chaos import with_chaos
 from core.logger import get_logger
 from core.telemetry import get_telemetry
-from core.chaos import with_chaos
 
 try:
-    from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+    from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
     has_tenacity = True
 except ImportError:
     has_tenacity = False
@@ -23,8 +24,8 @@ def safe_retry(func):
         )(func)
     return func
 
-from core.container import Container
-from core.quota import QuotaManager
+from core.container import Container  # noqa: E402
+from core.quota import QuotaManager  # noqa: E402
  
 logger = get_logger("swarm")
 
@@ -239,7 +240,6 @@ class SwarmEngine:
                     return msg.content or "Done", current_agent, transfer_count
 
             # 3. Handle Tool Calls
-            tool_responses = []
             agent_swapped = False
             last_summary = None
             current_agent_name = current_agent.name

@@ -76,7 +76,7 @@ async def proxy_request(path: str, request: Request):
 
     except Exception as e:
         print(f"Proxy Error: {e}", flush=True)
-        raise HTTPException(status_code=502, detail=f"Upstream Error: {e}")
+        raise HTTPException(status_code=502, detail=f"Upstream Error: {e}") from e
 
 
 if __name__ == "__main__":

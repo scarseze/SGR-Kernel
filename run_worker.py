@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import os
 import sys
 
@@ -12,7 +11,8 @@ from core.logging_config import setup_logging
 # This validates that the worker can connect to Fluent Bit
 logger = setup_logging("worker", host="sgr_fluent_bit")
 
-from core.runtime import CoreEngine
+from core.runtime import CoreEngine  # noqa: E402
+
 
 async def main():
     logger.info("👷 Worker Node Initialized (Standby Mode)")
@@ -48,10 +48,11 @@ async def main():
     logger.info("⚠️ Distributed Scheduler not yet active. Worker is listening for future tasks.")
 
     logger.info("🔌 Connecting to Redis for Distributed Tasks...")
-    from core.scheduler import TaskPayload
-    from core.tracing import new_span, set_trace_context
-    from core.execution.policy import StepResult
     import json
+
+    from core.execution.policy import StepResult
+    from core.scheduler import TaskPayload
+    from core.tracing import set_trace_context
 
     retry_delay = 1
     

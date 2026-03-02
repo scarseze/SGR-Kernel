@@ -68,7 +68,7 @@ async def verify_core_model():
 
         # Execute
         await kernel.run(request)
-        print(f"✅ Execution Result: {result}")
+        print("✅ Execution Result: unknown_result")
 
         # 4. Verify State
         kernel.checkpoints.get_latest_checkpoint(kernel.user_id)

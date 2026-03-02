@@ -76,12 +76,12 @@ class PortfolioSkill(BaseSkill[BaseModel]):
                 # Safe access and casting
                 try:
                     r_val = float(risk[t]) if risk is not None and t in risk else 0.0
-                except:
+                except Exception:
                     r_val = 0.0
 
                 try:
                     c_val = float(cagr[t]) if cagr is not None and t in cagr else 0.0
-                except:
+                except Exception:
                     c_val = 0.0
 
                 summary.append(f"- **{t}** ({name}): Risk {r_val * 100:.2f}%, Return {c_val * 100:.2f}%")

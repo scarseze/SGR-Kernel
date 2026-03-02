@@ -2,6 +2,7 @@ import pytest
 
 from core.planner import ExecutionPlan, PlanStep
 
+
 @pytest.mark.asyncio
 async def test_engine_initialization(engine):
     assert engine is not None

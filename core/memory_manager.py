@@ -1,7 +1,7 @@
 import logging
 
-from core.memory import PersistentMemory, Message
 from core.execution import ExecutionState
+from core.memory import Message, PersistentMemory
 from core.summarizer import ConversationSummarizer
 
 logger = logging.getLogger("core.memory_manager")

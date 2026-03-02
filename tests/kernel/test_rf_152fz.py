@@ -1,14 +1,14 @@
+import json
 import os
 import sys
 import unittest
-import asyncio
-import json
-import shutil
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "SA", "sgr_kernel"))
 import pytest
-from core.ui_memory import UIMemory
+
 from core.audit_logger import ComplianceAuditLogger
+from core.ui_memory import UIMemory
+
 
 class TestRF152FZCompliance(unittest.IsolatedAsyncioTestCase):
     def setUp(self):

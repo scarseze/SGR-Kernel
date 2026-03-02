@@ -2,12 +2,16 @@ import asyncio
 import json
 import os
 import re
-from typing import Any, Dict, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar
+
+if TYPE_CHECKING:
+    from core.router import ModelTier
 
 from openai import APIConnectionError, APITimeoutError, AsyncOpenAI, InternalServerError, RateLimitError
 from pydantic import BaseModel, ValidationError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
-from core.chaos import with_chaos, ChaosException
+
+from core.chaos import ChaosException, with_chaos
 
 T = TypeVar("T", bound=BaseModel)
 

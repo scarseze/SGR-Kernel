@@ -1,6 +1,7 @@
-from locust import HttpUser, task, between, events
-import json
 import uuid
+
+from locust import HttpUser, between, events, task
+
 
 class SwarmAPIUser(HttpUser):
     wait_time = between(1, 3)

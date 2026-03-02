@@ -21,7 +21,7 @@ class TestTelemetry(unittest.TestCase):
         self.assertTrue(tm.enabled)
         self.assertIsNotNone(tm.tracer)
 
-        with tm.span("test_span") as span:
+        with tm.span("test_span"):
             # Span might be None if failed, but if enabled it should be opaque object
             pass
 

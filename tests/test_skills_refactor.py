@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 
-from core.runtime import CoreEngine
 from core.execution import ExecutionState
+from core.runtime import CoreEngine
 from skills.gost_writer.handler import GostWriterInput, GostWriterSkill
 from skills.portfolio.handler import PortfolioInput, PortfolioSkill
 from skills.research_agent.handler import ResearchInput, ResearchSubAgent

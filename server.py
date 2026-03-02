@@ -1,20 +1,20 @@
+import json
 import os
 import sys
-import json
 from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
+from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
-from pydantic import BaseModel
 
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from core.runtime import CoreEngine
 from core.container import Container
 from core.logger import configure_logger, get_logger
+from core.runtime import CoreEngine
 from skills.calendar.handler import CalendarSkill
 from skills.data_analyst.handler import DataAnalystSkill
 from skills.filesystem.handler import ListDirSkill, ReadFileSkill
@@ -161,7 +161,7 @@ async def process_request(req: AgentRequest):
         return AgentResponse(result=result)
     except Exception as e:
         logger.error(f"Error processing request: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/health/db")
@@ -194,7 +194,7 @@ async def health_check_db():
         }
     except Exception as e:
         logger.error(f"Health check failed: {e}")
-        raise HTTPException(status_code=503, detail=f"Database connection failed: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Database connection failed: {str(e)}") from e
 
 
 @app.get("/health/swarm_topology")

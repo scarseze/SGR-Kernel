@@ -1,5 +1,5 @@
 import time
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Any
 
 from core.types import PolicyStatus, SkillExecutionContext, StepStatus
@@ -21,12 +21,15 @@ class ReturnCached(Exception):
 
 
 class SkillMiddleware(ABC):
+    @abstractmethod
     async def before_execute(self, ctx: SkillExecutionContext):
         pass
 
+    @abstractmethod
     async def after_execute(self, ctx: SkillExecutionContext, result: Any) -> Any:
         return result
 
+    @abstractmethod
     async def on_error(self, ctx: SkillExecutionContext, error: Exception):
         pass
 

@@ -9,8 +9,8 @@ try:
 except ImportError:
     etree = None
 
-from core.result import StepResult
 from core.execution import ExecutionState
+from core.result import StepResult
 from core.types import RetryPolicy
 from skills.base import BaseSkill, SkillMetadata
 from skills.xbrl_analyst.schema import XBRLInput
@@ -163,7 +163,7 @@ class XBRLAnalystSkill(BaseSkill[BaseModel]):
                 return 0.0
             try:
                 return float(row.iloc[0]["value"])
-            except:
+            except Exception:
                 return 0.0
 
         assets = get_val("Assets")

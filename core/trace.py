@@ -142,7 +142,7 @@ class TraceManager:
             if not files:
                 return None
 
-            latest_file = files[-1]  # Assuming standard sorting works for UUIDs/Time or we rely on OS creation time?
+            files[-1]  # Assuming standard sorting works for UUIDs/Time or we rely on OS creation time?
             # Actually UUIDs are random. We need to check file modification time or content.
             # Better: Sort by modification time.
 

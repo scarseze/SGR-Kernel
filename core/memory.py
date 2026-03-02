@@ -5,13 +5,14 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from pydantic import BaseModel
 from sqlalchemy import Column, DateTime, Integer, String, Text, desc, select
 
 from core.database import Base, Database, session_context
 from core.rag.embeddings import EmbeddingProvider
 from core.rag.vector_store import VectorStoreAdapter
 
-from pydantic import BaseModel
+
 class Message(BaseModel):
     role: str = "user"
     content: str = ""

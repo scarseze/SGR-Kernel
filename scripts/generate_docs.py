@@ -153,7 +153,7 @@ def generate_changelog() -> str:
         url = f"https://github.com/{GITHUB_ORG}/{KERNEL_REPO}/releases/tag/{tag}"
         changelog += f"## [{tag}]({url}) - {tag_date}\n\n"
 
-        lines = [l for l in commits.split("\n") if l.strip()][:20]
+        lines = [ln for ln in commits.split("\n") if ln.strip()][:20]
         if lines:
             for line in lines:
                 changelog += f"- {line}\n"

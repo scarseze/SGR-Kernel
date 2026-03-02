@@ -1,10 +1,7 @@
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 
-from core.planner import PlanStep
-from core.result import StepResult
 from core.runtime import CoreEngine
-from core.types import SkillMetadata
 
 
 class TestStructured(unittest.IsolatedAsyncioTestCase):

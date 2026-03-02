@@ -3,7 +3,6 @@ Shared fixtures for kernel compliance tests.
 Provides _EngineStub and common helpers.
 """
 
-import os
 from unittest.mock import MagicMock
 
 import pytest

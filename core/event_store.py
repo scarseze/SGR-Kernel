@@ -1,13 +1,11 @@
 import logging
-import uuid
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List
 
-from sqlalchemy import Column, String, DateTime, JSON, Integer, Text, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import JSON, Column, DateTime, Integer, String, select
 
 from core.database import Base
-from core.events import KernelEvent, EventType
+from core.events import EventType, KernelEvent
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,8 @@
 import os
 import sys
-from typing import Any
 
 import chainlit as cl
+
 from core.logging_config import setup_logging
 
 # Initialize Logging
@@ -11,8 +11,8 @@ setup_logging("core", host="sgr_fluent_bit")
 # Add core to path so we can import modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from core.logger import get_logger
-from core.telemetry import get_telemetry
+from core.logger import get_logger  # noqa: E402
+from core.telemetry import get_telemetry  # noqa: E402
 
 logger = get_logger("ui")
 
@@ -20,10 +20,11 @@ logger = get_logger("ui")
 metrics_port = int(os.getenv("METRICS_PORT", 8001))
 get_telemetry().start_metrics_server(metrics_port)
 
-from core.swarm import SwarmEngine
-from core.agent import Agent
-from skills.handoff import TransferSkill
-from core.ui_memory import UIMemory
+from core.agent import Agent  # noqa: E402
+from core.swarm import SwarmEngine  # noqa: E402
+from core.ui_memory import UIMemory  # noqa: E402
+from skills.handoff import TransferSkill  # noqa: E402
+
 
 def setup_swarm():
     llm_config = {}
@@ -40,12 +41,12 @@ def setup_swarm():
 
     # Import skills
     from skills.data_analyst.handler import DataAnalystSkill
-    from skills.web_search.handler import WebSearchSkill
-    from skills.peftlab.handler import PEFTLabSkill
-    from skills.gost_writer.handler import GostWriterSkill
-    from skills.knowledge_base.handler import KnowledgeBaseSkill
     from skills.database.handler import DatabaseSkill
     from skills.filesystem.handler import WriteFileSkill
+    from skills.gost_writer.handler import GostWriterSkill
+    from skills.knowledge_base.handler import KnowledgeBaseSkill
+    from skills.peftlab.handler import PEFTLabSkill
+    from skills.web_search.handler import WebSearchSkill
     
     # Define Agents
     knowledge_agent = Agent(

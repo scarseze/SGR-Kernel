@@ -1,10 +1,10 @@
-import os
 import asyncio
-import hmac
-import hashlib
-import json
 import datetime
+import hashlib
+import hmac
+import json
 import logging
+import os
 from typing import Any, Dict
 
 logger = logging.getLogger("audit_logger")
@@ -72,6 +72,6 @@ class ComplianceAuditLogger:
                     if not hmac.compare_digest(entry["signature"], expected_signature):
                         raise ValueError(f"Audit log integrity check failed at line {i+1}")
                 except json.JSONDecodeError:
-                    raise ValueError(f"Corrupted JSON in audit log at line {i+1}")
+                    raise ValueError(f"Corrupted JSON in audit log at line {i+1}") from None
                     
         return True

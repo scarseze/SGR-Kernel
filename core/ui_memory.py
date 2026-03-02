@@ -1,14 +1,16 @@
-import json
 import datetime
-import re
+import json
 import os
-from typing import List, Dict, Any, Tuple, Optional
-from sqlalchemy import MetaData, Table, Column, String, Integer, Text, DateTime, text
-from sqlalchemy.ext.asyncio import create_async_engine
+import re
+from typing import Any, Dict, List, Optional, Tuple
+
+from sqlalchemy import Column, DateTime, Integer, MetaData, String, Table, Text, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
-from core.logger import get_logger
+from sqlalchemy.ext.asyncio import create_async_engine
+
 from core.audit_logger import ComplianceAuditLogger
+from core.logger import get_logger
 from core.pii_classifier import PIIClassifier
 
 logger = get_logger("ui_memory")
@@ -223,28 +225,28 @@ Summary:"""
             now = datetime.datetime.now(datetime.UTC)
 
             # Upsert logic depends on dialect
-            stmt_params = dict(
-                session_id=session_id,
-                org_id=org_id,
-                history_json=history_json,
-                active_agent_name=active_agent_name,
-                transfer_count=transfer_count,
-                created_at=now,
-                updated_at=now
-            )
+            stmt_params = {
+                "session_id": session_id,
+                "org_id": org_id,
+                "history_json": history_json,
+                "active_agent_name": active_agent_name,
+                "transfer_count": transfer_count,
+                "created_at": now,
+                "updated_at": now
+            }
 
             is_sqlite = self.db_url.startswith('sqlite')
             insert_stmt = sqlite_insert(self.sessions) if is_sqlite else pg_insert(self.sessions)
             
             upsert_stmt = insert_stmt.on_conflict_do_update(
                 index_elements=['session_id'],
-                set_=dict(
-                    org_id=insert_stmt.excluded.org_id,
-                    history_json=insert_stmt.excluded.history_json,
-                    active_agent_name=insert_stmt.excluded.active_agent_name,
-                    transfer_count=insert_stmt.excluded.transfer_count,
-                    updated_at=insert_stmt.excluded.updated_at
-                )
+                set_={
+                    "org_id": insert_stmt.excluded.org_id,
+                    "history_json": insert_stmt.excluded.history_json,
+                    "active_agent_name": insert_stmt.excluded.active_agent_name,
+                    "transfer_count": insert_stmt.excluded.transfer_count,
+                    "updated_at": insert_stmt.excluded.updated_at
+                }
             )
 
             async with self.engine.begin() as conn:
@@ -366,7 +368,7 @@ Summary:"""
                 from core.container import Container
                 event_bus = Container.get("event_bus")
                 if event_bus:
-                    from core.events import KernelEvent, EventType
+                    from core.events import EventType, KernelEvent
                     event = KernelEvent(
                         type=EventType.RESOURCE_DELETED, 
                         request_id=f"purge_{session_id}",
@@ -426,7 +428,7 @@ Summary:"""
         - G2 Eventual Progress: Partition-Level Admission Control explicitly prevents constant CAS livelocks.
         """
         try:
-            from sqlalchemy import update, select, func
+            from sqlalchemy import func, select, update
             async with self.engine.begin() as conn:
                 # --- L8 DISTINGUISHED: G2 Partition-Level Admission Control ---
                 # Before attempting a highly-contended CAS update under SERIALIZABLE isolation,

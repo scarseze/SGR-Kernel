@@ -1,6 +1,5 @@
 """KC-F: Timeout authority tests."""
 
-import asyncio
 from unittest.mock import MagicMock
 
 import pytest

@@ -1,3 +1,7 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.execution import ExecutionState
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Optional, Type, TypeVar
 

@@ -1,8 +1,10 @@
-import pytest
 import asyncio
-from unittest.mock import patch, MagicMock
-import json
+from unittest.mock import MagicMock, patch
+
+import pytest
+
 from core.docker_mcp_client import DockerMCPClient
+
 
 @pytest.mark.asyncio
 async def test_docker_mcp_client_cmd_generation():

@@ -1,10 +1,9 @@
 import unittest
-from datetime import datetime, timedelta
 from unittest.mock import AsyncMock
 
-from core.memory_manager import MemoryManager
 from core.execution import ExecutionState
 from core.memory import Message
+from core.memory_manager import MemoryManager
 
 
 class TestMemoryManager(unittest.IsolatedAsyncioTestCase):

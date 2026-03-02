@@ -1,5 +1,6 @@
-import sys
 import json
+import sys
+
 
 def log(msg):
     print(f"DEBUG: {msg}", file=sys.stderr)

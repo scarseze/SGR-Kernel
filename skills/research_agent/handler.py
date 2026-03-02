@@ -3,9 +3,9 @@ from typing import Any, Dict, Type
 
 from pydantic import BaseModel, Field
 
+from core.execution import ExecutionState
 from core.llm import LLMService
 from core.result import StepResult
-from core.execution import ExecutionState
 from core.types import RetryPolicy
 from skills.base import BaseSkill, SkillMetadata
 

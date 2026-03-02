@@ -47,7 +47,7 @@ def refactor_skills(root_dir):
 
             def repl(m):
                 cls_name = m.group(1)
-                return f"class {cls_name}(BaseSkill[{input_model}]):"
+                return f"class {cls_name}(BaseSkill['input_model']):"
 
             new_content = re.sub(r"class (\w+)\(BaseSkill\):", repl, content)
 

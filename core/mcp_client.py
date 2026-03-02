@@ -74,7 +74,7 @@ class MCPClient:
                 break
                 
         # If we exit the loop (EOF or error), cancel all pending futures so they don't hang
-        for msg_id, future in list(self._pending_requests.items()):
+        for _msg_id, future in list(self._pending_requests.items()):
             if not future.done():
                 future.set_exception(EOFError("MCP Server closed stdout stream unexpectedly."))
         self._pending_requests.clear()

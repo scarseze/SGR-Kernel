@@ -1,4 +1,5 @@
 import asyncio
+
 import pytest
 
 pytestmark = pytest.mark.asyncio
@@ -10,12 +11,13 @@ from unittest.mock import AsyncMock
 # Add project root to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+import logging
+
 from core.execution import ExecutionStatus
 from core.planner import ExecutionPlan, PlanStep
 from core.runtime import CoreEngine
 from core.skill_interface import Skill, SkillContext, SkillResult
 
-import logging
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("parallel_test")
@@ -37,7 +39,7 @@ class SlowSkill(Skill):
 
     @property
     def metadata(self):
-        from core.types import SkillMetadata, CostClass, RiskLevel
+        from core.types import CostClass, RiskLevel, SkillMetadata
         return SkillMetadata(
             capabilities=[],
             risk_level=RiskLevel.LOW,

@@ -1,7 +1,10 @@
-import pytest
-import httpx
 from unittest.mock import AsyncMock, patch
+
+import httpx
+import pytest
+
 from skills.knowledge_base.handler import KnowledgeBaseSkill, SearchKnowledgeBase
+
 
 @pytest.fixture
 def skill():

@@ -51,7 +51,6 @@ class ExecutionGraphEngine:
 
             # Check dependencies
             deps_met = True
-            params_ready = True  # In future, check params availability
 
             dependencies = self.incoming_edges.get(step.id, [])
             for source_id in dependencies:

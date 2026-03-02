@@ -1,9 +1,11 @@
-from typing import Any, Dict
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Any
+
+from pydantic import BaseModel, Field
 
 from core.agent import Agent, TransferToAgent
 from core.types import Capability
 from skills.base import BaseSkill, SkillMetadata
+
 
 class TransferSchema(BaseModel):
     context_summary: str = Field(description="A concise summary of the conversation history, user's intent, and the reason for handoff. This will be the ONLY context the next agent receives, so be thorough but brief.")

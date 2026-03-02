@@ -1,8 +1,10 @@
+
 import pytest
-import asyncio
-from core.runtime import CoreEngine
-from core.events import KernelEvent, EventType
+
 from core.event_store import EventLog
+from core.events import EventType, KernelEvent
+from core.runtime import CoreEngine
+
 
 @pytest.mark.asyncio
 async def test_event_persistence():

@@ -1,11 +1,11 @@
-import json
 import logging
 from typing import Any, Dict, Optional, Type
+
 from pydantic import BaseModel, create_model
 
-from skills.base import BaseSkill
-from core.types import SkillMetadata
 from core.mcp_client import MCPClient
+from core.types import SkillMetadata
+from skills.base import BaseSkill
 
 logger = logging.getLogger("mcp_adapter")
 

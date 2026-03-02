@@ -15,27 +15,27 @@ from core.execution import (
 from core.execution.lifecycle import StepLifecycleEngine
 from core.governance import GovernanceHooksBus
 from core.llm import ModelPool
+from core.memory import PersistentMemory
+from core.memory_manager import MemoryManager
 from core.planner import Planner
+from core.policy import PolicyEngine
 from core.reliability import ReliabilityEngine
 from core.repair import RepairEngine
 from core.replay import ReplayEngine
+from core.security import SecurityGuardian
 from core.skill_interface import Skill, SkillRuntimeAdapter
-from core.memory import PersistentMemory
-from core.memory_manager import MemoryManager
 from core.summarizer import ConversationSummarizer
 from core.telemetry_kernel import KernelTelemetry
-from core.security import SecurityGuardian
-from core.policy import PolicyEngine
 from core.ui_memory import UIMemory
 
 logger = logging.getLogger(__name__)
 
-from core.container import Container
-from core.event_bus import EventBus
-from core.event_store import EventStore
-from core.events import EventType, KernelEvent
-from core.orchestrator import ExecutionOrchestrator
-from core.state_manager import StateManager
+from core.container import Container  # noqa: E402
+from core.event_bus import EventBus  # noqa: E402
+from core.event_store import EventStore  # noqa: E402
+from core.events import EventType, KernelEvent  # noqa: E402
+from core.orchestrator import ExecutionOrchestrator  # noqa: E402
+from core.state_manager import StateManager  # noqa: E402
 
 
 class CoreEngine:
@@ -66,6 +66,7 @@ class CoreEngine:
         
         # Redis (Phase 5)
         import os
+
         import redis.asyncio as redis
         redis_host = os.getenv("REDIS_HOST", "localhost")
         redis_port = int(os.getenv("REDIS_PORT", 6379))

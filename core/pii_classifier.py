@@ -1,6 +1,7 @@
 import re
+from typing import Any, Dict, List
+
 import structlog
-from typing import List, Dict, Any
 
 logger = structlog.get_logger(__name__)
 

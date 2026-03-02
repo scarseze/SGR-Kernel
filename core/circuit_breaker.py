@@ -1,8 +1,9 @@
 import time
-import asyncio
-import structlog
-from typing import Callable, Any
 from functools import wraps
+from typing import Callable
+
+import structlog
+
 from core.container import Container
 
 logger = structlog.get_logger(__name__)

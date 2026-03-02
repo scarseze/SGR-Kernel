@@ -83,7 +83,7 @@ async def test_event_driven_flow():
     user_input = "Write a report about AI"
     await engine.run(user_input)
 
-    logger.info(f"Result: {result}")
+    logger.info("Result: unknown_result")
 
     # Verify events
     types = [e.type for e in event_log]

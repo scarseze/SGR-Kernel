@@ -1,9 +1,10 @@
 import logging
-from typing import List
+from typing import List, Optional
+
+from pydantic import BaseModel
 
 from core.llm import LLMService
-from pydantic import BaseModel
-from typing import Optional
+
 
 class Message(BaseModel):
     role: str = "user"

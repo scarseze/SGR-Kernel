@@ -15,7 +15,7 @@ def is_safe_path(path: str) -> bool:
     try:
         abs_path = os.path.abspath(path)
         return any(abs_path.startswith(os.path.abspath(root)) for root in ALLOWED_ROOTS)
-    except:
+    except Exception:
         return False
 
 

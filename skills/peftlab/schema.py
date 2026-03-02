@@ -1,5 +1,7 @@
-from typing import Optional, Literal
+from typing import Literal, Optional
+
 from pydantic import BaseModel, Field
+
 
 class PEFTlabRequest(BaseModel):
     action: Literal["analyze_sensitivity", "tune_hyperparameters", "auto_benchmark", "train_final_model"] = Field(

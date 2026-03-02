@@ -33,7 +33,7 @@ async def query_llm(query: LLMQuery):
             response.raise_for_status()
             return {"text": response.json()["choices"][0]["message"]["content"]}
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 def start_proxy_server(port=8090):

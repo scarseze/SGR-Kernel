@@ -6,6 +6,7 @@ worker poison, replan risk.
 """
 
 from jinja2 import Undefined
+
 from core.execution.resolution import resolve_inputs
 from core.result import StepResult
 from core.types import (

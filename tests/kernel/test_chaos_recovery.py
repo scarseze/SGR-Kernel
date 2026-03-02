@@ -1,14 +1,15 @@
+import asyncio
 import os
 import sys
 import unittest
-import asyncio
 
 # Ensure project roots are on path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "SA", "sgr_kernel"))
 
-from core.chaos import ChaosException, with_chaos
 from core.agent import Agent
+from core.chaos import ChaosException, with_chaos
 from core.swarm import SwarmEngine
+
 
 class TestChaosEngineering(unittest.TestCase):
     def setUp(self):

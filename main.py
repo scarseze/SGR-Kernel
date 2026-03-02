@@ -13,10 +13,10 @@ load_dotenv(env_path)
 
 # Import specific skills
 # Import specific skills - REMOVED (using dynamic loader)
-import asyncio
+import asyncio  # noqa: E402
 
-from core.runtime import CoreEngine
-from core.logger import configure_logger, get_logger
+from core.logger import configure_logger, get_logger  # noqa: E402
+from core.runtime import CoreEngine  # noqa: E402
 
 logger = get_logger("main")
 
@@ -119,7 +119,7 @@ async def main():
             await asyncio.sleep(1)  # Prevent tight loop on error
 
 
-import argparse
+import argparse  # noqa: E402
 
 # ... (Previous Imports) ...
 

@@ -4,8 +4,6 @@ Migrated to v2: uses resolve_inputs and direct StepResult unit tests.
 
 import json
 
-import pytest
-
 from core.result import StepResult
 from core.types import StepStatus
 

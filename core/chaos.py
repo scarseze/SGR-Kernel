@@ -1,10 +1,10 @@
-import os
-import time
-import random
 import asyncio
 import logging
+import os
+import random
+import time
 from functools import wraps
-from typing import Callable, Any
+from typing import Callable
 
 logger = logging.getLogger("core.chaos")
 
@@ -79,7 +79,8 @@ def with_chaos(func: Callable) -> Callable:
 
 def inject_redis_failure(redis_client):
     """Mocks redis client to raise ChaosException on next call."""
-    if not is_chaos_enabled(): return
+    if not is_chaos_enabled():
+        return
     
     original_get = redis_client.get
     async def broken_get(*args, **kwargs):

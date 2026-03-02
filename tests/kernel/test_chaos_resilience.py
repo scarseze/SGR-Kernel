@@ -1,11 +1,12 @@
-import pytest
-import asyncio
 import os
-from unittest.mock import MagicMock, patch, AsyncMock
-from core.swarm import SwarmEngine, Agent
-from core.chaos import ChaosException, inject_redis_failure
-from core.container import Container
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from core.chaos import ChaosException
 from core.events import EventType, KernelEvent
+from core.swarm import Agent, SwarmEngine
+
 
 @pytest.mark.asyncio
 async def test_swarm_resilience_to_llm_failure():
@@ -42,8 +43,10 @@ async def test_scheduler_resilience_to_redis_failure():
     mock_lifecycle.execute_task = AsyncMock()
 
     def mock_get(k):
-        if k == "redis": return mock_redis
-        if k == "lifecycle": return mock_lifecycle
+        if k == "redis":
+            return mock_redis
+        if k == "lifecycle":
+            return mock_lifecycle
         return MagicMock()
 
     with patch.dict(os.environ, {"REDIS_HOST": "localhost", "ENABLE_CHAOS": "false"}), \
@@ -66,15 +69,15 @@ async def test_scheduler_resilience_to_redis_failure():
         # Wait, if quota manager throws an exception, we expect it to be raised since we don't catch it!
         # But wait, original test expected "results = await scheduler.dispatch" to handle it and return a results map.
         # Let's mock dispatch so that if Redis fails, it throws. Let's just expect an Exception to be raised.
-        with pytest.raises(Exception):
+        with pytest.raises(ChaosException):
             await scheduler.dispatch([payload])
 
 @pytest.mark.asyncio
 async def test_idempotency_guard_blocks_duplicate_retry():
     """Verify Orchestrator blocks retry for non-idempotent skills."""
-    from core.orchestrator import ExecutionOrchestrator
-    from core.execution import ExecutionState, StepNode, StepStatus
+    from core.execution import ExecutionState, StepNode
     from core.execution.policy import RetryPolicy as ExecRetryPolicy
+    from core.orchestrator import ExecutionOrchestrator
     
     state = ExecutionState(request_id="req1", input_payload="hi")
     # Non-idempotent node
@@ -90,7 +93,7 @@ async def test_idempotency_guard_blocks_duplicate_retry():
     
     # Simulate first attempt failed
     state.initialize_step("s1")
-    s_state = state.step_states["s1"]
+    state.step_states["s1"]
     
     mock_events = MagicMock()
     mock_events.publish = AsyncMock()
@@ -113,7 +116,7 @@ async def test_idempotency_guard_blocks_duplicate_retry():
 @pytest.mark.asyncio
 async def test_network_partition_chaos():
     """Verify that network partition effectively hijacks httpx requests."""
-    from core.chaos import inject_network_partition, ChaosException
+    from core.chaos import inject_network_partition
     
     class MockHttpxClient:
         async def send(self, *args, **kwargs):
@@ -128,8 +131,9 @@ async def test_network_partition_chaos():
 @pytest.mark.asyncio
 async def test_p99_latency_chaos():
     """Verify that p99 latency spikes actually enforce a minimum delay."""
-    from core.chaos import inject_p99_latency, with_chaos
     import time
+
+    from core.chaos import inject_p99_latency, with_chaos
     
     @with_chaos
     async def fast_function():

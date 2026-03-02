@@ -1,12 +1,15 @@
 import asyncio
+import datetime
+import hashlib
 import json
 import os
 import tempfile
+
 import structlog
 import yaml
-import hashlib
-import datetime
+
 from core.ui_memory import UIMemory
+
 
 class StaleLeaseException(Exception):
     """Raised when a worker attempts to update a job but loses the Compare-And-Swap race."""

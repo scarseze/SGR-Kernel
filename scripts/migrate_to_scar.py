@@ -8,7 +8,6 @@ excluding all runtime artifacts, junk files, and developer-only scripts.
 Usage: python migrate_to_scar.py [--dry-run]
 """
 
-import os
 import re
 import shutil
 import sys

@@ -1,10 +1,10 @@
-import pytest
-import asyncio
 import os
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
 from core.scheduler import Scheduler, TaskPayload
-from core.quota import QuotaManager
-from core.execution.policy import StepResult
+
 
 @pytest.mark.asyncio
 async def test_quota_enforcement_triggers_429():
@@ -21,8 +21,10 @@ async def test_quota_enforcement_triggers_429():
     mock_lifecycle.execute_task = AsyncMock()
 
     def mock_get(k):
-        if k == "redis": return mock_redis
-        if k == "lifecycle": return mock_lifecycle
+        if k == "redis":
+            return mock_redis
+        if k == "lifecycle":
+            return mock_lifecycle
         return MagicMock()
         
     with patch.dict(os.environ, {"REDIS_HOST": "localhost", "ENABLE_CHAOS": "false"}), \
@@ -61,8 +63,10 @@ async def test_backpressure_triggers_429():
     mock_lifecycle.execute_task = AsyncMock()
 
     def mock_get(k):
-        if k == "redis": return mock_redis
-        if k == "lifecycle": return mock_lifecycle
+        if k == "redis":
+            return mock_redis
+        if k == "lifecycle":
+            return mock_lifecycle
         return MagicMock()
 
     with patch.dict(os.environ, {"REDIS_HOST": "localhost", "ENABLE_CHAOS": "false"}), \

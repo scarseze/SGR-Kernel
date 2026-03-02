@@ -1,8 +1,8 @@
 import asyncio
-import time
 import uuid
-import structlog
 from typing import Optional
+
+import structlog
 
 logger = structlog.get_logger(__name__)
 

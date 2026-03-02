@@ -1,19 +1,15 @@
 import asyncio
-import logging
 import json
+import logging
 import time
-import uuid
-from typing import Awaitable, List, Dict, Any, Optional
-
-from core.chaos import with_chaos, ChaosException
-from core.events import KernelEvent, EventType
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
+from core.chaos import with_chaos
 from core.container import Container
-from core.execution import StepNode
+from core.events import EventType, KernelEvent
 from core.execution.policy import StepResult
-from core.tracing import get_trace_context
 
 logger = logging.getLogger(__name__)
 

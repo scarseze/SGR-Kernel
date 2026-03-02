@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 try:
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
-    from mcp.types import Tool
+    from mcp.types import Tool  # noqa: F401
 
     MCP_AVAILABLE = True
 except ImportError:

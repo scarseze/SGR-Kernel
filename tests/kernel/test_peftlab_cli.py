@@ -1,9 +1,11 @@
-import pytest
 import json
-import asyncio
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
 from skills.peftlab.handler import PEFTLabSkill
 from skills.peftlab.schema import PEFTlabRequest
+
 
 @pytest.fixture
 def skill():

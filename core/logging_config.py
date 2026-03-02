@@ -2,9 +2,9 @@
 import logging
 import os
 import sys
-from typing import Optional
 
 from fluent import handler
+
 
 def setup_logging(service_name: str, host: str = "localhost", port: int = 24224):
     """

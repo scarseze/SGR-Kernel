@@ -2,9 +2,7 @@
 Migrated to v2: uses core.execution.resolution.resolve_inputs directly.
 """
 
-import json
 
-import pytest
 from jinja2 import Undefined
 
 from core.execution.resolution import resolve_inputs

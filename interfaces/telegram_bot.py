@@ -80,7 +80,7 @@ async def send_response(message: types.Message, response_text: str):
 
             # Remove marker from text
             clean_text = response_text.replace(f"[FILE:{file_path}]", "").strip()
-        except:
+        except Exception:
             pass
 
     # Logic: If file exists and text is short, send as caption
@@ -212,7 +212,7 @@ async def handle_voice(message: types.Message):
         if os.path.exists(file_path):
             try:
                 os.remove(file_path)
-            except:
+            except Exception:
                 pass
 
 

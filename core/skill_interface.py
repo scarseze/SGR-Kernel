@@ -119,5 +119,5 @@ class SkillRuntimeAdapter:
             # Re-raise for Kernel to handle as Failure
             raise e
         finally:
-            duration = time.time() - start_time
+            time.time() - start_time
             # Telemetry emission here?

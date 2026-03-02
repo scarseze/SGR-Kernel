@@ -5,7 +5,7 @@ from typing import List, Type
 import httpx
 
 from core.execution import ExecutionState
-from core.types import SkillMetadata, Capability, RiskLevel, CostClass
+from core.types import Capability, CostClass, RiskLevel, SkillMetadata
 from skills.base import BaseSkill
 from skills.code_interpreter.handler import CodeInterpreterSkill
 from skills.code_interpreter.schema import CodeExecutionRequest

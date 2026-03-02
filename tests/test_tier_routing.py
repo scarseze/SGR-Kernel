@@ -1,10 +1,8 @@
-from unittest.mock import MagicMock, patch
 
 import pytest
 
 from core.llm import ModelPool
 from core.router import ModelTier, TierRouter
-from core.runtime import CoreEngine
 from core.types import Capability, RiskLevel, SkillMetadata
 
 # ═══════════════════════════════════════════════

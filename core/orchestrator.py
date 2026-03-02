@@ -13,7 +13,7 @@ from core.execution.graph_engine import ExecutionGraphEngine
 logger = logging.getLogger(__name__)
 
 
-from core.scheduler import Scheduler
+from core.scheduler import Scheduler  # noqa: E402
 
 
 class ExecutionOrchestrator:
@@ -54,8 +54,8 @@ class ExecutionOrchestrator:
                 break
 
             # 2. Dispatch Wave
-            from core.scheduler import TaskPayload
             from core.execution.resolution import resolve_inputs
+            from core.scheduler import TaskPayload
             from core.tracing import get_trace_context
             
             tasks = []

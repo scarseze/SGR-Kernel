@@ -3,9 +3,8 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from core.llm import LLMService
-
-
 from core.types import RetryPolicy
+
 
 class PlanStep(BaseModel):
     step_id: str = Field(..., description="Unique identifier for this step (e.g., 'step_1')")
