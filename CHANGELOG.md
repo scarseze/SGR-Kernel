@@ -10,7 +10,7 @@
 - **GDPR / HIPAA**: API для реализации "права на забвение" (`delete_session`), маскирование PII для паспортов, СНИЛС, ИНН, кредитных карт и номеров телефонов.
 - **Mariana Trench Hardening**: Ограничение частоты запросов (Rate limiting), эндпоинты `/health/db` и `/health/swarm_topology`, валидация ввода через `SecurityGuardian`, события `STEP_FAILED` по таймауту в планировщике.
 - **PostgreSQL Persistence**: Полная асинхронная поддержка SQLAlchemy + alembic; базы SQLite устарели для production-использования.
-- **Test Suite**: Успешно пройдено 126 тестов, 9 пропущено.
+- **Test Suite**: Успешно пройдено 135 тестов, 6 пропущено.
 
 ### Changed (Изменено)
 - `SwarmEngine.execute()` теперь использует жесткий лимит `max_turns` (по умолчанию 10) для предотвращения бесконечных циклов агентов.
@@ -55,7 +55,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **GDPR / HIPAA**: Right-to-be-forgotten API (`delete_session`), PII masking for passports, SNILS, INN, credit cards, and phone numbers.
 - **Mariana Trench Hardening**: Rate limiting, `/health/db` & `/health/swarm_topology` endpoints, input validation via `SecurityGuardian`, `STEP_FAILED` timeout events in scheduler.
 - **PostgreSQL Persistence**: Full async SQLAlchemy + alembic support; deprecated SQLite for production.
-- **Test Suite**: 126 tests passing, 9 skipped.
+- **Test Suite**: 135 tests passing, 6 skipped.
 
 ### Changed
 - `SwarmEngine.execute()` now enforces `max_turns` (default 10) to prevent infinite agent loops.

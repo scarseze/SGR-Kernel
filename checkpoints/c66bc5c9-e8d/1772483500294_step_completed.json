@@ -1,0 +1,268 @@
+{
+  "state_snapshot": {
+    "request_id": "c66bc5c9-e8d",
+    "plan_id": "be6ed8fa",
+    "input_payload": "Run parallel wave",
+    "plan_ir": {
+      "id": "be6ed8fa",
+      "steps": [
+        {
+          "id": "step1",
+          "skill_name": "dummy_skill",
+          "inputs_template": {},
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": null,
+          "description": null,
+          "timeout_seconds": 300.0,
+          "idempotent": false,
+          "idempotency_key": null
+        },
+        {
+          "id": "step2",
+          "skill_name": "dummy_skill",
+          "inputs_template": {},
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": null,
+          "description": null,
+          "timeout_seconds": 300.0,
+          "idempotent": false,
+          "idempotency_key": null
+        },
+        {
+          "id": "step3",
+          "skill_name": "dummy_skill",
+          "inputs_template": {},
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": null,
+          "description": null,
+          "timeout_seconds": 300.0,
+          "idempotent": false,
+          "idempotency_key": null
+        }
+      ],
+      "edges": [],
+      "global_risk_level": "low",
+      "deterministic_required": false,
+      "direct_response": null,
+      "created_at": 1772483500.1389105
+    },
+    "step_states": {
+      "step1": {
+        "step_id": "step1",
+        "status": "COMMITTED",
+        "attempts": 1,
+        "tier_used": null,
+        "started_at": 1772483500.148745,
+        "finished_at": 1772483500.262298,
+        "confidence": 1.0,
+        "failure": null,
+        "output": "success",
+        "history": []
+      },
+      "step2": {
+        "step_id": "step2",
+        "status": "COMMITTED",
+        "attempts": 1,
+        "tier_used": null,
+        "started_at": 1772483500.1488342,
+        "finished_at": 1772483500.2624667,
+        "confidence": 1.0,
+        "failure": null,
+        "output": "success",
+        "history": []
+      },
+      "step3": {
+        "step_id": "step3",
+        "status": "COMMITTED",
+        "attempts": 1,
+        "tier_used": null,
+        "started_at": 1772483500.1488795,
+        "finished_at": 1772483500.2625916,
+        "confidence": 1.0,
+        "failure": null,
+        "output": "success",
+        "history": []
+      }
+    },
+    "artifacts": {},
+    "skill_outputs": {
+      "step1": "success",
+      "step2": "success",
+      "step3": "success"
+    },
+    "llm_outputs": {},
+    "critic_reports": [],
+    "repair_history": [],
+    "retry_log": [],
+    "escalation_log": [],
+    "approvals": [],
+    "history": [],
+    "event_log": [
+      {
+        "event_id": "e65a5b37-64e4-41fe-a903-ab45b61a4ee3",
+        "type": "PLAN_CREATED",
+        "payload": {
+          "plan_ir": {
+            "id": "be6ed8fa",
+            "steps": [
+              {
+                "id": "step1",
+                "skill_name": "dummy_skill",
+                "inputs_template": {},
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": null,
+                "description": null,
+                "timeout_seconds": 300.0,
+                "idempotent": false,
+                "idempotency_key": null
+              },
+              {
+                "id": "step2",
+                "skill_name": "dummy_skill",
+                "inputs_template": {},
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": null,
+                "description": null,
+                "timeout_seconds": 300.0,
+                "idempotent": false,
+                "idempotency_key": null
+              },
+              {
+                "id": "step3",
+                "skill_name": "dummy_skill",
+                "inputs_template": {},
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": null,
+                "description": null,
+                "timeout_seconds": 300.0,
+                "idempotent": false,
+                "idempotency_key": null
+              }
+            ],
+            "edges": [],
+            "global_risk_level": "low",
+            "deterministic_required": false,
+            "direct_response": null,
+            "created_at": 1772483500.1389105
+          }
+        },
+        "request_id": "c66bc5c9-e8d",
+        "timestamp": 1772483500.1396122,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "81b57acc-f9da-44e6-bd9a-7a06103fba1e",
+        "type": "EXECUTION_STARTED",
+        "payload": {},
+        "request_id": "c66bc5c9-e8d",
+        "timestamp": 1772483500.1464725,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "0bbf83dc-fd44-44f3-94d7-4c2045075100",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 1
+        },
+        "request_id": "c66bc5c9-e8d",
+        "timestamp": 1772483500.148745,
+        "step_id": "step1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "f48349ea-36c2-4cff-a070-49e795fc445a",
+        "type": "STEP_COMPLETED",
+        "payload": {
+          "output": "success"
+        },
+        "request_id": "c66bc5c9-e8d",
+        "timestamp": 1772483500.262298,
+        "step_id": "step1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "bc6a6c3f-5536-45c4-93a3-9e6bc883cb6a",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 1
+        },
+        "request_id": "c66bc5c9-e8d",
+        "timestamp": 1772483500.1488342,
+        "step_id": "step2",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "5af97fb5-e583-49f8-b20c-46a47be193a2",
+        "type": "STEP_COMPLETED",
+        "payload": {
+          "output": "success"
+        },
+        "request_id": "c66bc5c9-e8d",
+        "timestamp": 1772483500.2624667,
+        "step_id": "step2",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "0842588e-8e3b-4f2b-807c-adf08f346877",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 1
+        },
+        "request_id": "c66bc5c9-e8d",
+        "timestamp": 1772483500.1488795,
+        "step_id": "step3",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "de2475fd-8595-43a6-8eeb-fcbf87ee5968",
+        "type": "STEP_COMPLETED",
+        "payload": {
+          "output": "success"
+        },
+        "request_id": "c66bc5c9-e8d",
+        "timestamp": 1772483500.2625916,
+        "step_id": "step3",
+        "actor": "kernel"
+      }
+    ],
+    "processed_event_ids": [
+      "e65a5b37-64e4-41fe-a903-ab45b61a4ee3",
+      "0bbf83dc-fd44-44f3-94d7-4c2045075100",
+      "de2475fd-8595-43a6-8eeb-fcbf87ee5968",
+      "5af97fb5-e583-49f8-b20c-46a47be193a2",
+      "f48349ea-36c2-4cff-a070-49e795fc445a",
+      "81b57acc-f9da-44e6-bd9a-7a06103fba1e",
+      "bc6a6c3f-5536-45c4-93a3-9e6bc883cb6a",
+      "0842588e-8e3b-4f2b-807c-adf08f346877"
+    ],
+    "checkpoints": [
+      "checkpoints\\c66bc5c9-e8d\\1772483500145_plan_created.json",
+      "checkpoints\\c66bc5c9-e8d\\1772483500267_step_completed.json",
+      "checkpoints\\c66bc5c9-e8d\\1772483500275_step_completed.json"
+    ],
+    "status": "RUNNING",
+    "created_at": 1772483500.1395423,
+    "updated_at": 1772483500.2625916,
+    "token_budget": null,
+    "tokens_used": 0,
+    "llm_call_budget": null,
+    "llm_calls_used": 0
+  },
+  "step_id": null,
+  "timestamp": 1772483500.2947922,
+  "reason": "step_completed"
+}

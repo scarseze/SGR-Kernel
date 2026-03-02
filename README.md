@@ -4,7 +4,7 @@
 
 ![Version](https://img.shields.io/badge/version-v3.0--gold-green)
 ![Compliance](https://img.shields.io/badge/compliance-GDPR%7CHIPAA%7C152--FZ-blue)
-![Tests](https://img.shields.io/badge/tests-151%20PASSED-brightgreen)
+![Tests](https://img.shields.io/badge/tests-135%20PASSED-brightgreen)
 
 ---
 

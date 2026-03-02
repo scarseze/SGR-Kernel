@@ -1,0 +1,138 @@
+{
+  "state_snapshot": {
+    "request_id": "10a9ea9d-842-fork-1772482826",
+    "plan_id": "becb985f",
+    "input_payload": "",
+    "plan_ir": {
+      "id": "becb985f",
+      "steps": [
+        {
+          "id": "step1",
+          "skill_name": "dummy_skill",
+          "inputs_template": {},
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": null,
+          "description": null,
+          "timeout_seconds": 300.0,
+          "idempotent": false,
+          "idempotency_key": null
+        }
+      ],
+      "edges": [],
+      "global_risk_level": "low",
+      "deterministic_required": false,
+      "direct_response": null,
+      "created_at": 1772482826.2194061
+    },
+    "step_states": {
+      "step1": {
+        "step_id": "step1",
+        "status": "COMMITTED",
+        "attempts": 1,
+        "tier_used": null,
+        "started_at": 1772482826.2710652,
+        "finished_at": 1772482826.271137,
+        "confidence": 1.0,
+        "failure": null,
+        "output": "success",
+        "history": []
+      }
+    },
+    "artifacts": {},
+    "skill_outputs": {
+      "step1": "success"
+    },
+    "llm_outputs": {},
+    "critic_reports": [],
+    "repair_history": [],
+    "retry_log": [],
+    "escalation_log": [],
+    "approvals": [],
+    "history": [],
+    "event_log": [
+      {
+        "event_id": "f9f9af20-1092-43e9-aba5-217b1ae9e461",
+        "type": "PLAN_CREATED",
+        "payload": {
+          "plan_ir": {
+            "id": "becb985f",
+            "steps": [
+              {
+                "id": "step1",
+                "skill_name": "dummy_skill",
+                "inputs_template": {},
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": null,
+                "description": null,
+                "timeout_seconds": 300.0,
+                "idempotent": false,
+                "idempotency_key": null
+              }
+            ],
+            "edges": [],
+            "global_risk_level": "low",
+            "deterministic_required": false,
+            "direct_response": null,
+            "created_at": 1772482826.2194061
+          }
+        },
+        "request_id": "10a9ea9d-842",
+        "timestamp": 1772482826.2202563,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "a3f07ac8-13d9-4921-a5ff-35fa494c05bd",
+        "type": "EXECUTION_STARTED",
+        "payload": {},
+        "request_id": "10a9ea9d-842-fork-1772482826",
+        "timestamp": 1772482826.269066,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "07d7f56d-544d-49be-bb92-4680eca6dbdf",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 1
+        },
+        "request_id": "10a9ea9d-842-fork-1772482826",
+        "timestamp": 1772482826.2710652,
+        "step_id": "step1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "3828cb9f-dc3c-4755-8cf8-34b12105dcb7",
+        "type": "STEP_COMPLETED",
+        "payload": {
+          "output": "success"
+        },
+        "request_id": "10a9ea9d-842-fork-1772482826",
+        "timestamp": 1772482826.271137,
+        "step_id": "step1",
+        "actor": "kernel"
+      }
+    ],
+    "processed_event_ids": [
+      "a3f07ac8-13d9-4921-a5ff-35fa494c05bd",
+      "3828cb9f-dc3c-4755-8cf8-34b12105dcb7",
+      "07d7f56d-544d-49be-bb92-4680eca6dbdf",
+      "f9f9af20-1092-43e9-aba5-217b1ae9e461"
+    ],
+    "checkpoints": [],
+    "status": "RUNNING",
+    "created_at": 1772482826.2688048,
+    "updated_at": 1772482826.271137,
+    "token_budget": null,
+    "tokens_used": 0,
+    "llm_call_budget": null,
+    "llm_calls_used": 0
+  },
+  "step_id": null,
+  "timestamp": 1772482826.275953,
+  "reason": "step_completed"
+}

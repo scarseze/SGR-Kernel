@@ -1,0 +1,298 @@
+{
+  "state_snapshot": {
+    "request_id": "e69ddb44-7be",
+    "plan_id": "d40ee7d0",
+    "input_payload": "Run parallel test",
+    "plan_ir": {
+      "id": "d40ee7d0",
+      "steps": [
+        {
+          "id": "step_1",
+          "skill_name": "skill_1",
+          "inputs_template": {},
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": {
+            "max_attempts": 1,
+            "escalation_tiers": [
+              "fast",
+              "mid",
+              "heavy"
+            ],
+            "repair_allowed": true,
+            "fallback_skill": null,
+            "abort_on_fail_types": []
+          },
+          "description": "Task 1",
+          "timeout_seconds": 300.0,
+          "idempotent": true,
+          "idempotency_key": null
+        },
+        {
+          "id": "step_2",
+          "skill_name": "skill_2",
+          "inputs_template": {},
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": {
+            "max_attempts": 1,
+            "escalation_tiers": [
+              "fast",
+              "mid",
+              "heavy"
+            ],
+            "repair_allowed": true,
+            "fallback_skill": null,
+            "abort_on_fail_types": []
+          },
+          "description": "Task 2",
+          "timeout_seconds": 300.0,
+          "idempotent": true,
+          "idempotency_key": null
+        },
+        {
+          "id": "step_3",
+          "skill_name": "skill_3",
+          "inputs_template": {},
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": {
+            "max_attempts": 1,
+            "escalation_tiers": [
+              "fast",
+              "mid",
+              "heavy"
+            ],
+            "repair_allowed": true,
+            "fallback_skill": null,
+            "abort_on_fail_types": []
+          },
+          "description": "Combine",
+          "timeout_seconds": 300.0,
+          "idempotent": true,
+          "idempotency_key": null
+        }
+      ],
+      "edges": [
+        {
+          "source_id": "step_1",
+          "target_id": "step_3",
+          "type": "hard"
+        },
+        {
+          "source_id": "step_2",
+          "target_id": "step_3",
+          "type": "hard"
+        }
+      ],
+      "global_risk_level": "low",
+      "deterministic_required": false,
+      "direct_response": null,
+      "created_at": 1772483496.0625923
+    },
+    "step_states": {
+      "step_1": {
+        "step_id": "step_1",
+        "status": "COMMITTED",
+        "attempts": 1,
+        "tier_used": null,
+        "started_at": 1772483496.0735645,
+        "finished_at": 1772483498.0838234,
+        "confidence": 1.0,
+        "failure": null,
+        "output": "Result from skill_1",
+        "history": []
+      },
+      "step_2": {
+        "step_id": "step_2",
+        "status": "PENDING",
+        "attempts": 0,
+        "tier_used": null,
+        "started_at": null,
+        "finished_at": null,
+        "confidence": 1.0,
+        "failure": null,
+        "output": null,
+        "history": []
+      },
+      "step_3": {
+        "step_id": "step_3",
+        "status": "PENDING",
+        "attempts": 0,
+        "tier_used": null,
+        "started_at": null,
+        "finished_at": null,
+        "confidence": 1.0,
+        "failure": null,
+        "output": null,
+        "history": []
+      }
+    },
+    "artifacts": {},
+    "skill_outputs": {
+      "step_1": "Result from skill_1"
+    },
+    "llm_outputs": {},
+    "critic_reports": [],
+    "repair_history": [],
+    "retry_log": [],
+    "escalation_log": [],
+    "approvals": [],
+    "history": [],
+    "event_log": [
+      {
+        "event_id": "5085a5b7-9fc4-401f-a9c9-6612c4875ca8",
+        "type": "PLAN_CREATED",
+        "payload": {
+          "plan_ir": {
+            "id": "d40ee7d0",
+            "steps": [
+              {
+                "id": "step_1",
+                "skill_name": "skill_1",
+                "inputs_template": {},
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": {
+                  "max_attempts": 1,
+                  "escalation_tiers": [
+                    "fast",
+                    "mid",
+                    "heavy"
+                  ],
+                  "repair_allowed": true,
+                  "fallback_skill": null,
+                  "abort_on_fail_types": []
+                },
+                "description": "Task 1",
+                "timeout_seconds": 300.0,
+                "idempotent": true,
+                "idempotency_key": null
+              },
+              {
+                "id": "step_2",
+                "skill_name": "skill_2",
+                "inputs_template": {},
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": {
+                  "max_attempts": 1,
+                  "escalation_tiers": [
+                    "fast",
+                    "mid",
+                    "heavy"
+                  ],
+                  "repair_allowed": true,
+                  "fallback_skill": null,
+                  "abort_on_fail_types": []
+                },
+                "description": "Task 2",
+                "timeout_seconds": 300.0,
+                "idempotent": true,
+                "idempotency_key": null
+              },
+              {
+                "id": "step_3",
+                "skill_name": "skill_3",
+                "inputs_template": {},
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": {
+                  "max_attempts": 1,
+                  "escalation_tiers": [
+                    "fast",
+                    "mid",
+                    "heavy"
+                  ],
+                  "repair_allowed": true,
+                  "fallback_skill": null,
+                  "abort_on_fail_types": []
+                },
+                "description": "Combine",
+                "timeout_seconds": 300.0,
+                "idempotent": true,
+                "idempotency_key": null
+              }
+            ],
+            "edges": [
+              {
+                "source_id": "step_1",
+                "target_id": "step_3",
+                "type": "hard"
+              },
+              {
+                "source_id": "step_2",
+                "target_id": "step_3",
+                "type": "hard"
+              }
+            ],
+            "global_risk_level": "low",
+            "deterministic_required": false,
+            "direct_response": null,
+            "created_at": 1772483496.0625923
+          }
+        },
+        "request_id": "e69ddb44-7be",
+        "timestamp": 1772483496.0626345,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "8dec5c48-e79f-44d1-8064-b8d5a0ba183d",
+        "type": "EXECUTION_STARTED",
+        "payload": {},
+        "request_id": "e69ddb44-7be",
+        "timestamp": 1772483496.0715065,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "fc5f69ea-0d9e-468f-83ff-9b3a415d2feb",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 1
+        },
+        "request_id": "e69ddb44-7be",
+        "timestamp": 1772483496.0735645,
+        "step_id": "step_1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "17509621-ebdd-4e91-bd69-aed96362b12e",
+        "type": "STEP_COMPLETED",
+        "payload": {
+          "output": "Result from skill_1"
+        },
+        "request_id": "e69ddb44-7be",
+        "timestamp": 1772483498.0838234,
+        "step_id": "step_1",
+        "actor": "kernel"
+      }
+    ],
+    "processed_event_ids": [
+      "5085a5b7-9fc4-401f-a9c9-6612c4875ca8",
+      "fc5f69ea-0d9e-468f-83ff-9b3a415d2feb",
+      "8dec5c48-e79f-44d1-8064-b8d5a0ba183d",
+      "17509621-ebdd-4e91-bd69-aed96362b12e"
+    ],
+    "checkpoints": [
+      "checkpoints\\e69ddb44-7be\\1772483496068_plan_created.json"
+    ],
+    "status": "RUNNING",
+    "created_at": 1772483496.0624506,
+    "updated_at": 1772483498.0838234,
+    "token_budget": null,
+    "tokens_used": 0,
+    "llm_call_budget": null,
+    "llm_calls_used": 0
+  },
+  "step_id": null,
+  "timestamp": 1772483498.102665,
+  "reason": "step_completed"
+}
