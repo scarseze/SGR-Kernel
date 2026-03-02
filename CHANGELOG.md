@@ -1,4 +1,49 @@
-# Changelog
+# 📋 История изменений (Changelog)
+
+Все значимые изменения в этом проекте будут задокументированы в этом файле.
+Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
+
+## [v3.0.0] - 2026-03-01 — SGR Kernel v3.0 & PEFTlab v2.9.0 Enterprise
+### Added (Добавлено)
+- **Иерархические рои (Hierarchical Swarms)** (`SubSwarmAgent`, `TransferToSubSwarm`): агенты теперь могут порождать вложенные рои для бесконечной глубины рассуждений.
+- **152-ФЗ Комплаенс**: `UIMemory` теперь контролирует размещение баз данных в зоне `.ru`, блокирует зарубежные соединения и генерирует защищенные от подделки аудиторские логи (HMAC).
+- **GDPR / HIPAA**: API для реализации "права на забвение" (`delete_session`), маскирование PII для паспортов, СНИЛС, ИНН, кредитных карт и номеров телефонов.
+- **Mariana Trench Hardening**: Ограничение частоты запросов (Rate limiting), эндпоинты `/health/db` и `/health/swarm_topology`, валидация ввода через `SecurityGuardian`, события `STEP_FAILED` по таймауту в планировщике.
+- **PostgreSQL Persistence**: Полная асинхронная поддержка SQLAlchemy + alembic; базы SQLite устарели для production-использования.
+- **Test Suite**: Успешно пройдено 126 тестов, 9 пропущено.
+
+### Changed (Изменено)
+- `SwarmEngine.execute()` теперь использует жесткий лимит `max_turns` (по умолчанию 10) для предотвращения бесконечных циклов агентов.
+- В логировании `MemoryManager` теперь используются f-строки для устранения TypeError.
+
+### Fixed (Исправлено)
+- `test_rf_152fz.py`: очистка переменных среды (teardown) больше не приводит к утечке `MEMORY_DB_URL` в других тестах.
+- `test_event_determinism`, `test_race_safety`, `test_replay_fork`, `test_replay_recon`: состояние теперь загружается из чекпоинтов, а не из очищенных `active_executions`.
+
+## [v2.1.0] - 2026-02-27 — Mariana Trench Hardening
+### Added (Добавлено)
+- Middleware для ограничения частоты API запросов (rate limiting) в `server.py`.
+- Кешированные хелсчеки `/health/db` и `/health/swarm_topology`.
+- `SecurityGuardian` валидация ввода в цикле выполнения.
+- Явные события `STEP_FAILED` для таймаутов планировщика.
+
+## [v2.0.0-rc1] - 2026-02-26
+### Changed (Изменено)
+- **Обновление архитектуры**: CoreEngine обновлен до архитектуры Multi-Agent Swarm. V1 DAG step-executor теперь устарел.
+- **Оркестрация агентов**: Представлены `RouterAgent`, `KnowledgeAgent`, `DataAgent`, `PeftAgent` и `WriterAgent`.
+- **Механизм Handoff**: Добавлен `TransferSkill`, позволяющий агентам бесшовно передавать контекст и управление с безопасной очисткой `context_summary`.
+- **Защита от циклов**: Реализовано ограничение `max_transfers` в `SwarmEngine` для предотвращения бесконечных циклов.
+- **Observability**: Добавлено структурированное журналирование передачи управления (handoffs) в стиле WAL.
+
+## [v1.0.0] - Prior Release
+### Added (Добавлено)
+- Первоначальный релиз с монолитным DAG step-executor.
+
+---
+
+## 🇺🇸 English
+
+# 📋 Changelog
 
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).

@@ -172,11 +172,15 @@ def copy_docs():
 
     for src_rel, dst_rel in MAPPINGS.items():
         # Resolve source: try Playbook first, then Kernel root
-        src_path = PLAYBOOK_DIR / src_rel
-        origin = PLAYBOOK_REPO
-        if not src_path.exists():
+        if src_rel == "CHANGELOG.md":
             src_path = ROOT_DIR / src_rel
             origin = KERNEL_REPO
+        else:
+            src_path = PLAYBOOK_DIR / src_rel
+            origin = PLAYBOOK_REPO
+            if not src_path.exists():
+                src_path = ROOT_DIR / src_rel
+                origin = KERNEL_REPO
 
         if src_path.exists():
             for lang in LANGUAGES:
