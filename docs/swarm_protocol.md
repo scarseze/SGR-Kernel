@@ -2,7 +2,7 @@
 **Версия протокола:** 1.0
 
 ## 1. 🤝 Протокол передачи управления (Handoff Protocol)
-SGR Kernel V2 использует многоагентную swarm-архитектуру. Агенты не вызывают друг друга напрямую через функции. Вместо этого они возвращают объект `TransferToAgent` через `TransferSkill`.
+SGR Kernel V3 использует многоагентную swarm-архитектуру. Агенты не вызывают друг друга напрямую через функции. Вместо этого они возвращают объект `TransferToAgent` через `TransferSkill`.
 
 Когда агент передает управление, он **обязан** предоставить `context_summary` (сводку контекста), содержащую:
 - Первоначальное намерение (intent) пользователя.
@@ -35,7 +35,7 @@ SGR Kernel V2 использует многоагентную swarm-архите
 **Protocol Version:** 1.0
 
 ## 1. 🤝 Handoff Protocol
-The SGR Kernel V2 leverages a multi-agent swarm architecture. Agents do not call each other directly via function calls. Instead, they yield a `TransferToAgent` object via the `TransferSkill`.
+The SGR Kernel V3 leverages a multi-agent swarm architecture. Agents do not call each other directly via function calls. Instead, they yield a `TransferToAgent` object via the `TransferSkill`.
 
 When an Agent yields control, it **must** provide a `context_summary` outlining:
 - The user's original intent.
