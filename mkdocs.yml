@@ -104,11 +104,9 @@ extra:
     provider: mike
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/sgr-kernel/sgr-kernel
+      link: https://github.com/scarseze/SGR-Kernel-R7
     - icon: fontawesome/brands/telegram
-      link: https://t.me/sgr_kernel
-    - icon: fontawesome/brands/docker
-      link: https://hub.docker.com/r/sgr/kernel
+      link: https://t.me/scarseze
 
 extra_css:
   - stylesheets/extra.css
