@@ -1,11 +1,11 @@
 # mkdocs.yml
 site_name: SGR Kernel
 site_description: "Enterprise Multi-Agent Swarm — Correctness is a Basic Right"
-site_url: "https://scarseze.github.io/SGR-Kernel-R7"
+site_url: "https://scarseze.github.io/sgr-kernel"
 site_author: "SGR Kernel Team"
 
-repo_name: "scarseze/SGR-Kernel-R7"
-repo_url: "https://github.com/scarseze/SGR-Kernel-R7"
+repo_name: "scarseze/sgr-kernel"
+repo_url: "https://github.com/scarseze/sgr-kernel"
 edit_uri: "blob/main/docs/"
 docs_dir: site_docs
 
@@ -105,7 +105,7 @@ extra:
     provider: mike
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/scarseze/SGR-Kernel-R7
+      link: https://github.com/scarseze/sgr-kernel
     - icon: fontawesome/brands/telegram
       link: https://t.me/scarseze
 

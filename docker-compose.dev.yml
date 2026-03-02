@@ -1,4 +1,4 @@
-# Development overrides for SGR-Kernel
+# Development overrides for SGR Kernel
 # Run with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 services:

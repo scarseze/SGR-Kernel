@@ -1,6 +1,6 @@
 # 🔄 RAG Development Flow
 
-Этот документ описывает пайплайн разработки системы RAG (Retrieval-Augmented Generation) в рамках платформы SGR-Kernel.
+Этот документ описывает пайплайн разработки системы RAG (Retrieval-Augmented Generation) в рамках платформы SGR Kernel.
 
 ## 1. Сбор и очистка данных (Data Engineer)
 1. **Source:** Парсинг или экспорт документов.
@@ -10,11 +10,11 @@
 ## 2. Chunking & Embeddings (RAG Specialist)
 1. **Chunking Strategy:** Написание скрипта для разбивки текстов на чанки. Фиксация размера чанка и overlap.
 2. **Embedding Model:** Выбор оптимальной модели эмбеддингов. 
-3. **Execution:** Инициализация Job внутри SGR-Kernel, который прогоняет CLEANED документы через Embedding Model. Результат заливается в векторную базу данных (Milvus).
+3. **Execution:** Инициализация Job внутри SGR Kernel, который прогоняет CLEANED документы через Embedding Model. Результат заливается в векторную базу данных (Milvus).
 
 ## 3. Разработка Промпта (RAG Specialist & MLOps)
 1. Создание базового промпта в `templates/prompt_template.json`.
-2. Описание Capability для SGR-Kernel R7. Агенту дается Read-доступ к векторной базе.
+2. Описание Capability для SGR Kernel R7. Агенту дается Read-доступ к векторной базе.
 
 ## 4. Evaluation (LLM Evaluator & AI Product Owner)
 1. Прогон `manifest.json` эксперимента с тестовым датасетом.
@@ -23,4 +23,4 @@
 
 ## 5. Deployment (MLOps)
 1. Вливание pull request с новым промптом и весами в `main`.
-2. SGR-Kernel-R7 обновляет DAG для Production.
+2. SGR Kernel обновляет DAG для Production.

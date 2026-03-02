@@ -72,7 +72,7 @@ SGR Kernel — open-source, потому что:
 
 ```bash
 # 1. Клонировать
-git clone https://github.com/scarseze/SGR-Kernel-R7
+git clone https://github.com/scarseze/sgr-kernel
 
 # 2. Запустить демо
 cd examples/payment-demo && docker-compose up

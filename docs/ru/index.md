@@ -22,7 +22,7 @@ description: Корректность выполнения — это базов
 ### 🚀 Быстрый старт
 
 ```bash
-git clone https://github.com/sgr-kernel/sgr-kernel.git
+git clone https://github.com/scarseze/sgr-kernel.git
 cd sgr-kernel
 docker-compose up -d
 ```
