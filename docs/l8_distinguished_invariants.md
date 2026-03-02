@@ -2,8 +2,6 @@
 
 ---
 
-## [RU] РУССКАЯ ВЕРСИЯ
-
 Этот документ формализует строгие инварианты, границы эксплуатации и математические гарантии архитектуры SGR Kernel. Он восполняет пробел между эмпирической устойчивостью и формально доказуемой корректностью в условиях агрессивных сбоев.
 
 ### 🚦 G0: Модель сбоев системы
@@ -53,7 +51,7 @@
 ---
 ---
 
-## [EN] ENGLISH VERSION (ORIGINAL)
+## 🇺🇸 English
 
 This document formalizes the rigorous invariants, operational boundaries, and mathematical guarantees of the SGR Kernel architecture. It bridges the gap between empirical resilience and formally provable correctness under adversarial conditions.
 

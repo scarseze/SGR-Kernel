@@ -1,6 +1,4 @@
-# Russian Section / Русская Секция 🇷🇺
-
-# Телеметрия и Наблюдаемость (Observability)
+# 📊 Телеметрия и Наблюдаемость (Observability)
 
 SGR Kernel предоставляет мощную подсистему телеметрии уровня Enterprise, которая обеспечивает полный контроль над состоянием агентов, графом выполнения задач и производительностью LLM.
 
@@ -43,6 +41,7 @@ init_telemetry(
 ## Дашборды Grafana
 
 В папке `grafana/` (появится в следующих версиях) мы предоставляем готовые дашборды для мониторинга:
+
 * **Cost Overview**: Финансовый мониторинг расходов на API по ключам.
 * **Agent Performance**: Эффективность выполнения цепочек размышлений.
 
@@ -93,5 +92,6 @@ init_telemetry(
 ## Grafana Dashboards
 
 In the `grafana/` directory (coming in future releases) we provide out-of-the-box dashboards for monitoring:
+
 * **Cost Overview**: Financial tracking of API usage by keys.
 * **Agent Performance**: Efficiency tracking of reasoning chains.

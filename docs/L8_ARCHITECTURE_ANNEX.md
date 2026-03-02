@@ -2,8 +2,6 @@
 
 ---
 
-## [RU] РУССКАЯ ВЕРСИЯ
-
 В этом приложении описаны явные архитектурные ограничения, глубоко проработанные компромиссы и механизмы изоляции, используемые для создания системы с надежностью уровня Top 1% в условиях агрессивных сбоев и конкуренции за ресурсы.
 
 ### 1. 🔄 Компромисс SERIALIZABLE и конкуренция
@@ -37,7 +35,7 @@
 ---
 ---
 
-## [EN] ENGLISH VERSION (ORIGINAL)
+## 🇺🇸 English
 
 This annex describes the explicit architectural constraints, deeply considered tradeoffs, and isolation mechanisms employed to achieve a Top 1% predictable system under adversarial failure conditions and noisy-neighbor contention.
 
