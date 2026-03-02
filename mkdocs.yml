@@ -80,8 +80,8 @@ nav:
     - getting-started/quickstart.md
   - 📚 Документация:
     - 🏛️ Architecture: docs/architecture.md
-    - docs/l8_distinguished_invariants.md
-    - docs/L8_ARCHITECTURE_ANNEX.md
+    - 📑 L8 System Invariants: docs/l8_distinguished_invariants.md
+    - ⚖️ L8 Architecture Annex: docs/L8_ARCHITECTURE_ANNEX.md
     - docs/swarm-protocol.md
     - docs/agents.md
     - docs/memory.md
