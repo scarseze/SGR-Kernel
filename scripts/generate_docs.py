@@ -58,10 +58,11 @@ MAPPINGS = {
     "docs/enterprise/migration.md":           "enterprise/migration.md",
     "CONTRIBUTING.md":                        "community/contributing.md",
     "CODE_OF_CONDUCT.md":                     "community/code-of-conduct.md",
+    "CHANGELOG.md":                           "changelog.md",
 }
 
 # Extended mapping for link resolution (includes generated files)
-ALL_MAPPINGS = {**MAPPINGS, "CHANGELOG.md": "changelog.md"}
+ALL_MAPPINGS = MAPPINGS
 
 
 def log(message: str):
@@ -309,13 +310,6 @@ def main():
     copy_docs()
     copy_static_assets()
     generate_index_pages()
-
-    changelog = generate_changelog()
-    for lang in LANGUAGES:
-        p = DOCS_DIR / lang / "changelog.md"
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(changelog, encoding="utf-8")
-        log(f"  [OK] Generated {lang}/changelog.md")
 
     version = os.getenv("GITHUB_REF_NAME", "dev")
     (ROOT_DIR / "VERSION").write_text(version)
