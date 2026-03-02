@@ -73,7 +73,7 @@ class BackgroundReconciler:
         
         try:
             active_jobs = await ui_memory.get_active_jobs()
-            now = datetime.datetime.now(datetime.UTC)
+            now = datetime.datetime.now(datetime.timezone.utc)
             
             # 1. Sweep stale RUNNING jobs strictly using DB-side clocks (Solves Distributed Time)
             stale_jobs = await ui_memory.get_stale_jobs(grace_period_seconds=30)
@@ -84,7 +84,7 @@ class BackgroundReconciler:
                 
             # 2. Handle CREATED jobs that stuck before hitting Queue (Redis failure)
             active_jobs = await ui_memory.get_active_jobs()
-            now = datetime.datetime.now(datetime.UTC)
+            now = datetime.datetime.now(datetime.timezone.utc)
             for job in active_jobs:
                 job_id = job.get("job_id")
                 status = job.get("status")
