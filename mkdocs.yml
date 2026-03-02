@@ -79,7 +79,9 @@ nav:
     - getting-started/installation.md
     - getting-started/quickstart.md
   - 📚 Документация:
-    - docs/architecture.md
+    - 🏛️ Architecture: docs/architecture.md
+    - docs/l8_distinguished_invariants.md
+    - docs/L8_ARCHITECTURE_ANNEX.md
     - docs/swarm-protocol.md
     - docs/agents.md
     - docs/memory.md

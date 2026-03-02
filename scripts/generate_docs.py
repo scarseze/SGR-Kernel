@@ -44,6 +44,8 @@ MAPPINGS = {
     "ONBOARDING.md":                          "getting-started/installation.md",
     "README.md":                              "getting-started/quickstart.md",
     "docs/architecture.md":                   "docs/architecture.md",
+    "docs/l8_distinguished_invariants.md":    "docs/l8_distinguished_invariants.md",
+    "docs/L8_ARCHITECTURE_ANNEX.md":          "docs/L8_ARCHITECTURE_ANNEX.md",
     "docs/swarm_protocol.md":                 "docs/swarm-protocol.md",
     "AGENTS.md":                              "docs/agents.md",
     "Glossary.md":                            "docs/glossary.md",
