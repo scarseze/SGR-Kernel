@@ -43,8 +43,8 @@ _MARKERS = [
         ),
         "first": "en",
     },
-    # Pattern A variant: inline marker "# Архитектура (Architecture)"
-    # architecture.md uses "---\n\n# Архитектура" as the split
+    # Pattern A variant: inline marker "# Архитектура"
+    # architecture.md uses "---\n# Архитектура SGR Kernel" as the split
     {
         "split_re": re.compile(
             r"^-{3,}\s*\n+\s*#\s*Архитектура.*$", re.MULTILINE
@@ -81,10 +81,6 @@ def split_by_language(content: str) -> tuple[str, str]:
             first_part = content[: match.start()].strip()
             second_part = content[match.end() :].strip()
 
-            # Remove the repeated title line that often appears right after
-            # the separator (e.g. "# AI/ML Playbook" duplicated)
-            second_part = _strip_duplicate_title(first_part, second_part)
-
             if marker["first"] == "en":
                 return second_part, first_part   # (ru, en)
             else:
@@ -92,26 +88,6 @@ def split_by_language(content: str) -> tuple[str, str]:
 
     # No marker found — return identical content for both languages
     return content.strip(), content.strip()
-
-
-def _strip_duplicate_title(first: str, second: str) -> str:
-    """If the second section starts with the exact same H1 as the first, remove it."""
-    first_h1 = _extract_first_h1(first)
-    second_h1 = _extract_first_h1(second)
-
-    if first_h1 and second_h1:
-        # Don't strip if they're genuinely different
-        # (but strip if the second is just a translation header with same structure)
-        pass  # Keep both — they're likely translated titles
-
-    return second
-
-
-def _extract_first_h1(text: str) -> str | None:
-    """Return the text of the first H1 heading, or None."""
-    m = re.search(r"^#\s+(.+)$", text, re.MULTILINE)
-    return m.group(1).strip() if m else None
-
 
 # ---------------------------------------------------------------------------
 # CLI for testing

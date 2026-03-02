@@ -1,4 +1,4 @@
-# 🏛️ Architecture
+# Architecture
 
 ## 🤖 High-Level Agent Architecture
 
@@ -88,7 +88,7 @@ sequenceDiagram
 
 ---
 
-## 🛡️ L8 Distinguished Guarantees, Invariants, & Constraints (L8 Guarantees)
+## 🛡️ L8 Distinguished Guarantees, Invariants, & Constraints
 SGR Kernel's architecture contains a strict set of formal invariants, specifically designed to survive under chaos, "noisy neighbors" and extreme resource competition:
 
 *   **📈 Eventual Progress Guarantees:** The system guarantees forward progress under bounded contention $C$, despite transaction abort rates up to 15% under `SERIALIZABLE` DB isolation. This is ensured by rigid retry budgets with full jitter and priority escalation.
@@ -103,8 +103,9 @@ For a comprehensive architectural rationale, see:
 *   [⚖️ L8 Architecture Annex & Tradeoffs](L8_ARCHITECTURE_ANNEX.md)
 
 ---
+# Russian Section
 
-# Архитектура (Architecture)
+# Архитектура SGR Kernel
 
 ## 🤖 Высокоуровневая Архитектура Агента (Swarm)
 
