@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [v3.0.0] - 2026-03-01 — Gold Master
+## [v3.0.0] - 2026-03-01 — SGR Kernel v3.0 & PEFTlab v2.9.0 Enterprise
 ### Added
 - **Hierarchical Swarms** (`SubSwarmAgent`, `TransferToSubSwarm`): agents can now spawn nested swarms for infinite reasoning depth.
 - **152-FZ Compliance**: `UIMemory` now enforces `.ru` DB residency, blocks foreign connections, and emits tamper-proof audit logs (HMAC).

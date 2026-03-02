@@ -51,7 +51,7 @@ MAPPINGS = {
     "Glossary.md":                            "docs/glossary.md",
     "docs/workflows/rag_development_flow.md": "docs/memory.md",
     "docs/telemetry.md":                      "docs/telemetry.md",
-    "configs/compliance/rf_152fz_example.yaml":"compliance/152fz.md",
+    "docs/compliance/152fz.md":               "compliance/152fz.md",
     "docs/compliance/gdpr.md":                "compliance/gdpr.md",
     "docs/compliance/hipaa.md":               "compliance/hipaa.md",
     "docs/enterprise/features.md":            "enterprise/features.md",
