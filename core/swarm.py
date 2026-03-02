@@ -82,7 +82,8 @@ class SwarmEngine:
         _global_transfer_count: list = None,
         max_budget_usd: float = 0.0,
         _current_cost_usd: list = None,
-        org_id: str = "default"
+        org_id: str = "default",
+        event_callback=None
     ) -> tuple[str, Agent, int]:
         
         current_agent = starting_agent
@@ -127,6 +128,8 @@ class SwarmEngine:
             while turn_count < max_turns:
                 turn_count += 1
                 logger.info(f"Swarm turn {turn_count}, Agent: {current_agent.name}")
+                if event_callback:
+                    await event_callback("agent_start", current_agent.name, {})
                 
                 # Safety: Summarize history if too long to prevent context overflow
                 if len(history) > 20:
@@ -182,12 +185,23 @@ class SwarmEngine:
                             # Standard format for vLLM/Ollama dynamic adapters
                             completion_kwargs["extra_body"] = {"lora_name": current_agent.lora_adapter}
                         
-                        response = await self._safe_call_llm(
+                        response_stream = await self._safe_call_llm(
                             model=model_name,
                             messages=history,
                             tools=tools if tools else None,
+                            stream=True,
                             **completion_kwargs
                         )
+
+                        chunks = []
+                        async for chunk in response_stream:
+                            chunks.append(chunk)
+                            delta = chunk.choices[0].delta if chunk.choices else None
+                            if delta and getattr(delta, "content", None) and getattr(delta, "tool_calls", None) is None:
+                                if event_callback:
+                                    await event_callback("token", current_agent.name, {"token": delta.content})
+
+                        response = litellm.stream_chunk_builder(chunks, messages=history)
 
                         latency_ms = int((time.time() - start_time) * 1000)
                         tokens_used = response.usage.total_tokens if hasattr(response, "usage") and response.usage else 0
@@ -240,6 +254,8 @@ class SwarmEngine:
                     args = {}
 
                 logger.info(f"[{current_agent.name}] calling {func_name} with {args}")
+                if event_callback:
+                    await event_callback("tool_call", current_agent.name, {"tool": func_name, "args": args_str})
                 
                 # Find matching skill
                 target_skill = next((s for s in current_agent.skills if s.name == func_name), None)
@@ -325,6 +341,8 @@ class SwarmEngine:
                                     to_agent=current_agent.name,
                                     context=last_summary
                                 )
+                                if event_callback:
+                                    await event_callback("transfer", current_agent_name, {"detail": result_str, "to_agent": current_agent.name})
                             else:
                                 result_str = str(raw_res)
                                 

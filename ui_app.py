@@ -141,15 +141,37 @@ async def main(message: cl.Message):
     # Add user message
     messages.append({"role": "user", "content": message.content})
 
-    msg = cl.Message(content="Thinking...")
+    msg = cl.Message(content="")
     await msg.send()
+
+    async def swarm_event_handler(event_type, agent_name, payload):
+        if event_type == "agent_start":
+            step = cl.Step(name=f"🤖 {agent_name} is analyzing...")
+            cl.user_session.set("current_step", step)
+            await step.send()
+        elif event_type == "tool_call":
+            step = cl.Step(name=f"🛠️ {agent_name} -> {payload['tool']}")
+            step.output = payload.get('args', '')
+            await step.send()
+        elif event_type == "transfer":
+            step = cl.Step(name=f"🔄 Transfer (from {agent_name} to {payload['to_agent']})")
+            step.output = payload['detail']
+            await step.send()
+            current_step = cl.user_session.get("current_step")
+            if current_step:
+                current_step.output = "Transferred focus."
+                await current_step.update()
+        elif event_type == "token":
+            cl.user_session.set("has_token_stream", True)
+            await msg.stream_token(payload['token'])
 
     try:
         # Run Swarm
         result, new_agent, new_transfer_count = await swarm.execute(
             active_agent, 
             messages,
-            current_transfer_count=transfer_count
+            current_transfer_count=transfer_count,
+            event_callback=swarm_event_handler
         )
         
         # Persist the newly active agent across chat turns
@@ -173,7 +195,13 @@ async def main(message: cl.Message):
         except Exception as e:
             logger.error("session_save_failed", session_id=session_id, error=str(e))
         
-        msg.content = result
+        # If tokens were streamed, msg.content is likely already populated natively in UI
+        # We only override if it fell back to regular message
+        if not cl.user_session.get("has_token_stream"):
+            msg.content = result
+        else:
+            msg.content = result # this ensures markdown logic below will parse against the full text anyway
+            cl.user_session.set("has_token_stream", False)
 
         import re
         matches = re.findall(r"\(file:///(.+?)\)", result)
