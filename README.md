@@ -1,4 +1,4 @@
-# SGR Kernel (Agentic OS)
+# 🚀 SGR Kernel (Agentic OS)
 
 > **Enterprise-Grade Agentic Kernel for Automated Research & Engineering / Ядро корпоративного уровня для автоматизированных исследований и инжиниринга**
 
@@ -10,15 +10,15 @@
 
 ## 🇷🇺 Русский (Russian)
 
-### Обзор
+### ℹ️ Обзор
 SGR Kernel — это операционная система для AI Агентов, построенная на концепции **Multi-Agent Swarm**. Ядро обеспечивает детерминированное выполнение, безопасность и соблюдение регуляторных требований (152-ФЗ, GDPR).
 
-### Архитектура
+### 🏗️ Архитектура
 1.  **Swarm Orchestration**: Легковесный цикл, передающий контекст между агентами: `RouterAgent`, `KnowledgeAgent`, `DataAgent`, `PeftAgent`, `WriterAgent`.
 2.  **Декаплинг**: Тяжелые зависимости (VectorDB, PyTorch) подгружаются только внутри скиллов (Lazy Load).
 3.  **Безопасность**: Изоляция исполнения, ACL-контроль скиллов и санирование вывода в реальном времени.
 
-### Быстрый старт
+### ⚡ Быстрый старт
 ```bash
 # 1. Установка
 pip install -r requirements.txt
@@ -33,7 +33,7 @@ python main.py
 chainlit run ui_app.py
 ```
 
-### Экосистема Скиллов
+### 🧩 Экосистема Скиллов
 *   **Knowledge Base (RAG)**: Поиск по внутренним документам.
 *   **PEFTlab**: Настройка и дообучение моделей (Mamba, RWKV).
 *   **Logic-RL**: Продвинутые рассуждения и логика.
@@ -43,15 +43,15 @@ chainlit run ui_app.py
 
 ## 🇺🇸 English
 
-### Overview
+### ℹ️ Overview
 SGR Kernel is an Agentic Operating System built on the **Multi-Agent Swarm** concept. The kernel provides deterministic execution, security, and regulatory compliance (GDPR, HIPAA, 152-FZ).
 
-### Architecture
+### 🏗️ Architecture
 1.  **Swarm Orchestration**: A lightweight loop that routes tasks between specialized agents: `RouterAgent`, `KnowledgeAgent`, `DataAgent`, `PeftAgent`, `WriterAgent`.
 2.  **Decoupling**: Heavy dependencies (VectorDBs, PyTorch) are strictly lazy-loaded within their respective Skills.
 3.  **Safety & Security**: Execution isolation, Skill ACL enforcement, and output sanitization at every turn.
 
-### Quick Start
+### ⚡ Quick Start
 ```bash
 # 1. Install
 pip install -r requirements.txt
@@ -66,7 +66,7 @@ python main.py
 chainlit run ui_app.py
 ```
 
-### Skills Ecosystem
+### 🧩 Skills Ecosystem
 *   **Knowledge Base (RAG)**: Decoupled vector search for internal manuals.
 *   **PEFTlab**: Integrated HPO and model fine-tuning (Mamba, RWKV).
 *   **Logic-RL**: Advanced reasoning and rule-based reinforcement learning.
@@ -74,7 +74,7 @@ chainlit run ui_app.py
 
 ---
 
-## Documentation Index / Индекс Документации
+## 📚 Documentation Index / Индекс Документации
 
 | Document | Purpose / Назначение |
 | :--- | :--- |

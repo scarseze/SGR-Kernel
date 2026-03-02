@@ -1,6 +1,6 @@
-# Architecture
+# 🏛️ Architecture
 
-## High-Level Agent Architecture
+## 🤖 High-Level Agent Architecture
 
 ```mermaid
 graph TD
@@ -48,7 +48,7 @@ graph TD
     PEFT -.->|Lazy Load| Torch
 ```
 
-## Abstract Execution Flow
+## ⚡ Abstract Execution Flow
 
 ```text
 User Message -> WebUI

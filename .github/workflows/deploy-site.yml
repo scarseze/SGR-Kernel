@@ -34,7 +34,7 @@ jobs:
       - name: Checkout Playbook repository
         uses: actions/checkout@v4
         with:
-          repository: scarseze/ai_ml_playbook
+          repository: sgr-kernel/ai_ml_playbook
           path: ai_ml_playbook
 
       - name: Set up Python
