@@ -89,29 +89,29 @@ KnowledgeAgent generates text response -> User
 
 # Архитектура (Architecture)
 
-## Высокоуровневая Архитектура Агента (Swarm)
+## 🤖 Высокоуровневая Архитектура Агента (Swarm)
 
-*   **Swarm Engine**: Легковесный движок-оркестратор. Управляет историей диалога и бесшовно передает контекст между Агентами.
-*   **RouterAgent**: Маршрутизатор. Анализирует запрос и решает, какому узкоспециализированному Агенту передать задачу.
-*   **Specialized Agents**: 
-    *   **KnowledgeAgent**: Владеет RAG (База знаний).
-    *   **DataAgent**: Владеет аналитикой и веб-серфингом.
-    *   **PeftAgent**: Владеет машинным обучением (PEFTlab, HPO).
-    *   **WriterAgent**: Владеет форматированием ГОСТ.
-*   **Skills (Навыки)**: Инструменты, которые привязаны к конкретному Агенту. Тяжелые зависимости (`chromadb`, `optuna`, `torch`) загружаются **лениво** (Lazy Load), чтобы не замедлять ядро.
+*   **⚙️ Swarm Engine**: Легковесный движок-оркестратор. Управляет историей диалога и бесшовно передает контекст между Агентами.
+*   **🚦 RouterAgent**: Маршрутизатор. Анализирует запрос и решает, какому узкоспециализированному Агенту передать задачу.
+*   **👥 Specialized Agents**: 
+    *   **🧠 KnowledgeAgent**: Владеет RAG (База знаний).
+    *   **📊 DataAgent**: Владеет аналитикой и веб-серфингом.
+    *   **🔧 PeftAgent**: Владеет машинным обучением (PEFTlab, HPO).
+    *   **✍️ WriterAgent**: Владеет форматированием ГОСТ.
+*   **🛠️ Skills (Навыки)**: Инструменты, которые привязаны к конкретному Агенту. Тяжелые зависимости (`chromadb`, `optuna`, `torch`) загружаются **лениво** (Lazy Load), чтобы не замедлять ядро.
 
 ---
 
-## L8 Distinguished Guarantees, Invariants, & Constraints
-The SGR Kernel architecture adheres to a rigorous set of formal invariants, specifically designed to survive adversarial conditions, noisy neighbors, and extreme contention:
+## 🛡️ L8 Distinguished Guarantees, Invariants, & Constraints (Гарантии L8)
+В архитектуре SGR Kernel заложен строгий набор формальных инвариантов, специально разработанных для выживания в условиях хаоса, "шумных соседей" и экстремальной конкуренции за ресурсы:
 
-*   **Eventual Progress Guarantees:** The system guarantees eventual progress under bounded contention $C$ despite up to 15% transaction abort rates under `SERIALIZABLE` DB isolation. This is enforced via strict max retry budgets with full jitter and fallback priority escalations.
-*   **Admission Control (Multi-Dimensional DRF):** To prevent shared resource contention (e.g., GPU vs CPU workloads), Admission Control calculates quotas over a multi-dimensional resource vector (Dominant Resource Fairness) rather than relying on naive, uniform token buckets.
-*   **SLO Isolation & Tail Amplification:** Explicit tail correlation modeling prevents storage/DB retries from geometrically amplifying total queue execution latencies, ensuring per-stage SLO limits.
-*   **Failure Domain Decoupling:** The execution plane remains completely decoupled from DB availability during runtime. A database outage will only cause bounded execution duplication during recovery, never crashing in-flight compute nodes.
-*   **Atomic S3 Protocol:** Because S3 pseudo-`RENAME` operations are inherently flawed (COPY+DELETE), atomic visibility relies strictly on versioned storage paths and atomic `_SUCCESS` commit markers.
-*   **Formal Failure Model:** The system exclusively targets crash-stop resilience. It does not tolerate Byzantine errors, and it assumes eventual network and hardware recovery.
+*   **📈 Eventual Progress Guarantees (Гарантии конечного прогресса):** Система гарантирует продвижение вперед при ограниченной конкуренции $C$, несмотря на уровень прерывания транзакций до 15% в условиях изоляции БД `SERIALIZABLE`. Это обеспечивается жесткими бюджетами на повторные попытки (retries) с полным джиттером (full jitter) и эскалацией приоритетов.
+*   **🚦 Admission Control (Контроль доступа / Multi-Dimensional DRF):** Для предотвращения борьбы за общие ресурсы (например, GPU против CPU-нагрузок), Admission Control рассчитывает квоты по многомерному вектору ресурсов (Dominant Resource Fairness), а не полагаясь на наивные, равномерные корзины токенов (token buckets).
+*   **⏱️ SLO Isolation & Tail Amplification (Изоляция SLO):** Явное моделирование корреляции хвостов (tail correlation) предотвращает геометрическое усиление задержек выполнения очередей из-за повторных попыток хранилища/БД, гарантируя соблюдение лимитов SLO на каждом этапе.
+*   **🔌 Failure Domain Decoupling (Разделение доменов отказа):** Плоскость исполнения (execution plane) остается полностью независимой от доступности БД во время работы. Сбой базы данных вызовет лишь ограниченное дублирование исполнения при восстановлении, но никогда не приведет к падению активных вычислительных узлов.
+*   **📦 Atomic S3 Protocol (Атомарный протокол S3):** Поскольку псевдо-операции `RENAME` в S3 изначально уязвимы (COPY+DELETE), атомарная видимость строго опирается на версионируемые пути хранилища и атомарные маркеры фиксации `_SUCCESS`.
+*   **🔥 Formal Failure Model (Формальная модель отказов):** Система нацелена исключительно на устойчивость к остановкам при сбое (crash-stop). Она не терпит Византийских ошибок (Byzantine errors) и предполагает конечное восстановление сети и оборудования.
 
-For an exhaustive architectural rationale, refer to:
-*   [L8 Distinguished System Invariants](l8_distinguished_invariants.md)
-*   [L8 Architecture Annex & Tradeoffs](L8_ARCHITECTURE_ANNEX.md)
+Для исчерпывающего архитектурного обоснования обратитесь к:
+*   [📑 L8 Distinguished System Invariants](l8_distinguished_invariants.md)
+*   [⚖️ L8 Architecture Annex & Tradeoffs](L8_ARCHITECTURE_ANNEX.md)
