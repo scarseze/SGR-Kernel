@@ -75,6 +75,7 @@ markdown_extensions:
 
 nav:
   - 🏠 Главная: index.md
+  - 💡 Почему SGR?: docs/why_sgr.md
   - 🚀 Быстрый старт:
     - getting-started/installation.md
     - getting-started/quickstart.md
