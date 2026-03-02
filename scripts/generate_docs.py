@@ -33,8 +33,8 @@ SITE_DIR = ROOT_DIR / "site"
 
 LANGUAGES = ["ru", "en"]
 
-GITHUB_ORG = "sgr-kernel"
-KERNEL_REPO = "sgr-kernel"
+GITHUB_ORG = "scarseze"
+KERNEL_REPO = "SGR-Kernel-R7"
 PLAYBOOK_REPO = "ai_ml_playbook"
 
 # ---------------------------------------------------------------------------
@@ -281,8 +281,8 @@ graph LR
 ## Быстрый старт
 
 ```bash
-git clone https://github.com/sgr-kernel/sgr-kernel.git
-cd sgr-kernel
+git clone https://github.com/scarseze/SGR-Kernel-R7.git
+cd SGR-Kernel-R7
 docker-compose up -d
 ```
 
@@ -340,8 +340,8 @@ graph LR
 ## Quick Start
 
 ```bash
-git clone https://github.com/sgr-kernel/sgr-kernel.git
-cd sgr-kernel
+git clone https://github.com/scarseze/SGR-Kernel-R7.git
+cd SGR-Kernel-R7
 docker-compose up -d
 ```
 
