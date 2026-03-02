@@ -86,7 +86,7 @@ nav:
     - docs/agents.md
     - docs/memory.md
     - docs/telemetry.md
-    - docs/glossary.md
+    - 📖 Словарь: docs/glossary.md
   - 🔒 Комплаенс:
     - compliance/152fz.md
     - compliance/gdpr.md
