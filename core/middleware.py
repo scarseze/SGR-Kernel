@@ -1,5 +1,4 @@
 import time
-from abc import ABC
 from typing import Any
 
 from core.types import PolicyStatus, SkillExecutionContext, StepStatus
@@ -20,15 +19,15 @@ class ReturnCached(Exception):
         self.result = result
 
 
-class SkillMiddleware(ABC):
+class SkillMiddleware:
     async def before_execute(self, ctx: SkillExecutionContext):
-        pass  # noqa: B027
+        pass
 
     async def after_execute(self, ctx: SkillExecutionContext, result: Any) -> Any:
         return result
 
     async def on_error(self, ctx: SkillExecutionContext, error: Exception):
-        pass  # noqa: B027
+        pass
 
 
 # --- Middlewares ---
