@@ -27,24 +27,53 @@
 
 ## Что делает SGR Kernel?
 
-SGR Kernel — это **минимальное ядро выполнения** с формально определёнными гарантиями:
+SGR Kernel — это **минимальное ядро выполнения** с формально определёнными гарантиями. Вот как выглядит этот слой абстракции в коде:
 
-### 🔹 Execution Exclusivity (I1)
+```python
+from sgr_kernel import SGRKernel
+
+kernel = SGRKernel()
+
+# Ядро само позаботится об эксклюзивности,
+# идемпотентности и отбрасывании дублей:
+@kernel.task(retries=3, idempotency_key="tx_123")
+async def process_payment(amount: float):
+    return await bank_api.charge(amount)
+```
+
+Гарантии ядра:
+
+### 🔹 [Execution Exclusivity (I1)](https://github.com/scarseze/SGR-Kernel/blob/main/docs/RFC_SGR_KERNEL_L8.md#invariant-1-execution-exclusivity-i1)
 > Максимум один воркер может удерживать валидную аренду (lease) для задачи.
 
 **Как:** CAS-операции на `lease_version` + изоляция `SERIALIZABLE`.
 
-### 🔹 Bounded Duplication (I3)
+```mermaid
+sequenceDiagram
+    participant W1 as Worker 1
+    participant DB as SGR Memory (DB)
+    participant W2 as Worker 2
+    
+    W1->>DB: acquire_lease(task_id, expected_version=1)
+    DB-->>W1: OK (version 2)
+    Note over W1: Начинает выполнение
+    
+    W2->>DB: acquire_lease(task_id, expected_version=1)
+    DB-->>W2: ERROR (version mismatch)
+    Note over W2: Отклоняется ядром
+```
+
+### 🔹 [Bounded Duplication (I3)](https://github.com/scarseze/SGR-Kernel/blob/main/docs/RFC_SGR_KERNEL_L8.md#invariant-3-bounded-duplication-i3)
 > Дублирование выполнения ограничено ≤ 1 попытки на цикл аренды.
 
 **Как:** Таймауты аренды + запас прочности + отклонение устаревших воркеров.
 
-### 🔹 Atomic Visibility (I4)
+### 🔹 [Atomic Visibility (I4)](https://github.com/scarseze/SGR-Kernel/blob/main/docs/RFC_SGR_KERNEL_L8.md#invariant-4-atomic-visibility-i4)
 > Частичные результаты не видны извне.
 
 **Как:** Протокол маркера коммита в объектном хранилище (`_SUCCESS` + checksum).
 
-### 🔹 Eventual Progress (I5)
+### 🔹 [Eventual Progress (I5)](https://github.com/scarseze/SGR-Kernel/blob/main/docs/RFC_SGR_KERNEL_L8.md#invariant-5-eventual-progress-i5)
 > Все задачи завершаются при ограниченной конкуренции.
 
 **Как:** Admission control + бюджеты на ретраи + эскалация приоритетов.
@@ -70,6 +99,13 @@ SGR Kernel — open-source, потому что:
 - Формальные гарантии должны быть доступны всем, а не только enterprise
 - Безопасность через прозрачность: код и инварианты открыты для аудита
 - Комьюнити — лучший способ найти edge-cases и усилить систему
+
+## Early Adopters
+
+SGR Kernel уже используется в **production**:
+
+- **Scarseze Enterprise Platform** — оркестрация 15M+ AI-агентов с высокими требованиями к комплаенсу (152-ФЗ) и безопасности.
+- *(Используешь SGR Kernel? [Расскажи нам!](https://github.com/scarseze/SGR-Kernel/issues))*
 
 ## Начни сейчас
 

@@ -27,24 +27,53 @@ This is not your fault. It is an **architectural gap** in modern distributed sys
 
 ## What Does SGR Kernel Do?
 
-SGR Kernel is a **minimal execution core** with formally defined guarantees:
+SGR Kernel is a **minimal execution core** with formally defined guarantees. Here is what this abstraction layer looks like in code:
 
-### 🔹 Execution Exclusivity (I1)
+```python
+from sgr_kernel import SGRKernel
+
+kernel = SGRKernel()
+
+# The kernel handles exclusivity, idempotency,
+# and duplicate rejection out of the box:
+@kernel.task(retries=3, idempotency_key="tx_123")
+async def process_payment(amount: float):
+    return await bank_api.charge(amount)
+```
+
+Core Guarantees:
+
+### 🔹 [Execution Exclusivity (I1)](https://github.com/scarseze/SGR-Kernel/blob/main/docs/RFC_SGR_KERNEL_L8.md#invariant-1-execution-exclusivity-i1)
 > At most one worker can hold a valid lease for a task.
 
 **How:** CAS operations on `lease_version` + `SERIALIZABLE` isolation.
 
-### 🔹 Bounded Duplication (I3)
+```mermaid
+sequenceDiagram
+    participant W1 as Worker 1
+    participant DB as SGR Memory (DB)
+    participant W2 as Worker 2
+    
+    W1->>DB: acquire_lease(task_id, expected_version=1)
+    DB-->>W1: OK (version 2)
+    Note over W1: Starts execution
+    
+    W2->>DB: acquire_lease(task_id, expected_version=1)
+    DB-->>W2: ERROR (version mismatch)
+    Note over W2: Rejected by Kernel
+```
+
+### 🔹 [Bounded Duplication (I3)](https://github.com/scarseze/SGR-Kernel/blob/main/docs/RFC_SGR_KERNEL_L8.md#invariant-3-bounded-duplication-i3)
 > Execution duplication is bounded to &le; 1 attempt per lease cycle.
 
 **How:** Lease timeouts + safety margins + rejection of stale workers.
 
-### 🔹 Atomic Visibility (I4)
+### 🔹 [Atomic Visibility (I4)](https://github.com/scarseze/SGR-Kernel/blob/main/docs/RFC_SGR_KERNEL_L8.md#invariant-4-atomic-visibility-i4)
 > Partial results are never visible externally.
 
 **How:** Commit marker protocol in object storage (`_SUCCESS` + checksum).
 
-### 🔹 Eventual Progress (I5)
+### 🔹 [Eventual Progress (I5)](https://github.com/scarseze/SGR-Kernel/blob/main/docs/RFC_SGR_KERNEL_L8.md#invariant-5-eventual-progress-i5)
 > All tasks eventually complete under bounded contention.
 
 **How:** Admission control + retry budgets + priority escalation.
@@ -70,6 +99,13 @@ SGR Kernel is open-source because:
 - Formal guarantees should be available to everyone, not just enterprise.
 - Security through transparency: code and invariants are open for audit.
 - Community is the best way to find edge-cases and harden the system.
+
+## Early Adopters
+
+SGR Kernel is already used in **production**:
+
+- **Scarseze Enterprise Platform** — orchestration of 15M+ AI agents with strict compliance (152-FZ) and security requirements.
+- *(Are you using SGR Kernel? [Let us know!](https://github.com/scarseze/SGR-Kernel/issues))*
 
 ## Start Now
 
