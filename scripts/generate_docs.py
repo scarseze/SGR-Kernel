@@ -189,9 +189,14 @@ def copy_docs():
                 dst_path.parent.mkdir(parents=True, exist_ok=True)
 
                 if src_path.suffix == ".md":
-                    raw = src_path.read_text(encoding="utf-8")
-                    ru_content, en_content = split_by_language(raw)
-                    section = ru_content if lang == "ru" else en_content
+                    lang_path = src_path.with_name(f"{src_path.stem}.{lang}.md")
+                    if lang_path.exists():
+                        section = lang_path.read_text(encoding="utf-8")
+                    else:
+                        raw = src_path.read_text(encoding="utf-8")
+                        ru_content, en_content = split_by_language(raw)
+                        section = ru_content if lang == "ru" else en_content
+                    
                     fixed = fix_markdown_links(section, dst_rel, src_rel, origin)
                     dst_path.write_text(fixed, encoding="utf-8")
                     log(f"  [OK] {src_rel} -> {lang}/{dst_rel}")
