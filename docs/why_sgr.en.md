@@ -117,15 +117,6 @@ SGR Kernel is open-source because:
   </p>
 </section>
 
-> ### Why solo?
-> 
-> SGR Kernel started as a pet-project because:
-> - No existing system guaranteed *exactly-once correctness* under failures
-> - Enterprise solutions charge $$$ for what should be a fundamental right
-> - One focused engineer can move faster than a committee
-> 
-> **Now seeking co-authors, not just users.**
-
 ## Start Now
 
 ```bash
