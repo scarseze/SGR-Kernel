@@ -84,7 +84,7 @@ cd examples/payment-demo && docker-compose up
 # (попробуй «убить» воркер во время выполнения — задача перезапустится без дублирования)
 ```
 
-👉 [Архитектура](architecture.md) • [RFC](https://github.com/scarseze/ai_ml_playbook/blob/main/RFC_SGR_KERNEL_L8.md) • [Внести вклад](https://github.com/scarseze/ai_ml_playbook/blob/main/CONTRIBUTING.md)
+👉 [Архитектура](architecture.md) • [RFC](https://github.com/scarseze/SGR-Kernel/blob/main/RFC_SGR_KERNEL_L8.md) • [Внести вклад](https://github.com/scarseze/SGR-Kernel/blob/main/CONTRIBUTING.md)
 
 
 ---
@@ -177,4 +177,4 @@ cd examples/payment-demo && docker-compose up
 # (try "killing" the worker during execution — the task will restart without duplication)
 ```
 
-👉 [Architecture](architecture.md) • [RFC](https://github.com/scarseze/ai_ml_playbook/blob/main/RFC_SGR_KERNEL_L8.md) • [Contributing](https://github.com/scarseze/ai_ml_playbook/blob/main/CONTRIBUTING.md)
+👉 [Architecture](architecture.md) • [RFC](https://github.com/scarseze/SGR-Kernel/blob/main/RFC_SGR_KERNEL_L8.md) • [Contributing](https://github.com/scarseze/SGR-Kernel/blob/main/CONTRIBUTING.md)
