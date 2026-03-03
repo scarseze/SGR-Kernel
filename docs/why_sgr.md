@@ -100,12 +100,31 @@ SGR Kernel — open-source, потому что:
 - Безопасность через прозрачность: код и инварианты открыты для аудита
 - Комьюнити — лучший способ найти edge-cases и усилить систему
 
-## Early Adopters
+<!-- === EARLY ADOPTERS — HONEST VERSION === -->
+<section class="early-adopters" style="margin: 3rem 0; padding: 1.5rem; background: #f8fafc; border-left: 4px solid #22c55e; border-radius: 0 8px 8px 0;">
+  <h3 style="margin-top: 0;">🚀 Раннее внедрение</h3>
+  
+  <p><strong>SGR Kernel</strong> на данный момент обеспечивает:</p>
+  
+  <ul style="margin: 1rem 0;">
+    <li>✅ <strong>Личное использование в продакшене</strong> — детерминированное выполнение для критических пет-проектов</li>
+    <li>🔍 <strong>Открытый аудит RFC</strong> — архитектура подтверждена отзывами сообщества</li>
+    <li>🤝 <strong>Первые внешние пользователи?</strong> — <a href="https://github.com/scarseze/SGR-Kernel-R7/issues/new?title=Early+Adopter:+[Project+Name]&labels=early-adopter" target="_blank">Стань первым →</a></li>
+  </ul>
+  
+  <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 0;">
+    <em>Создано одним инженером, который верит, что корректность — это базовое право. Присоединяйтесь к путешествию.</em>
+  </p>
+</section>
 
-SGR Kernel уже используется в **production**:
-
-- **Scarseze Enterprise Platform** — оркестрация 15M+ AI-агентов с высокими требованиями к комплаенсу (152-ФЗ) и безопасности.
-- *(Используешь SGR Kernel? [Расскажи нам!](https://github.com/scarseze/SGR-Kernel/issues))*
+> ### Почему соло?
+> 
+> SGR Kernel начинался как пет-проект, потому что:
+> - Ни одна из существующих систем не гарантировала *exactly-once корректность* при сбоях
+> - Энтерпрайз-решения просят $$$ за то, что должно быть базовым правом
+> - Один сфокусированный инженер может двигаться быстрее, чем целый комитет
+> 
+> **Ищу соавторов, а не просто пользователей.**
 
 ## Начни сейчас
 

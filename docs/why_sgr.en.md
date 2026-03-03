@@ -100,12 +100,31 @@ SGR Kernel is open-source because:
 - Security through transparency: code and invariants are open for audit.
 - Community is the best way to find edge-cases and harden the system.
 
-## Early Adopters
+<!-- === EARLY ADOPTERS — HONEST VERSION === -->
+<section class="early-adopters" style="margin: 3rem 0; padding: 1.5rem; background: #f8fafc; border-left: 4px solid #22c55e; border-radius: 0 8px 8px 0;">
+  <h3 style="margin-top: 0;">🚀 Early Adoption</h3>
+  
+  <p><strong>SGR Kernel</strong> currently powers:</p>
+  
+  <ul style="margin: 1rem 0;">
+    <li>✅ <strong>Personal production use</strong> — deterministic execution for critical pet-project workloads</li>
+    <li>🔍 <strong>Open RFC review</strong> — architecture validated by community feedback</li>
+    <li>🤝 <strong>First external adopters?</strong> — <a href="https://github.com/scarseze/SGR-Kernel-R7/issues/new?title=Early+Adopter:+[Project+Name]&labels=early-adopter" target="_blank">Be the first →</a></li>
+  </ul>
+  
+  <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 0;">
+    <em>Built by one engineer who believes correctness is a fundamental right. Join the journey.</em>
+  </p>
+</section>
 
-SGR Kernel is already used in **production**:
-
-- **Scarseze Enterprise Platform** — orchestration of 15M+ AI agents with strict compliance (152-FZ) and security requirements.
-- *(Are you using SGR Kernel? [Let us know!](https://github.com/scarseze/SGR-Kernel/issues))*
+> ### Why solo?
+> 
+> SGR Kernel started as a pet-project because:
+> - No existing system guaranteed *exactly-once correctness* under failures
+> - Enterprise solutions charge $$$ for what should be a fundamental right
+> - One focused engineer can move faster than a committee
+> 
+> **Now seeking co-authors, not just users.**
 
 ## Start Now
 
