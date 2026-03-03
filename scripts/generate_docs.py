@@ -34,7 +34,7 @@ SITE_DIR = ROOT_DIR / "site"
 LANGUAGES = ["ru", "en"]
 
 GITHUB_ORG = "scarseze"
-KERNEL_REPO = "SGR Kernel"
+KERNEL_REPO = "sgr-kernel"
 PLAYBOOK_REPO = "ai_ml_playbook"
 
 # ---------------------------------------------------------------------------

@@ -84,11 +84,11 @@ cd examples/payment-demo && docker-compose up
 # (попробуй «убить» воркер во время выполнения — задача перезапустится без дублирования)
 ```
 
-👉 [Архитектура](architecture.md) • [RFC](../RFC_SGR_KERNEL_L8.md) • [Внести вклад](../community/contributing.md)
+👉 [Архитектура](architecture.md) • [RFC](../RFC_SGR_KERNEL_L8.md) • [Внести вклад](../CONTRIBUTING.md)
 
 
 ---
-## ???? English
+## 🇺🇸 English
 
 
 # Why SGR Kernel?
@@ -96,11 +96,13 @@ cd examples/payment-demo && docker-compose up
 ## The Problem Existing Systems Don't Solve
 
 Imagine: you are writing a payment processing service. You added:
+
 - Retries on timeouts ✅
 - Idempotency at the DB level ✅
 - Logging of every step ✅
 
 But during a network partition or a worker crash:
+
 - The payment is charged twice ❌
 - Order state goes out of sync ❌
 - You cannot **prove** the system behaves correctly ❌
@@ -157,6 +159,7 @@ SGR Kernel is not for everyone. It is needed when **correctness is more importan
 > **Execution correctness is a fundamental right of a distributed system, not a paid feature.**
 
 SGR Kernel is open-source because:
+
 - Formal guarantees should be available to everyone, not just enterprise.
 - Security through transparency: code and invariants are open for audit.
 - Community is the best way to find edge-cases and harden the system.
@@ -174,4 +177,4 @@ cd examples/payment-demo && docker-compose up
 # (try "killing" the worker during execution — the task will restart without duplication)
 ```
 
-👉 [Architecture](architecture.en.md) • [RFC](../RFC_SGR_KERNEL_L8.md) • [Contributing](../community/contributing.en.md)
+👉 [Architecture](architecture.md) • [RFC](../RFC_SGR_KERNEL_L8.md) • [Contributing](../CONTRIBUTING.md)
