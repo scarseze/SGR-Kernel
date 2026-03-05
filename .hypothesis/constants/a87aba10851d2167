@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\router_utils\batch_utils.py
+# hypothesis_version: 6.151.9
+
+['_acreate_batch', 'application/jsonl', 'batch', 'body', 'file', 'generic_api_call', 'litellm_metadata', 'metadata', 'model', 'modified_file.jsonl', 'read', 'utf-8']

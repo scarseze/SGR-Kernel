@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\okama\frontier\multi_period.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1e-06, 1e-05, 0.0001, 0.001, 0.01, 1.0, 100, '%Y-%m', 'CAGR', 'FTOL', 'None', 'Risk', 'Risk_monthly', 'SLSQP', 'USD', 'Weights', 'bounds', 'cagr', 'currency', 'disp', 'eq', 'first', 'first_date', 'ftol', 'fun', 'inflation', 'iter', 'last_date', 'list_position', 'max_annual_risk', 'max_asset_cagr', 'maxiter', 'min_asset_cagr', 'period_length', 'rebalancing_period', 'symbols', 'tickers', 'type', 'year']

@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\azure\realtime\handler.py
+# hypothesis_version: 6.151.9
+
+['/openai/realtime', '/openai/v1/realtime', 'GA', 'api-key', 'https://', 'v1', 'wss://']

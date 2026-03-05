@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\okama\asset.py
+# hypothesis_version: 6.151.9
+
+[365, '%Y-%m', '.', 'D', 'M', 'MS', 'PIF', 'code', 'country', 'currency', 'exchange', 'first date', 'isin', 'last date', 'name', 'neither', 'period length', 'symbol', 'type', '{:.2f}']

@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\security.py
+# hypothesis_version: 6.151.9
+
+['(?i)/dev/tcp/', '(?i)/dev/udp/', '(?i)/etc/passwd', '(?i)/etc/shadow', '(?i)/var/log/auth', '(?i):(){:|:&};:', '(?i)\\.\\./\\.\\./', '(?i)\\.env\\b', '(?i)\\.ssh', '(?i)\\bbase64\\b', '(?i)\\bchown\\b', '(?i)\\bdd\\b', '(?i)\\benv\\b', '(?i)\\bgpg\\b', '(?i)\\bhexdump\\b', '(?i)\\bmkfs\\b', '(?i)\\bnc\\s+', '(?i)\\bncat\\b', '(?i)\\bnetcat\\b', '(?i)\\bnpm\\s+install', '(?i)\\bod\\b', '(?i)\\bpip\\s+install', '(?i)\\bprintenv\\b', '(?i)\\breboot\\b', '(?i)\\bshutdown\\b', '(?i)\\bsocat\\b', '(?i)\\bssh\\s+', '(?i)\\btelnet\\b', '(?i)\\bwget\\b', '(?i)\\bxxd\\b', '(?i)credentials', '(?i)id_rsa', "Detected 'chown'", "Detected 'ncat'", "Detected 'netcat'", "Detected 'printenv'", "Detected 'reboot'", "Detected 'shutdown'", "Detected 'socat'", "Detected 'telnet'", 'Detected Fork Bomb', 'Detected apt install', 'Detected npm install', '[REDACTED SECRET]', 'rf_152fz']

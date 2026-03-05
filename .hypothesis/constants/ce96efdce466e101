@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\checkpoints.py
+# hypothesis_version: 6.151.9
+
+[1000, '.json', 'CHECKPOINT_PATH', 'checkpoints', 'current_step_id', 'json', 'r', 'utf-8', 'w']

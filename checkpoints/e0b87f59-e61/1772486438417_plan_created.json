@@ -1,0 +1,61 @@
+{
+  "state_snapshot": {
+    "request_id": "e0b87f59-e61",
+    "plan_id": "30e4852b",
+    "input_payload": "hi",
+    "plan_ir": {
+      "id": "30e4852b",
+      "steps": [],
+      "edges": [],
+      "global_risk_level": "low",
+      "deterministic_required": false,
+      "direct_response": "Hello!",
+      "created_at": 1772486438.4165092
+    },
+    "step_states": {},
+    "artifacts": {},
+    "skill_outputs": {},
+    "llm_outputs": {},
+    "critic_reports": [],
+    "repair_history": [],
+    "retry_log": [],
+    "escalation_log": [],
+    "approvals": [],
+    "history": [],
+    "event_log": [
+      {
+        "event_id": "a24f050a-e5cc-4c0b-82d9-47d05d9af926",
+        "type": "PLAN_CREATED",
+        "payload": {
+          "plan_ir": {
+            "id": "30e4852b",
+            "steps": [],
+            "edges": [],
+            "global_risk_level": "low",
+            "deterministic_required": false,
+            "direct_response": "Hello!",
+            "created_at": 1772486438.4165092
+          }
+        },
+        "request_id": "e0b87f59-e61",
+        "timestamp": 1772486438.4165344,
+        "step_id": null,
+        "actor": "kernel"
+      }
+    ],
+    "processed_event_ids": [
+      "a24f050a-e5cc-4c0b-82d9-47d05d9af926"
+    ],
+    "checkpoints": [],
+    "status": "PLANNED",
+    "created_at": 1772486438.416481,
+    "updated_at": 1772486438.4165344,
+    "token_budget": null,
+    "tokens_used": 0,
+    "llm_call_budget": null,
+    "llm_calls_used": 0
+  },
+  "step_id": null,
+  "timestamp": 1772486438.4172468,
+  "reason": "plan_created"
+}

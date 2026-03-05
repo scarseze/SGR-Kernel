@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\litellm_core_utils\mock_functions.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1536, 'Mock error', 'embedding', 'error']

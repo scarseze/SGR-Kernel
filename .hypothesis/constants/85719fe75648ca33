@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\ocr\main.py
+# hypothesis_version: 6.151.9
+
+['aocr', 'api_base', 'document_url', 'image_url', 'litellm_call_id', 'litellm_logging_obj', 'type']

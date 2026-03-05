@@ -1,0 +1,126 @@
+{
+  "state_snapshot": {
+    "request_id": "d4504c0c-e8b",
+    "plan_id": "554db5cf",
+    "input_payload": "Do something",
+    "plan_ir": {
+      "id": "554db5cf",
+      "steps": [
+        {
+          "id": "1",
+          "skill_name": "mock_skill",
+          "inputs_template": {
+            "x": 1
+          },
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": {
+            "max_attempts": 1,
+            "escalation_tiers": [
+              "fast",
+              "mid",
+              "heavy"
+            ],
+            "repair_allowed": true,
+            "fallback_skill": null,
+            "abort_on_fail_types": []
+          },
+          "description": "Mock Step",
+          "timeout_seconds": 300.0,
+          "idempotent": true,
+          "idempotency_key": null
+        }
+      ],
+      "edges": [],
+      "global_risk_level": "low",
+      "deterministic_required": false,
+      "direct_response": null,
+      "created_at": 1772745959.8266933
+    },
+    "step_states": {
+      "1": {
+        "step_id": "1",
+        "status": "PENDING",
+        "attempts": 0,
+        "tier_used": null,
+        "started_at": null,
+        "finished_at": null,
+        "confidence": 1.0,
+        "failure": null,
+        "output": null,
+        "history": []
+      }
+    },
+    "artifacts": {},
+    "skill_outputs": {},
+    "llm_outputs": {},
+    "critic_reports": [],
+    "repair_history": [],
+    "retry_log": [],
+    "escalation_log": [],
+    "approvals": [],
+    "history": [],
+    "event_log": [
+      {
+        "event_id": "2dc66282-431a-43a5-a961-c6fd49321a9e",
+        "type": "PLAN_CREATED",
+        "payload": {
+          "plan_ir": {
+            "id": "554db5cf",
+            "steps": [
+              {
+                "id": "1",
+                "skill_name": "mock_skill",
+                "inputs_template": {
+                  "x": 1
+                },
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": {
+                  "max_attempts": 1,
+                  "escalation_tiers": [
+                    "fast",
+                    "mid",
+                    "heavy"
+                  ],
+                  "repair_allowed": true,
+                  "fallback_skill": null,
+                  "abort_on_fail_types": []
+                },
+                "description": "Mock Step",
+                "timeout_seconds": 300.0,
+                "idempotent": true,
+                "idempotency_key": null
+              }
+            ],
+            "edges": [],
+            "global_risk_level": "low",
+            "deterministic_required": false,
+            "direct_response": null,
+            "created_at": 1772745959.8266933
+          }
+        },
+        "request_id": "d4504c0c-e8b",
+        "timestamp": 1772745959.8267314,
+        "step_id": null,
+        "actor": "kernel"
+      }
+    ],
+    "processed_event_ids": [
+      "2dc66282-431a-43a5-a961-c6fd49321a9e"
+    ],
+    "checkpoints": [],
+    "status": "PLANNED",
+    "created_at": 1772745959.8265767,
+    "updated_at": 1772745959.8389664,
+    "token_budget": null,
+    "tokens_used": 0,
+    "llm_call_budget": null,
+    "llm_calls_used": 0
+  },
+  "step_id": null,
+  "timestamp": 1772745959.839116,
+  "reason": "plan_created"
+}

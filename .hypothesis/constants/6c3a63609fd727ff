@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\event_store.py
+# hypothesis_version: 6.151.9
+
+[100, 'event_log', 'json', 'payload', 'span_id', 'trace_id']

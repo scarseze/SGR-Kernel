@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\okama\macro.py
+# hypothesis_version: 6.151.9
+
+[1.0, '%Y-%m', '.', 'D', 'INFL', 'M', 'RATE', 'YTD', 'annual inflation', 'arithmetic mean', 'code', 'compound inflation', 'country', 'currency', 'first', 'first date', 'last date', 'max 12m inflation', 'max value', 'median', 'median value', 'min value', 'name', 'period', 'period length', 'property', 'symbol', 'type', 'value']

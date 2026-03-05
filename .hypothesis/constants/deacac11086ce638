@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\okama\asset_list.py
+# hypothesis_version: 6.151.9
+
+[0.5, 1.0, '%Y-%m', '.', 'CAGR', 'CVAR', 'Compound return', 'Dividend yield', 'INFL', 'Inception date', 'LTM', 'Last asset date', 'Max drawdowns', 'Max drawdowns dates', 'None', 'Risk', 'Y', 'YTD', 'assets', 'corr', 'currency', 'false', 'first', 'first_date', 'inflation', 'inner', 'last', 'last_date', 'norm', 'period', 'period_length', 'property', 'ytd']

@@ -1,0 +1,16 @@
+services:
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:latest
+    container_name: sgr_toxiproxy
+    ports:
+      - "8474:8474"   # Toxiproxy API
+      - "26379:26379" # Redis proxy
+      - "26333:26333" # Qdrant proxy
+    restart: unless-stopped
+
+  # Override sgr-kernel to use Toxiproxy endpoints
+  sgr-kernel:
+    environment:
+      - REDIS_URL=redis://toxiproxy:26379/0
+      - QDRANT_HOST=toxiproxy
+      - QDRANT_PORT=26333

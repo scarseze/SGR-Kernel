@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\ai21\chat\transformation.py
+# hypothesis_version: 6.151.9
+
+['max_tokens', 'n', 'response_format', 'seed', 'self', 'stop', 'stream', 'temperature', 'tool_choice', 'tools']

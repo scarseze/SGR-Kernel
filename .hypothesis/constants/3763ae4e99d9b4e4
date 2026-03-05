@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\llm.py
+# hypothesis_version: 6.151.9
+
+[0.0, 60.0, 300.0, 900.0, 1000, 'DEEPSEEK_API_KEY', 'LLM_API_KEY', 'LLM_BASE_URL', 'LLM_MODEL', 'ModelTier', 'T', '```json(.*?)```', 'api_key', 'base_url', 'cached', 'choices', 'completion_tokens', 'content', 'fast_model', 'fast_timeout', 'heavy_model', 'heavy_timeout', 'json_object', 'latency_ms', 'mid_model', 'mid_timeout', 'model', 'prompt_tokens', 'replay', 'role', 'system', 'total_tokens', 'type', 'user', '{', '}']

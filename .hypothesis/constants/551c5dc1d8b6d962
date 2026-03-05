@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\router_utils\cooldown_callbacks.py
+# hypothesis_version: 6.151.9
+
+['custom_llm_provider', 'litellm_params', 'model', 'model_info', 'model_name']

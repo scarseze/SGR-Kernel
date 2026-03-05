@@ -146,22 +146,28 @@ async def main(message: cl.Message):
     await msg.send()
 
     async def swarm_event_handler(event_type, agent_name, payload):
+        current_step = cl.user_session.get("current_step")
         if event_type == "agent_start":
+            # Start a new Agent execution tree
             step = cl.Step(name=f"🤖 {agent_name} is analyzing...")
             cl.user_session.set("current_step", step)
             await step.send()
         elif event_type == "tool_call":
-            step = cl.Step(name=f"🛠️ {agent_name} -> {payload['tool']}")
+            # Tool call happens inside the active agent
+            parent_id = current_step.id if current_step else None
+            step = cl.Step(name=f"🛠️ {agent_name} -> {payload['tool']}", parent_id=parent_id)
             step.output = payload.get('args', '')
             await step.send()
         elif event_type == "transfer":
-            step = cl.Step(name=f"🔄 Transfer (from {agent_name} to {payload['to_agent']})")
+            parent_id = current_step.id if current_step else None
+            step = cl.Step(name=f"🔄 Transfer (from {agent_name} to {payload['to_agent']})", parent_id=parent_id)
             step.output = payload['detail']
             await step.send()
-            current_step = cl.user_session.get("current_step")
+            
             if current_step:
-                current_step.output = "Transferred focus."
+                current_step.output = f"Transferred focus to {payload['to_agent']}."
                 await current_step.update()
+                cl.user_session.set("current_step", None) # Clear out so next agent_start is at top level
         elif event_type == "token":
             cl.user_session.set("has_token_stream", True)
             await msg.stream_token(payload['token'])

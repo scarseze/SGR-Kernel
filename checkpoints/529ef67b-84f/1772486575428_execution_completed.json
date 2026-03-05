@@ -1,0 +1,274 @@
+{
+  "state_snapshot": {
+    "request_id": "529ef67b-84f",
+    "plan_id": "33460248",
+    "input_payload": "retry please",
+    "plan_ir": {
+      "id": "33460248",
+      "steps": [
+        {
+          "id": "s1",
+          "skill_name": "fake",
+          "inputs_template": {
+            "x": 1
+          },
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": {
+            "max_attempts": 3,
+            "escalation_tiers": [
+              "fast",
+              "mid",
+              "heavy"
+            ],
+            "repair_allowed": true,
+            "fallback_skill": null,
+            "abort_on_fail_types": []
+          },
+          "description": "default step",
+          "timeout_seconds": 5.0,
+          "idempotent": false,
+          "idempotency_key": null
+        }
+      ],
+      "edges": [],
+      "global_risk_level": "low",
+      "deterministic_required": false,
+      "direct_response": null,
+      "created_at": 1772486575.4069643
+    },
+    "step_states": {
+      "s1": {
+        "step_id": "s1",
+        "status": "COMMITTED",
+        "attempts": 3,
+        "tier_used": null,
+        "started_at": 1772486575.4247122,
+        "finished_at": 1772486575.4248676,
+        "confidence": 1.0,
+        "failure": {
+          "step_id": "s1",
+          "failure_type": "TOOL_ERROR",
+          "phase": "RUNNING",
+          "error_class": "RuntimeError",
+          "retryable": true,
+          "repairable": true,
+          "timestamp": 1772486575.4118614,
+          "error_message": "planned failure #2"
+        },
+        "output": "ok:1",
+        "history": []
+      }
+    },
+    "artifacts": {},
+    "skill_outputs": {
+      "s1": "ok:1"
+    },
+    "llm_outputs": {},
+    "critic_reports": [],
+    "repair_history": [],
+    "retry_log": [],
+    "escalation_log": [],
+    "approvals": [],
+    "history": [],
+    "event_log": [
+      {
+        "event_id": "2e04c8fc-a91b-4df5-b809-fa0d597f5dc9",
+        "type": "PLAN_CREATED",
+        "payload": {
+          "plan_ir": {
+            "id": "33460248",
+            "steps": [
+              {
+                "id": "s1",
+                "skill_name": "fake",
+                "inputs_template": {
+                  "x": 1
+                },
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": {
+                  "max_attempts": 3,
+                  "escalation_tiers": [
+                    "fast",
+                    "mid",
+                    "heavy"
+                  ],
+                  "repair_allowed": true,
+                  "fallback_skill": null,
+                  "abort_on_fail_types": []
+                },
+                "description": "default step",
+                "timeout_seconds": 5.0,
+                "idempotent": false,
+                "idempotency_key": null
+              }
+            ],
+            "edges": [],
+            "global_risk_level": "low",
+            "deterministic_required": false,
+            "direct_response": null,
+            "created_at": 1772486575.4069643
+          }
+        },
+        "request_id": "529ef67b-84f",
+        "timestamp": 1772486575.4070163,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "72e0ff05-9202-4995-a4e7-4f81de255e8b",
+        "type": "EXECUTION_STARTED",
+        "payload": {},
+        "request_id": "529ef67b-84f",
+        "timestamp": 1772486575.4100285,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "36b9ce9a-79e7-4bfd-82f1-60fc9b1fead6",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 1
+        },
+        "request_id": "529ef67b-84f",
+        "timestamp": 1772486575.410629,
+        "step_id": "s1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "c0cdb434-e8e3-491a-927c-e69a52010a13",
+        "type": "STEP_FAILED",
+        "payload": {
+          "failure": {
+            "step_id": "s1",
+            "failure_type": "TOOL_ERROR",
+            "phase": "RUNNING",
+            "error_class": "RuntimeError",
+            "retryable": true,
+            "repairable": true,
+            "timestamp": 1772486575.4107478,
+            "error_message": "planned failure #1"
+          }
+        },
+        "request_id": "529ef67b-84f",
+        "timestamp": 1772486575.4107552,
+        "step_id": "s1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "cbe1189d-2a6e-4c33-b62b-c18542df89c3",
+        "type": "STEP_RETRYING",
+        "payload": {
+          "reason": "Automatic Retry"
+        },
+        "request_id": "529ef67b-84f",
+        "timestamp": 1772486575.4114313,
+        "step_id": "s1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "1bbc2cae-1e22-4cf7-95e5-e94aa2f2f544",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 2
+        },
+        "request_id": "529ef67b-84f",
+        "timestamp": 1772486575.4117794,
+        "step_id": "s1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "3e5b23a6-0e9c-4942-b0cb-2140b6f215cc",
+        "type": "STEP_FAILED",
+        "payload": {
+          "failure": {
+            "step_id": "s1",
+            "failure_type": "TOOL_ERROR",
+            "phase": "RUNNING",
+            "error_class": "RuntimeError",
+            "retryable": true,
+            "repairable": true,
+            "timestamp": 1772486575.4118614,
+            "error_message": "planned failure #2"
+          }
+        },
+        "request_id": "529ef67b-84f",
+        "timestamp": 1772486575.4118643,
+        "step_id": "s1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "399a47f1-c9cd-4d77-aa0c-d9488707d6c8",
+        "type": "STEP_RETRYING",
+        "payload": {
+          "reason": "Automatic Retry"
+        },
+        "request_id": "529ef67b-84f",
+        "timestamp": 1772486575.4242551,
+        "step_id": "s1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "9a4447d6-bb7e-4c56-9572-49807e7a1161",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 3
+        },
+        "request_id": "529ef67b-84f",
+        "timestamp": 1772486575.4247122,
+        "step_id": "s1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "1e53085d-9c10-4967-ba1f-f5d9cc989447",
+        "type": "STEP_COMPLETED",
+        "payload": {
+          "output": "ok:1"
+        },
+        "request_id": "529ef67b-84f",
+        "timestamp": 1772486575.4248676,
+        "step_id": "s1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "ee9653a0-09c6-4e97-9e49-ecf1707188a4",
+        "type": "EXECUTION_COMPLETED",
+        "payload": {},
+        "request_id": "529ef67b-84f",
+        "timestamp": 1772486575.427708,
+        "step_id": null,
+        "actor": "kernel"
+      }
+    ],
+    "processed_event_ids": [
+      "9a4447d6-bb7e-4c56-9572-49807e7a1161",
+      "2e04c8fc-a91b-4df5-b809-fa0d597f5dc9",
+      "1e53085d-9c10-4967-ba1f-f5d9cc989447",
+      "cbe1189d-2a6e-4c33-b62b-c18542df89c3",
+      "1bbc2cae-1e22-4cf7-95e5-e94aa2f2f544",
+      "36b9ce9a-79e7-4bfd-82f1-60fc9b1fead6",
+      "3e5b23a6-0e9c-4942-b0cb-2140b6f215cc",
+      "399a47f1-c9cd-4d77-aa0c-d9488707d6c8",
+      "ee9653a0-09c6-4e97-9e49-ecf1707188a4",
+      "c0cdb434-e8e3-491a-927c-e69a52010a13",
+      "72e0ff05-9202-4995-a4e7-4f81de255e8b"
+    ],
+    "checkpoints": [
+      "checkpoints\\529ef67b-84f\\1772486575407_plan_created.json",
+      "checkpoints\\529ef67b-84f\\1772486575425_step_completed.json"
+    ],
+    "status": "COMPLETED",
+    "created_at": 1772486575.4068842,
+    "updated_at": 1772486575.427708,
+    "token_budget": null,
+    "tokens_used": 0,
+    "llm_call_budget": null,
+    "llm_calls_used": 0
+  },
+  "step_id": null,
+  "timestamp": 1772486575.4280705,
+  "reason": "execution_completed"
+}

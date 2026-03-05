@@ -49,6 +49,11 @@ class BaseSkill(ABC, Generic[InputT]):
         pass
 
     @property
+    def requirements(self) -> Optional[str]:
+        """Optional strict requirements for the output to be passed into CriticEngine."""
+        return None
+
+    @property
     @abstractmethod
     def input_schema(self) -> Type[BaseModel]:
         """The Pydantic model defining the strict input structure this skill requires."""

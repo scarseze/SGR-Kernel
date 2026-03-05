@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\opentelemetry\_logs\__init__.py
+# hypothesis_version: 6.151.9
+
+['LogRecord', 'Logger', 'LoggerProvider', 'NoOpLogger', 'NoOpLoggerProvider', 'SeverityNumber', 'get_logger', 'get_logger_provider', 'set_logger_provider']

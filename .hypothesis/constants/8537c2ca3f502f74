@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\skills\research_agent\handler.py
+# hypothesis_version: 6.151.9
+
+[5000, 'api_key', 'base_url', 'cost', 'cost_class', 'deep_research', 'deep_research_agent', 'expensive', 'internal_docs_found', 'internal_kb', 'medium', 'model', 'plan', 'planning', 'report_writing', 'simulated', 'simulated_sources', 'summary', 'tokens', 'web_simulation']

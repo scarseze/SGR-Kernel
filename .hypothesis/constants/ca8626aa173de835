@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\types.py
+# hypothesis_version: 6.151.9
+
+[0.0, 60.0, '1.0.0', 'BaseSkill instance', 'SPOT', 'StepTrace object', 'aggressive', 'allow', 'api', 'backoff', 'before', 'blocked', 'capabilities', 'cheap', 'code', 'completed', 'cost_class', 'db', 'deny', 'expensive', 'exponential', 'failed', 'filesystem', 'handler.py', 'high', 'llm', 'low', 'max_retries', 'medium', 'none', 'normal', 'pending', 'planning', 'reasoning', 'report_writing', 'require_approval', 'retry_policy', 'retrying', 'running', 'standard', 'unknown', 'web']

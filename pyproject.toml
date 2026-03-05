@@ -34,7 +34,8 @@ dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
     "ruff>=0.1.0",
-    "mypy>=1.0.0"
+    "mypy>=1.0.0",
+    "hypothesis>=6.0.0"
 ]
 
 [project.scripts]
@@ -61,11 +62,31 @@ known-first-party = ["core"]
 
 [tool.mypy]
 python_version = "3.10"
-strict = true
+# Pragmatic baseline: catch real bugs without requiring full annotation
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+disallow_incomplete_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
 ignore_missing_imports = true
 exclude = ["tests/", "proxy/", "examples/"]
 disable_error_code = ["import-untyped"]
 
+# Strict enforcement on critical path modules
 [[tool.mypy.overrides]]
-module = ["requests", "qdrant_client"]
+module = [
+    "core.swarm",
+    "core.critic",
+    "core.artifacts",
+    "core.scheduler",
+    "core.reconciler"
+]
+disallow_untyped_defs = true
+disallow_any_generics = true
+warn_return_any = true
+
+[[tool.mypy.overrides]]
+module = ["requests", "qdrant_client", "litellm", "litellm.*"]
 ignore_missing_imports = true

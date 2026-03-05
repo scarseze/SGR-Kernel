@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\base_llm\guardrail_translation\base_translation.py
+# hypothesis_version: 6.151.9
+
+['CustomGuardrail', 'LiteLLMLoggingObj', 'UserAPIKeyAuth', '_', 'model_dump', 'user_api_key_']

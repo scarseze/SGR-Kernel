@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\nlp_cloud\chat\handler.py
+# hypothesis_version: 6.151.9
+
+[b'\x00', 1024, '/generation', 'api_base', 'complete_input_dict', 'headers', 'stream', 'utf-8']

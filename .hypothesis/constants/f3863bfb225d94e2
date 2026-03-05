@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\okama\api\api_methods.py
+# hypothesis_version: 6.151.9
+
+[0.1, 404, 429, 500, 502, 503, 504, '/api/live_price/', '/api/namespaces/', '/api/search/', '/api/symbol/', '/api/ts/close/', '/api/ts/dividends/', '/api/ts/macro/', '/api/ts/nav/', '/api/ts/ror/', 'd', 'first_date', 'http://', 'https://', 'last_date', 'm', 'period']

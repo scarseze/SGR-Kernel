@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\litellm_core_utils\realtime_streaming.py
+# hypothesis_version: 6.151.9
+
+['*', 'Connection closed', 'audio', 'content', 'create_response', 'current_delta_chunks', 'current_delta_type', 'current_item_chunks', 'current_response_id', 'detail', 'error', 'images', 'input_text', 'instructions', 'item', 'item_id', 'modalities', 'request', 'response', 'response.cancel', 'response.create', 'response.done', 'role', 'server_vad', 'session', 'session.created', 'session.update', 'session.updated', 'status_code', 'text', 'texts', 'transcript', 'turn_detection', 'type', 'user', 'user_api_key_dict', 'utf-8']

@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\grpc\_channel.py
+# hypothesis_version: 6.151.9
+
+[0.2, '<{} object>', 'Channel closed!', 'Channel deallocated!', '_channel', '_context', '_managed_call', '_method', '_request_serializer', '_target', 'grpc-python/{}']

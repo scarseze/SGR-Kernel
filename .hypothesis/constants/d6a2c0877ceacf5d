@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\ui_memory.py
+# hypothesis_version: 6.151.9
+
+[b'0', 300, '+aiosqlite', '/', '127.0.0.1', ':', '@', 'COMPLIANCE_LEVEL', 'CREATED', 'GLOBAL', 'LEASED', 'MEMORY_DB_URL', 'PII_MASKED', 'QUEUED', 'RU', 'RUNNING', 'SELECT 1', 'SUMMARY_LLM', '\\.ru$', '_ru', 'action', 'active_agent_name', 'artifact_uri', 'content', 'created_at', 'default_org', 'event_bus', 'gpt-4o-mini', 'hard_delete_vectors', 'history_json', 'job_id', 'job_persisted_to_db', 'job_status_updated', 'jobs', 'lease_expiry', 'lease_owner', 'lease_version', 'localhost', 'org_id', 'payload', 'postgresql', 'redis', 'rf_152fz', 'role', 'session_id', 'sessions', 'sqlite', 'sqlite+aiosqlite://', 'sqlite://', 'standard', 'status', 'system', 'transfer_count', 'ui_memory', 'updated_at', 'user']

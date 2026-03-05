@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\governance.py
+# hypothesis_version: 6.151.9
+
+[1.0, 'after_llm', 'after_step', 'before_llm', 'before_step', 'on_commit', 'on_escalation', 'on_failure', 'on_repair', 'on_retry']

@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\docker_mcp_client.py
+# hypothesis_version: 6.151.9
+
+[0.5, '--cap-drop', '--cpus', '--memory', '--name', '--network', '--read-only', '--rm', '--rootless', '--security-opt', '--tmpfs', '--userns', '-f', '-i', '256m', 'ALL', 'docker', 'docker_mcp', 'none', 'rm', 'run']

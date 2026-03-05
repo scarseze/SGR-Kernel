@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\types\containers\main.py
+# hypothesis_version: 6.151.9
+
+['container', 'container.deleted', 'container.file', 'container_file', 'last_active_at', 'list']

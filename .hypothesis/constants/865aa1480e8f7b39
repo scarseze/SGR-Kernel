@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\litellm_core_utils\initialize_dynamic_callback_params.py
+# hypothesis_version: 6.151.9
+
+['arize_api_key', 'arize_space_id', 'arize_space_key', 'braintrust_api_key', 'braintrust_host', 'braintrust_project', 'gcs_bucket_name', 'humanloop_api_key', 'langfuse_host', 'langfuse_public_key', 'langfuse_secret', 'langfuse_secret_key', 'langsmith_api_key', 'langsmith_base_url', 'langsmith_project', 'langsmith_tenant_id', 'litellm_params', 'lunary_public_key', 'metadata', 'os.environ/', 'posthog_api_key', 'posthog_host', 'slack_webhook_url']

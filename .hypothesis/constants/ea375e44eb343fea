@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\__editable___peft_research_platform_0_1_0_finder.py
+# hypothesis_version: 6.151.9
+
+['.', '.__path_hook__', '__init__.py', 'peftlab', 'peftlab.adapters', 'peftlab.agents', 'peftlab.api', 'peftlab.artifacts', 'peftlab.cli', 'peftlab.configs', 'peftlab.decision', 'peftlab.docs', 'peftlab.evaluation', 'peftlab.intelligence', 'peftlab.peft', 'peftlab.peft.config', 'peftlab.peft.methods', 'peftlab.plugins', 'peftlab.plugins.hpo', 'peftlab.protocols', 'peftlab.reporting', 'peftlab.schemas', 'peftlab.search', 'peftlab.tests', 'peftlab.training', 'peftlab.utils']

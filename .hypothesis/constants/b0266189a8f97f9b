@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\completion_extras\litellm_responses_transformation\handler.py
+# hypothesis_version: 6.151.9
+
+['CustomStreamWrapper', 'LiteLLMLoggingObj', 'ModelResponse', 'ResponsesAPIResponse', '_hidden_params', 'acompletion', 'api_key', 'client', 'completed_response', 'custom_llm_provider', 'encoding', 'headers', 'headers is required', 'json_mode', 'litellm_params', 'logging_obj', 'messages', 'messages is required', 'model', 'model is required', 'model_response', 'optional_params', 'response', 'stream']

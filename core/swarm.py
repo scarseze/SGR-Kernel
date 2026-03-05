@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import litellm
 
@@ -14,7 +14,7 @@ try:
 except ImportError:
     has_tenacity = False
 
-def safe_retry(func):
+def safe_retry(func: Callable[..., Any]) -> Callable[..., Any]:
     if has_tenacity:
         return retry(
             stop=stop_after_attempt(3),
@@ -63,7 +63,7 @@ class SwarmEngine:
 
     @safe_retry
     @with_chaos
-    async def _safe_call_llm(self, model: str, messages: List[Dict[str, Any]], tools: Optional[List[Dict[str, Any]]] = None, **kwargs) -> Any:
+    async def _safe_call_llm(self, model: str, messages: List[Dict[str, Any]], tools: Optional[List[Dict[str, Any]]] = None, **kwargs: Any) -> Any:
         return await litellm.acompletion(
             model=model,
             messages=messages,
@@ -80,16 +80,19 @@ class SwarmEngine:
         max_transfers: int = 5,
         current_transfer_count: int = 0,
         _swarm_depth: int = 0,
-        _global_transfer_count: list = None,
+        _global_transfer_count: Optional[List[int]] = None,
         max_budget_usd: float = 0.0,
-        _current_cost_usd: list = None,
+        _current_cost_usd: Optional[List[float]] = None,
         org_id: str = "default",
-        event_callback=None
-    ) -> tuple[str, Agent, int]:
+        event_callback: Optional[Callable[..., Any]] = None,
+        critic_engine: Optional[Any] = None,
+        max_internal_retries: int = 2
+    ) -> Tuple[str, Agent, int]:
         
         current_agent = starting_agent
         turn_count = 0
         transfer_count = current_transfer_count
+        consecutive_critic_failures = 0
         
         # Max horizontal explosions across ALL sub-swarms in one session call
         MAX_GLOBAL_TRANSFERS = 15
@@ -133,8 +136,11 @@ class SwarmEngine:
                     await event_callback("agent_start", current_agent.name, {})
                 
                 # Safety: Summarize history if too long to prevent context overflow
-                if len(history) > 20:
-                    logger.info("History exceeds 20 turns, summarizing context...")
+                approx_tokens = sum(len(str(m.get("content", ""))) for m in history) // 4
+                max_context_tokens = self.llm_config.get("max_context_tokens", 8000)
+                
+                if len(history) > 20 or approx_tokens > (max_context_tokens * 0.8):
+                    logger.info(f"Context limits approached (turns: {len(history)}, approx_tokens: {approx_tokens}). Summarizing context...")
                     middle_history = history[1:-10]
                     summary_prompt = (
                         "Summarize the following conversation history briefly, focusing on key facts and user intent:\n" 
@@ -205,7 +211,7 @@ class SwarmEngine:
                         response = litellm.stream_chunk_builder(chunks, messages=history)
 
                         latency_ms = int((time.time() - start_time) * 1000)
-                        tokens_used = response.usage.total_tokens if hasattr(response, "usage") and response.usage else 0
+                        tokens_used = response.usage.total_tokens if hasattr(response, "usage") and response.usage else 0  # type: ignore[union-attr]
                         
                         try:
                             call_cost = litellm.completion_cost(completion_response=response)
@@ -232,144 +238,164 @@ class SwarmEngine:
                         parent_span.record_exception(e)
                     return f"Error connecting to LLM: {str(e)}", current_agent, transfer_count
 
-                msg = response.choices[0].message
+                msg = response.choices[0].message  # type: ignore[union-attr]
                 history.append(msg.model_dump(exclude_none=True))
 
                 # 2. Check for tool calls
                 if not msg.tool_calls:
                     return msg.content or "Done", current_agent, transfer_count
 
-            # 3. Handle Tool Calls
-            agent_swapped = False
-            last_summary = None
-            current_agent_name = current_agent.name
-            
-            for tool_call in msg.tool_calls:
-                func_name = tool_call.function.name
-                args_str = tool_call.function.arguments
+                # 3. Handle Tool Calls
+                agent_swapped = False
+                last_summary = None
+                current_agent_name = current_agent.name
                 
-                try:
-                    args = json.loads(args_str)
-                except json.JSONDecodeError:
-                    args = {}
-
-                logger.info(f"[{current_agent.name}] calling {func_name} with {args}")
-                if event_callback:
-                    await event_callback("tool_call", current_agent.name, {"tool": func_name, "args": args_str})
-                
-                # Find matching skill
-                target_skill = next((s for s in current_agent.skills if s.name == func_name), None)
-                if not target_skill:
-                    result_str = f"Error: Skill {func_name} not found in {current_agent.name}"
-                else:
+                for tool_call in msg.tool_calls:
+                    func_name = tool_call.function.name
+                    args_str = tool_call.function.arguments
+                    
                     try:
-                        with get_telemetry().span(f"skill.execute.{func_name}") as skill_span:
-                            if skill_span:
-                                skill_span.set_attribute("skill.name", func_name)
-                            # Convert raw dict to Pydantic model and execute
-                            validated_params = target_skill.input_schema(**args)
-                            
-                            import inspect
-                            if inspect.iscoroutinefunction(target_skill.execute):
-                                raw_res = await target_skill.execute(validated_params)
-                            else:
-                                raw_res = target_skill.execute(validated_params)
+                        args = json.loads(args_str)
+                    except json.JSONDecodeError:
+                        args = {}
+
+                    logger.info(f"[{current_agent.name}] calling {func_name} with {args}")
+                    if event_callback:
+                        await event_callback("tool_call", current_agent.name, {"tool": func_name, "args": args_str})
+                    
+                    # Find matching skill
+                    target_skill = next((s for s in current_agent.skills if s.name == func_name), None)
+                    if not target_skill:
+                        result_str = f"Error: Skill {func_name} not found in {current_agent.name}"
+                    else:
+                        try:
+                            with get_telemetry().span(f"skill.execute.{func_name}") as skill_span:
+                                if skill_span:
+                                    skill_span.set_attribute("skill.name", func_name)
+                                # Convert raw dict to Pydantic model and execute
+                                validated_params = target_skill.input_schema(**args)
                                 
-                            # Handle Handoff
-                            if isinstance(raw_res, TransferToSubSwarm):
-                                sub_agent = raw_res.agent
-                                next_depth = _swarm_depth + 1
-                                MAX_SWARM_DEPTH = 3
-                                
-                                if next_depth > MAX_SWARM_DEPTH:
-                                    logger.error(f"Sub-swarm depth limit ({MAX_SWARM_DEPTH}) exceeded! Aborting recursion.")
-                                    result_str = f"Error: Max sub-swarm nesting depth ({MAX_SWARM_DEPTH}) reached."
+                                import inspect
+                                if inspect.iscoroutinefunction(target_skill.execute):
+                                    raw_res = await target_skill.execute(validated_params)
                                 else:
-                                    logger.info(f"Handoff to SUB-SWARM: {sub_agent.name} (depth={next_depth})")
-                                    get_telemetry().record_metric("subswarm_depth", next_depth)
+                                    raw_res = target_skill.execute(validated_params)
                                     
-                                    sub_config = dict(self.llm_config)
-                                    if getattr(sub_agent, "sub_swarm_config", None):
-                                        sub_config.update(sub_agent.sub_swarm_config)
-                                        
-                                    sub_engine = SwarmEngine(sub_config)
-                                    sub_max_turns = max(3, max_turns // 2)
-                                    sub_msg, _, sub_transfers = await sub_engine.execute(
-                                        starting_agent=sub_agent,
-                                        messages=[{"role": "user", "content": f"Sub-task context: {raw_res.context_message or 'Execute.'}"}],
-                                        max_turns=sub_max_turns,
-                                        _swarm_depth=next_depth,
-                                        _global_transfer_count=_global_transfer_count,
-                                        max_budget_usd=max_budget_usd,
-                                        _current_cost_usd=_current_cost_usd,
-                                        org_id=org_id
+                                # Multi-turn Critic Evaluation
+                                critic_passed = True
+                                if critic_engine and target_skill.requirements:
+                                    critic_passed, critic_reason = await critic_engine.evaluate(
+                                        step_id=tool_call.id,
+                                        skill_name=func_name,
+                                        inputs=args,
+                                        output=raw_res,
+                                        requirements=target_skill.requirements
                                     )
-                                    
-                                    transfer_count += sub_transfers
-                                    result_str = f"[Sub-Swarm {sub_agent.name} Result]: {sub_msg}"
-                                    
-                                    if not raw_res.return_to_parent_on_complete:
-                                        current_agent = sub_agent
+                                    if not critic_passed:
+                                        consecutive_critic_failures += 1
+                                        if consecutive_critic_failures <= max_internal_retries:
+                                            logger.warning(f"Critic rejected {func_name}. Retry {consecutive_critic_failures}/{max_internal_retries}. Reason: {critic_reason}")
+                                            result_str = f"Critic Evaluation Failed: {critic_reason}. Please correct the errors and call the tool again."
+                                        else:
+                                            logger.error(f"Critic rejected {func_name}. Max retries ({max_internal_retries}) reached.")
+                                            result_str = f"Critic Evaluation Failed completely: {critic_reason}. Move on."
+                                            consecutive_critic_failures = 0 # reset to allow future calls to proceed
+
+                                if critic_passed:
+                                    consecutive_critic_failures = 0  # reset on success
+                                    # Handle Handoff
+                                    if isinstance(raw_res, TransferToSubSwarm):
+                                        sub_agent = raw_res.agent
+                                        next_depth = _swarm_depth + 1
+                                        MAX_SWARM_DEPTH = 3
+
+                                        if next_depth > MAX_SWARM_DEPTH:
+                                            logger.error(f"Sub-swarm depth limit ({MAX_SWARM_DEPTH}) exceeded! Aborting recursion.")
+                                            result_str = f"Error: Max sub-swarm nesting depth ({MAX_SWARM_DEPTH}) reached."
+                                        else:
+                                            logger.info(f"Handoff to SUB-SWARM: {sub_agent.name} (depth={next_depth})")
+                                            get_telemetry().record_metric("subswarm_depth", next_depth)
+
+                                            sub_config = dict(self.llm_config)
+                                            if getattr(sub_agent, "sub_swarm_config", None):
+                                                sub_config.update(sub_agent.sub_swarm_config)  # type: ignore[arg-type]
+
+                                            sub_engine = SwarmEngine(sub_config)
+                                            sub_max_turns = max(3, max_turns // 2)
+                                            sub_msg, _, sub_transfers = await sub_engine.execute(
+                                                starting_agent=sub_agent,
+                                                messages=[{"role": "user", "content": f"Sub-task context: {raw_res.context_message or 'Execute.'}"}],
+                                                max_turns=sub_max_turns,
+                                                _swarm_depth=next_depth,
+                                                _global_transfer_count=_global_transfer_count,
+                                                max_budget_usd=max_budget_usd,
+                                                _current_cost_usd=_current_cost_usd,
+                                                org_id=org_id
+                                            )
+
+                                            transfer_count += sub_transfers
+                                            result_str = f"[Sub-Swarm {sub_agent.name} Result]: {sub_msg}"
+
+                                            if not raw_res.return_to_parent_on_complete:
+                                                current_agent = sub_agent
+                                                agent_swapped = True
+                                                last_summary = result_str
+
+                                    elif isinstance(raw_res, TransferToAgent):
+                                        current_agent = raw_res.agent
                                         agent_swapped = True
-                                        last_summary = result_str
-                                    
-                            elif isinstance(raw_res, TransferToAgent):
-                                current_agent = raw_res.agent
-                                agent_swapped = True
-                                _global_transfer_count[0] += 1
-                                
-                                MAX_GLOBAL_TRANSFERS = 15
-                                if _global_transfer_count[0] > MAX_GLOBAL_TRANSFERS:
-                                    logger.error(f"Global max transfers exceeded ({MAX_GLOBAL_TRANSFERS})! DDoS protection triggered.")
-                                    result_str = f"Error: System-wide transfer limit ({MAX_GLOBAL_TRANSFERS}) reached. Emergency abort."
-                                    agent_swapped = False # Abort swap
-                                else:
-                                    handoff_msg = f"Transferred to {current_agent.name}."
-                                    if raw_res.context_message:
-                                        handoff_msg += f" Note: {raw_res.context_message}"
-                                        last_summary = raw_res.context_message
+                                        _global_transfer_count[0] += 1
+
+                                        MAX_GLOBAL_TRANSFERS = 15
+                                        if _global_transfer_count[0] > MAX_GLOBAL_TRANSFERS:
+                                            logger.error(f"Global max transfers exceeded ({MAX_GLOBAL_TRANSFERS})! DDoS protection triggered.")
+                                            result_str = f"Error: System-wide transfer limit ({MAX_GLOBAL_TRANSFERS}) reached. Emergency abort."
+                                            agent_swapped = False  # Abort swap
+                                        else:
+                                            handoff_msg = f"Transferred to {current_agent.name}."
+                                            if raw_res.context_message:
+                                                handoff_msg += f" Note: {raw_res.context_message}"
+                                                last_summary = raw_res.context_message
+                                            else:
+                                                last_summary = "No context summary provided."
+
+                                            result_str = handoff_msg
+
+                                        # Audit log for handoff
+                                        get_telemetry().record_handoff(from_agent=current_agent_name, to_agent=current_agent.name)
+                                        logger.info(
+                                            "transfer_audit",
+                                            from_agent=current_agent_name,
+                                            to_agent=current_agent.name,
+                                            context=last_summary
+                                        )
+                                        if event_callback:
+                                            await event_callback("transfer", current_agent_name, {"detail": result_str, "to_agent": current_agent.name})
                                     else:
-                                        last_summary = "No context summary provided."
-                                    
-                                    result_str = handoff_msg
-                                
-                                # Audit log for handoff
-                                get_telemetry().record_handoff(from_agent=current_agent_name, to_agent=current_agent.name)
-                                logger.info(
-                                    "transfer_audit",
-                                    from_agent=current_agent_name,
-                                    to_agent=current_agent.name,
-                                    context=last_summary
-                                )
-                                if event_callback:
-                                    await event_callback("transfer", current_agent_name, {"detail": result_str, "to_agent": current_agent.name})
-                            else:
-                                result_str = str(raw_res)
-                                
-                    except Exception as e:
-                        result_str = f"Error executing {func_name}: {str(e)}"
+                                        result_str = str(raw_res)
 
-                # Append tool result
-                history.append({
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "name": func_name,
-                    "content": result_str
-                })
+                        except Exception as e:
+                            result_str = f"Error executing {func_name}: {str(e)}"
+                    # Append tool result
+                    history.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "name": func_name,
+                        "content": result_str
+                    })
+                    
+                    # If we swapped agents mid-loop, we break out to let the newly swapped
+                    # agent read the context and decide what to do
+                    if agent_swapped:
+                        transfer_count += 1
+                        if transfer_count > max_transfers:
+                            return f"Error: Swarm max transfers ({max_transfers}) exceeded. Escalating to human/aborting.", current_agent, transfer_count
+
+                        # Context Sanitization (Bleed Protection)
+                        # Replace history with System instructions + condensed context summary
+                        new_history = [{"role": "system", "content": isolated_instructions}]
+                        new_history.append({"role": "user", "content": f"[Context from {current_agent_name}]: {last_summary} \n\nPlease proceed."})
+                        history = new_history
+                        break
                 
-                # If we swapped agents mid-loop, we break out to let the newly swapped
-                # agent read the context and decide what to do
-                if agent_swapped:
-                    transfer_count += 1
-                    if transfer_count > max_transfers:
-                        return f"Error: Swarm max transfers ({max_transfers}) exceeded. Escalating to human/aborting.", current_agent, transfer_count
-
-                    # Context Sanitization (Bleed Protection)
-                    # Replace history with System instructions + condensed context summary
-                    new_history = [{"role": "system", "content": isolated_instructions}]
-                    new_history.append({"role": "user", "content": f"[Context from {current_agent_name}]: {last_summary} \n\nPlease proceed."})
-                    history = new_history
-                    break
-            
-            # Out of while loop
-            return "Max turns reached", current_agent, transfer_count
+            return last_summary or "Max turns reached", current_agent, transfer_count

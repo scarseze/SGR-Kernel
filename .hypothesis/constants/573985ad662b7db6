@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\bedrock\image_generation\image_handler.py
+# hypothesis_version: 6.151.9
+
+[408, 'Content-Type', 'api_base', 'application/json', 'complete_input_dict', 'guardrailIdentifier', 'guardrailVersion', 'headers', 'timeout', 'utf-8']

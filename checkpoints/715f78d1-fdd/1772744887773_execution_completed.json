@@ -1,0 +1,151 @@
+{
+  "state_snapshot": {
+    "request_id": "715f78d1-fdd",
+    "plan_id": "6714c135",
+    "input_payload": "Initial branch",
+    "plan_ir": {
+      "id": "6714c135",
+      "steps": [
+        {
+          "id": "step1",
+          "skill_name": "dummy_skill",
+          "inputs_template": {},
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": null,
+          "description": null,
+          "timeout_seconds": 300.0,
+          "idempotent": false,
+          "idempotency_key": null
+        }
+      ],
+      "edges": [],
+      "global_risk_level": "low",
+      "deterministic_required": false,
+      "direct_response": null,
+      "created_at": 1772744887.7451415
+    },
+    "step_states": {
+      "step1": {
+        "step_id": "step1",
+        "status": "COMMITTED",
+        "attempts": 1,
+        "tier_used": null,
+        "started_at": 1772744887.7664342,
+        "finished_at": 1772744887.7665122,
+        "confidence": 1.0,
+        "failure": null,
+        "output": "success",
+        "history": []
+      }
+    },
+    "artifacts": {},
+    "skill_outputs": {
+      "step1": "success"
+    },
+    "llm_outputs": {},
+    "critic_reports": [],
+    "repair_history": [],
+    "retry_log": [],
+    "escalation_log": [],
+    "approvals": [],
+    "history": [],
+    "event_log": [
+      {
+        "event_id": "dc44bf0e-b1eb-43d9-98ad-b41968835bec",
+        "type": "PLAN_CREATED",
+        "payload": {
+          "plan_ir": {
+            "id": "6714c135",
+            "steps": [
+              {
+                "id": "step1",
+                "skill_name": "dummy_skill",
+                "inputs_template": {},
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": null,
+                "description": null,
+                "timeout_seconds": 300.0,
+                "idempotent": false,
+                "idempotency_key": null
+              }
+            ],
+            "edges": [],
+            "global_risk_level": "low",
+            "deterministic_required": false,
+            "direct_response": null,
+            "created_at": 1772744887.7451415
+          }
+        },
+        "request_id": "715f78d1-fdd",
+        "timestamp": 1772744887.7458951,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "16e19ac9-a399-4049-a217-de4624cda4d0",
+        "type": "EXECUTION_STARTED",
+        "payload": {},
+        "request_id": "715f78d1-fdd",
+        "timestamp": 1772744887.764308,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "ad862333-d73f-4bda-a480-9c4a3338009f",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 1
+        },
+        "request_id": "715f78d1-fdd",
+        "timestamp": 1772744887.7664342,
+        "step_id": "step1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "63029ed0-85fe-4062-88a6-022bc518054e",
+        "type": "STEP_COMPLETED",
+        "payload": {
+          "output": "success"
+        },
+        "request_id": "715f78d1-fdd",
+        "timestamp": 1772744887.7665122,
+        "step_id": "step1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "181a38b1-c678-4ed8-862f-0a16e4f6e409",
+        "type": "EXECUTION_COMPLETED",
+        "payload": {},
+        "request_id": "715f78d1-fdd",
+        "timestamp": 1772744887.7712684,
+        "step_id": null,
+        "actor": "kernel"
+      }
+    ],
+    "processed_event_ids": [
+      "63029ed0-85fe-4062-88a6-022bc518054e",
+      "dc44bf0e-b1eb-43d9-98ad-b41968835bec",
+      "ad862333-d73f-4bda-a480-9c4a3338009f",
+      "181a38b1-c678-4ed8-862f-0a16e4f6e409",
+      "16e19ac9-a399-4049-a217-de4624cda4d0"
+    ],
+    "checkpoints": [
+      "checkpoints\\715f78d1-fdd\\1772744887751_plan_created.json",
+      "checkpoints\\715f78d1-fdd\\1772744887770_step_completed.json"
+    ],
+    "status": "COMPLETED",
+    "created_at": 1772744887.7458317,
+    "updated_at": 1772744887.7712684,
+    "token_budget": null,
+    "tokens_used": 0,
+    "llm_call_budget": null,
+    "llm_calls_used": 0
+  },
+  "step_id": null,
+  "timestamp": 1772744887.7738655,
+  "reason": "execution_completed"
+}

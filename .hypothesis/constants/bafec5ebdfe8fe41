@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\skills\xbrl_analyst\handler.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.08, 100, 'Assets', 'AssetsTotal', 'Capital Adequacy', 'Equity', 'Health Check', 'Net Profit', 'NetProfit', 'OK', 'RISK', 'ROE', 'UNKNOWN', 'cheap', 'concept', 'contextRef', 'cost_class', 'data', 'date', 'facts_count', 'file_path', 'financial_analysis', 'health_check', 'id', 'instant', 'low', 'metrics', 'rag', 'rag_context', 'tokens', 'type', 'unit', 'unitRef', 'value', 'xbrl', 'xbrl_analyst', 'xml', '| Metric | Value |', '|---|---|', '}', '⚠️', '✅']

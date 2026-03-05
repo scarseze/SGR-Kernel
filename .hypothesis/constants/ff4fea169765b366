@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\together_ai\rerank\transformation.py
+# hypothesis_version: 6.151.9
+
+['document', 'id', 'index', 'relevance_score', 'results', 'text', 'usage']

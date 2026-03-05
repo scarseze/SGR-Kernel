@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\logger.py
+# hypothesis_version: 6.151.9
+
+['%(message)s', 'LOG_DIR', 'LOG_FORMAT', 'console', 'iso', 'json', 'logs', 'sgr_core.log', 'utf-8']

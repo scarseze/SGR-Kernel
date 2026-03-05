@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\bedrock\count_tokens\transformation.py
+# hypothesis_version: 6.151.9
+
+['bedrock/', 'body', 'content', 'converse', 'input', 'inputTokens', 'input_tokens', 'invokeModel', 'messages', 'model', 'role', 'system', 'text']

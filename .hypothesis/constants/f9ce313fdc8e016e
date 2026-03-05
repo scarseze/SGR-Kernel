@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\anthropic\experimental_pass_through\messages\transformation.py
+# hypothesis_version: 6.151.9
+
+[400, ',', '/v1/messages', '2023-06-01', 'ANTHROPIC_API_KEY', 'anthropic', 'anthropic-beta', 'anthropic-version', 'application/json', 'authorization', 'compact_20260112', 'content-type', 'context_management', 'edits', 'fast', 'inference_geo', 'max_tokens', 'messages', 'model', 'output_config', 'output_format', 'speed', 'stop_sequences', 'system', 'temperature', 'text', 'thinking', 'tool_choice', 'tools', 'top_k', 'top_p', 'type', 'x-api-key']

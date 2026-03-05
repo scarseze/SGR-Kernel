@@ -31,7 +31,7 @@ class Scheduler:
     Hybrid Scheduler: Dispatches tasks either Locally or to Redis.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.redis = Container.get("redis")
         self.lifecycle = Container.get("lifecycle")
         # Initialize QuotaManager for org-level budgeting and rate limiting
@@ -53,7 +53,7 @@ class Scheduler:
         use_redis = self.redis is not None and os.getenv("REDIS_HOST") not in ["mock_redis", None, ""]
         
         if use_redis:
-            return await self._dispatch_distributed(tasks)
+            return await self._dispatch_distributed(tasks)  # type: ignore[no-any-return]
         else:
             return await self._dispatch_local(tasks)
 
@@ -76,7 +76,7 @@ class Scheduler:
                 logger.error(f"Local Task failed with exception: {res}", exc_info=res)
                 processed_results.append(StepResult(success=False, events=[]))
             else:
-                processed_results.append(res)
+                processed_results.append(res)  # type: ignore[arg-type]
         
         return processed_results
 

@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\okama\common\helpers\helpers.py
+# hypothesis_version: 6.151.9
+
+[0.5, 1.0, 1000.0, 100, 365, 1000, 'A', 'CVaR', 'D', 'End', 'M', 'VaR', 'amount', 'columns', 'corr', 'cov', 'first', 'fixed_amount', 'fixed_percentage', 'last', 'lognorm', 'month', 'norm', 'p-value', 'start', 'statistic', 't', 'time_series', 'window']

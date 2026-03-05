@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\batches\batch_utils.py
+# hypothesis_version: 6.151.9
+
+[0.0, 200, ';', 'JOB_STATE_SUCCEEDED', 'anthropic', 'api_base', 'api_key', 'api_version', 'azure', 'azure_ad_token', 'batch_', 'batch_processing', 'batch_request', 'body', 'content', 'custom_llm_provider', 'dict', 'file_id', 'gemini-2.5-flash', 'hosted_vllm', 'json_objects=%s', 'llm_output_file_id,', 'max_retries', 'messages', 'model', 'openai', 'optional_params', 'organization', 'response', 'role', 'status', 'status_code', 'timeout', 'total_cost=%s', 'usage', 'user', 'utf-8', 'vertex_ai', 'vertex_credentials', 'vertex_location', 'vertex_project']

@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\chaos.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.5, 2.0, '0.0', '1.0', '10.0', '2.0', '3.0', '5.0', 'CHAOS_FAILURE_RATE', 'CHAOS_MAX_DELAY', 'CHAOS_MIN_DELAY', 'ENABLE_CHAOS', 'core.chaos', 'false', 'true']

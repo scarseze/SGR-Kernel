@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\rag\ingestion\vertex_ai_ingestion.py
+# hypothesis_version: 6.151.9
+
+[2.0, 60.0, 300.0, 200, 201, 1024, 'Authorization', 'Content-Type', 'RAGIngestOptions', 'Router', 'application/json', 'chunkOverlap', 'chunkSize', 'chunk_overlap', 'chunk_size', 'description', 'displayName', 'display_name', 'done', 'embedding_model', 'endpoint', 'error', 'file', 'file_description', 'gcsSource', 'importRagFilesConfig', 'litellm-rag-corpus', 'metadata', 'multipart', 'name', 'ragFile', 'rag_file', 'response', 'timeout', 'uploaded', 'uris', 'us-central1', 'vectorDbConfig', 'vector_db_config', 'vector_store_id', 'vertex_ai']

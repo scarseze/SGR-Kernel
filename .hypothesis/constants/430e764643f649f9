@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\distributed_lock.py
+# hypothesis_version: 6.151.9
+
+[2.0, 1000.0, 10000, 'leader_election_won', 'leader_lock_released', 'redis']

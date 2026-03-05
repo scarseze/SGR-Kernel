@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\bedrock\embed\cohere_transformation.py
+# hypothesis_version: 6.151.9
+
+['3', 'dimensions', 'embedding_types', 'encoding_format', 'input_type', 'output_dimension']

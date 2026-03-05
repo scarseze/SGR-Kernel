@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\telemetry_kernel.py
+# hypothesis_version: 6.151.9
+
+['checkpoint_count', 'escalation_count', 'plan_latency', 'repair_count', 'resume_count', 'retry_count', 'skill_success_count', 'step_latency']

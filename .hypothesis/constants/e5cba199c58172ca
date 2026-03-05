@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\base_llm\files\transformation.py
+# hypothesis_version: 6.151.9
+
+['FileContentRequest', 'FileDeleted', 'POST']

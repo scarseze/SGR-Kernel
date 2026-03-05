@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\litellm_core_utils\sensitive_data_masker.py
+# hypothesis_version: 6.151.9
+
+['*', '-', '_', '__dict__', 'access', 'auth', 'authorization', 'certificate', 'cost', 'credential', 'fingerprint', 'key', 'password', 'private', 'secret', 'tenancy', 'token']

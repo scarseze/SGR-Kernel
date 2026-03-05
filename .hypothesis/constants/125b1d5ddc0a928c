@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\types\images\main.py
+# hypothesis_version: 6.151.9
+
+['auto', 'b64_json', 'high', 'low', 'medium', 'opaque', 'standard', 'transparent', 'url']

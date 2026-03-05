@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\litellm_core_utils\get_model_cost_map.py
+# hypothesis_version: 6.151.9
+
+[100, 'fallback_reason', 'is_env_forced', 'litellm', 'local', 'remote', 'source', 'true', 'url', 'utf-8']

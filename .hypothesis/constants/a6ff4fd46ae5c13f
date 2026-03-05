@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\litellm_core_utils\get_provider_specific_headers.py
+# hypothesis_version: 6.151.9
+
+[',', 'custom_llm_provider', 'extra_headers']

@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\evals\main.py
+# hypothesis_version: 6.151.9
+
+[5.0, 600.0, 'acancel_eval', 'acancel_run', 'acreate_eval', 'acreate_run', 'adelete_eval', 'adelete_run', 'after', 'aget_eval', 'aget_run', 'alist_evals', 'alist_runs', 'aupdate_eval', 'before', 'client', 'data_source', 'data_source_config', 'endpoint', 'eval_id', 'evals', 'headers', 'limit', 'litellm_api_version', 'litellm_call_id', 'litellm_logging_obj', 'metadata', 'name', 'openai', 'order', 'order_by', 'requester_ip_address', 'requester_metadata', 'run_id', 'shared_session', 'testing_criteria', 'user_agent', 'user_api_key', 'user_api_key_alias', 'user_api_key_auth', 'user_api_key_hash', 'user_api_key_org_id', 'user_api_key_spend', 'user_api_key_team_id', 'user_api_key_user_id']

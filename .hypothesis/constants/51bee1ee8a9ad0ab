@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\types\llms\watsonx.py
+# hypothesis_version: 6.151.9
+
+['/ml/v1/prompts', '/ml/v1/text/chat', '/ml/v1/text/rerank', 'granite-chat', 'ibm-mistral', 'ibm-mistralai', 'openai/gpt-oss']

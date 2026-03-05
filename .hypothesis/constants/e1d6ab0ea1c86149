@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\gemini\common_utils.py
+# hypothesis_version: 6.151.9
+
+[200, 'GEMINI_API_BASE', 'GEMINI_API_KEY', 'GOOGLE_API_KEY', 'ascii', 'contents', 'gemini/', 'litellm_params', 'model', 'models', 'models/', 'name', 'tokenizer_used', 'totalTokens', 'v1beta']

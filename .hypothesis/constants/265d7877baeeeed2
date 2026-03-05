@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\skills\mcp_adapter.py
+# hypothesis_version: 6.151.9
+
+['MCPTool', 'boolean', 'description', 'inputSchema', 'integer', 'mcp_adapter', 'mcp_isolated', 'mcp_plugins', 'name', 'number', 'properties', 'required', 'string', 'type', 'unknown_mcp_tool']

@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\base_llm\rerank\transformation.py
+# hypothesis_version: 6.151.9
+
+[0.0, 'input_cost_per_query', 'search_units']

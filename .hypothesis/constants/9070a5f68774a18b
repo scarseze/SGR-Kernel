@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\topaz\common_utils.py
+# hypothesis_version: 6.151.9
+
+['Accept', 'TOPAZ_API_BASE', 'TOPAZ_API_KEY', 'X-API-Key', 'image/jpeg', 'topaz/CGI', 'topaz/Standard V2', 'topaz/Text Refine']

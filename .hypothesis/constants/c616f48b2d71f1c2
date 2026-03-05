@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\skills\base.py
+# hypothesis_version: 6.151.9
+
+['BaseSkill', 'ExecutionState', 'InputT', 'SkillManifest', 'SkillMetadata']

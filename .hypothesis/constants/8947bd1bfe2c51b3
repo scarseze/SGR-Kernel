@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\opentelemetry\exporter\otlp\proto\grpc\exporter.py
+# hypothesis_version: 6.151.9
+
+[0.8, 1.2, 1000000000.0, 30000, 'ExportResultT', 'ExportStubT', 'ResourceDataT', 'SDKDataT', 'TypingResourceT', 'gzip', 'http', 'https', 'rb', 'true']

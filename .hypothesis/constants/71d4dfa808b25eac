@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\types\llms\openai_evals.py
+# hypothesis_version: 6.151.9
+
+['asc', 'bleu', 'cancelled', 'completed', 'created_at', 'custom', 'dataset', 'desc', 'eval', 'eval.deleted', 'eval.run', 'eval.run.deleted', 'exact_match', 'f1_score', 'failed', 'ground_truth', 'inline', 'list', 'llm_as_judge', 'logs', 'queued', 'running', 'sample_set', 'stored_completions', 'updated_at']

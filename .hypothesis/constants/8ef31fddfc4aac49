@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\search\cost_calculator.py
+# hypothesis_version: 6.151.9
+
+[0.0, 'input_cost_per_query', 'max_results', 'max_results_range', 'tiered_pricing']

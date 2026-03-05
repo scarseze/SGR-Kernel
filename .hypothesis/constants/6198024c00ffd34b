@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\opentelemetry\semconv\_incubating\attributes\code_attributes.py
+# hypothesis_version: 6.151.9
+
+['code.column', 'code.column.number', 'code.file.path', 'code.filepath', 'code.function', 'code.function.name', 'code.line.number', 'code.lineno', 'code.namespace', 'code.stacktrace']

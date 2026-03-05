@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\policy.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.5, 0.6, 1.0, 10.0, 60.0, 6000, './workspace', '/data', 'Policy check passed.', 'Rate limit exceeded.', 'admin', 'allow_filesystem', 'allow_high_risk', 'cost', 'cumulative_spend', 'expensive', 'global_rate', 'guest', 'high', 'is_sensitive', 'last_refill', 'skill', 'step_costs', 'tokens', 'user', 'user_role']

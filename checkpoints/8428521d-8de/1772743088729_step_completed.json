@@ -1,0 +1,164 @@
+{
+  "state_snapshot": {
+    "request_id": "8428521d-8de",
+    "plan_id": "70be5e95",
+    "input_payload": "Do something",
+    "plan_ir": {
+      "id": "70be5e95",
+      "steps": [
+        {
+          "id": "1",
+          "skill_name": "mock_skill",
+          "inputs_template": {
+            "x": 1
+          },
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": {
+            "max_attempts": 1,
+            "escalation_tiers": [
+              "fast",
+              "mid",
+              "heavy"
+            ],
+            "repair_allowed": true,
+            "fallback_skill": null,
+            "abort_on_fail_types": []
+          },
+          "description": "Mock Step",
+          "timeout_seconds": 300.0,
+          "idempotent": true,
+          "idempotency_key": null
+        }
+      ],
+      "edges": [],
+      "global_risk_level": "low",
+      "deterministic_required": false,
+      "direct_response": null,
+      "created_at": 1772743088.670307
+    },
+    "step_states": {
+      "1": {
+        "step_id": "1",
+        "status": "COMMITTED",
+        "attempts": 1,
+        "tier_used": null,
+        "started_at": 1772743088.7223754,
+        "finished_at": 1772743088.7225692,
+        "confidence": 1.0,
+        "failure": null,
+        "output": "Executed: 1",
+        "history": []
+      }
+    },
+    "artifacts": {},
+    "skill_outputs": {
+      "1": "Executed: 1"
+    },
+    "llm_outputs": {},
+    "critic_reports": [],
+    "repair_history": [],
+    "retry_log": [],
+    "escalation_log": [],
+    "approvals": [],
+    "history": [],
+    "event_log": [
+      {
+        "event_id": "e2b819f9-491d-4780-a186-c615e4e314c6",
+        "type": "PLAN_CREATED",
+        "payload": {
+          "plan_ir": {
+            "id": "70be5e95",
+            "steps": [
+              {
+                "id": "1",
+                "skill_name": "mock_skill",
+                "inputs_template": {
+                  "x": 1
+                },
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": {
+                  "max_attempts": 1,
+                  "escalation_tiers": [
+                    "fast",
+                    "mid",
+                    "heavy"
+                  ],
+                  "repair_allowed": true,
+                  "fallback_skill": null,
+                  "abort_on_fail_types": []
+                },
+                "description": "Mock Step",
+                "timeout_seconds": 300.0,
+                "idempotent": true,
+                "idempotency_key": null
+              }
+            ],
+            "edges": [],
+            "global_risk_level": "low",
+            "deterministic_required": false,
+            "direct_response": null,
+            "created_at": 1772743088.670307
+          }
+        },
+        "request_id": "8428521d-8de",
+        "timestamp": 1772743088.6703732,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "6ca3bb09-2768-4c06-9a12-9ce3327b1c80",
+        "type": "EXECUTION_STARTED",
+        "payload": {},
+        "request_id": "8428521d-8de",
+        "timestamp": 1772743088.7185097,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "9d1a2100-073f-4065-86cc-9782a24f5573",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 1
+        },
+        "request_id": "8428521d-8de",
+        "timestamp": 1772743088.7223754,
+        "step_id": "1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "92da890e-8140-41bb-9262-be1535236add",
+        "type": "STEP_COMPLETED",
+        "payload": {
+          "output": "Executed: 1"
+        },
+        "request_id": "8428521d-8de",
+        "timestamp": 1772743088.7225692,
+        "step_id": "1",
+        "actor": "kernel"
+      }
+    ],
+    "processed_event_ids": [
+      "e2b819f9-491d-4780-a186-c615e4e314c6",
+      "6ca3bb09-2768-4c06-9a12-9ce3327b1c80",
+      "92da890e-8140-41bb-9262-be1535236add",
+      "9d1a2100-073f-4065-86cc-9782a24f5573"
+    ],
+    "checkpoints": [
+      "checkpoints\\8428521d-8de\\1772743088716_plan_created.json"
+    ],
+    "status": "RUNNING",
+    "created_at": 1772743088.6700988,
+    "updated_at": 1772743088.7225692,
+    "token_budget": null,
+    "tokens_used": 0,
+    "llm_call_budget": null,
+    "llm_calls_used": 0
+  },
+  "step_id": null,
+  "timestamp": 1772743088.7299619,
+  "reason": "step_completed"
+}

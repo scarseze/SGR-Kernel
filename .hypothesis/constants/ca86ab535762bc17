@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\pii_classifier.py
+# hypothesis_version: 6.151.9
+
+[0.85, 0.86, 0.88, 0.9, 0.92, 0.94, 0.95, 0.96, 0.98, 0.99, 'API_KEY', 'CARD_RF', 'CREDIT_CARD', 'EMAIL', 'INN', 'IP_ADDRESS', 'MEDICAL_DATE', 'MEDICAL_ID', 'PASSPORT_RF', 'PHONE', 'PHONE_RU', 'SNILS', '[\\w.-]+@[\\w.-]+\\.\\w+', '\\b\\d{12}\\b', '\\b\\d{4}\\s?\\d{6}\\b', 'end', 'entity_type', 'gdpr', 'hipaa', 'mock_ml_ner', 'rf_152fz', 'score', 'sk-[a-zA-Z0-9]{20,}', 'start', 'value']

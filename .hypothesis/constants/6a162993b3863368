@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\base.py
+# hypothesis_version: 6.151.9
+
+['CustomStreamWrapper', 'ModelResponse', '_aclient_session', '_client_session']

@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\okama\frontier\single_period.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1e-08, 1.0, 1.1, 100, '%Y-%m', '-', '--', '-.', ':', 'CAGR', 'MSR', 'Mean return', 'Mean_return_monthly', 'None', 'Rate_of_return', 'Return', 'Risk', 'Risk (volatility)', 'Risk_monthly', 'SLSQP', 'USD', 'Weights', 'Weights of assets', 'black', 'bounds', 'cagr', 'center', 'currency', 'disp', 'eq', 'first_date', 'float', 'ftol', 'fun', 'green', 'inflation', 'last_date', 'max', 'mean', 'mean_return', 'min', 'n_points', 'offset points', 'period_length', 'risk', 'symbols', 'tickers', 'type', 'upper left']

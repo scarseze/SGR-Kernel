@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\skills\peftlab\schema.py
+# hypothesis_version: 6.151.9
+
+['analyze_sensitivity', 'attention_only', 'auto_benchmark', 'train_final_model', 'tune_hyperparameters']

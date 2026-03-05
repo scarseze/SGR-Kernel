@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\grpc\_utilities.py
+# hypothesis_version: 6.151.9
+
+['.', '_RpcMethodHandler', 'request_deserializer', 'request_streaming', 'response_serializer', 'response_streaming', 'stream_stream', 'stream_unary', 'unary_stream', 'unary_unary']

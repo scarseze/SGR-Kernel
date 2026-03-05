@@ -1,0 +1,175 @@
+{
+  "state_snapshot": {
+    "request_id": "8ee17e4b-27c",
+    "plan_id": "8b207da3",
+    "input_payload": "Do something",
+    "plan_ir": {
+      "id": "8b207da3",
+      "steps": [
+        {
+          "id": "1",
+          "skill_name": "mock_skill",
+          "inputs_template": {
+            "x": 1
+          },
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": {
+            "max_attempts": 1,
+            "escalation_tiers": [
+              "fast",
+              "mid",
+              "heavy"
+            ],
+            "repair_allowed": true,
+            "fallback_skill": null,
+            "abort_on_fail_types": []
+          },
+          "description": "Mock Step",
+          "timeout_seconds": 300.0,
+          "idempotent": true,
+          "idempotency_key": null
+        }
+      ],
+      "edges": [],
+      "global_risk_level": "low",
+      "deterministic_required": false,
+      "direct_response": null,
+      "created_at": 1772486448.323195
+    },
+    "step_states": {
+      "1": {
+        "step_id": "1",
+        "status": "COMMITTED",
+        "attempts": 1,
+        "tier_used": null,
+        "started_at": 1772486448.5147526,
+        "finished_at": 1772486448.5149474,
+        "confidence": 1.0,
+        "failure": null,
+        "output": "Executed: 1",
+        "history": []
+      }
+    },
+    "artifacts": {},
+    "skill_outputs": {
+      "1": "Executed: 1"
+    },
+    "llm_outputs": {},
+    "critic_reports": [],
+    "repair_history": [],
+    "retry_log": [],
+    "escalation_log": [],
+    "approvals": [],
+    "history": [],
+    "event_log": [
+      {
+        "event_id": "75f80e19-6007-4163-bef3-e95cc24cbe4e",
+        "type": "PLAN_CREATED",
+        "payload": {
+          "plan_ir": {
+            "id": "8b207da3",
+            "steps": [
+              {
+                "id": "1",
+                "skill_name": "mock_skill",
+                "inputs_template": {
+                  "x": 1
+                },
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": {
+                  "max_attempts": 1,
+                  "escalation_tiers": [
+                    "fast",
+                    "mid",
+                    "heavy"
+                  ],
+                  "repair_allowed": true,
+                  "fallback_skill": null,
+                  "abort_on_fail_types": []
+                },
+                "description": "Mock Step",
+                "timeout_seconds": 300.0,
+                "idempotent": true,
+                "idempotency_key": null
+              }
+            ],
+            "edges": [],
+            "global_risk_level": "low",
+            "deterministic_required": false,
+            "direct_response": null,
+            "created_at": 1772486448.323195
+          }
+        },
+        "request_id": "8ee17e4b-27c",
+        "timestamp": 1772486448.32323,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "c91621c6-de14-4618-9758-c134b65dd738",
+        "type": "EXECUTION_STARTED",
+        "payload": {},
+        "request_id": "8ee17e4b-27c",
+        "timestamp": 1772486448.5100179,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "6447f2e6-23f7-48b7-aa6b-a31cd993dcf7",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 1
+        },
+        "request_id": "8ee17e4b-27c",
+        "timestamp": 1772486448.5147526,
+        "step_id": "1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "4ea19564-c881-4d72-8a40-8841491fd81e",
+        "type": "STEP_COMPLETED",
+        "payload": {
+          "output": "Executed: 1"
+        },
+        "request_id": "8ee17e4b-27c",
+        "timestamp": 1772486448.5149474,
+        "step_id": "1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "63e56e65-54e4-45c4-8a16-dd0498c2df26",
+        "type": "EXECUTION_COMPLETED",
+        "payload": {},
+        "request_id": "8ee17e4b-27c",
+        "timestamp": 1772486448.5219955,
+        "step_id": null,
+        "actor": "kernel"
+      }
+    ],
+    "processed_event_ids": [
+      "6447f2e6-23f7-48b7-aa6b-a31cd993dcf7",
+      "63e56e65-54e4-45c4-8a16-dd0498c2df26",
+      "c91621c6-de14-4618-9758-c134b65dd738",
+      "4ea19564-c881-4d72-8a40-8841491fd81e",
+      "75f80e19-6007-4163-bef3-e95cc24cbe4e"
+    ],
+    "checkpoints": [
+      "checkpoints\\8ee17e4b-27c\\1772486448508_plan_created.json",
+      "checkpoints\\8ee17e4b-27c\\1772486448520_step_completed.json"
+    ],
+    "status": "COMPLETED",
+    "created_at": 1772486448.3230896,
+    "updated_at": 1772486448.5219955,
+    "token_budget": null,
+    "tokens_used": 0,
+    "llm_call_budget": null,
+    "llm_calls_used": 0
+  },
+  "step_id": null,
+  "timestamp": 1772486448.5247605,
+  "reason": "execution_completed"
+}

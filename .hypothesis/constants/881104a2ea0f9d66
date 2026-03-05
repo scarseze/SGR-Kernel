@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\integrations\datadog\datadog_handler.py
+# hypothesis_version: 6.151.9
+
+[',', 'DD_BASE_URL', 'DD_ENV', 'DD_SERVICE', 'DD_SOURCE', 'DD_VERSION', 'HOSTNAME', 'POD_NAME', 'env', 'litellm', 'litellm-server', 'metadata', 'request_tags', 'service', 'team_alias', 'team_id', 'unknown', 'user_api_key_team_id', 'version']

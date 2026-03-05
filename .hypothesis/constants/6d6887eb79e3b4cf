@@ -1,0 +1,4 @@
+# file: C:\Users\macht\SA\sgr_kernel\core\database.py
+# hypothesis_version: 6.151.9
+
+['+aiosqlite', 'DATABASE_URL', 'check_same_thread', 'session_context', 'sqlite', 'sqlite+aiosqlite://', 'sqlite://']

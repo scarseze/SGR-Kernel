@@ -1,0 +1,216 @@
+{
+  "state_snapshot": {
+    "request_id": "e65bbdc3-bde",
+    "plan_id": "0a05e1e5",
+    "input_payload": "Run parallel wave",
+    "plan_ir": {
+      "id": "0a05e1e5",
+      "steps": [
+        {
+          "id": "step1",
+          "skill_name": "dummy_skill",
+          "inputs_template": {},
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": null,
+          "description": null,
+          "timeout_seconds": 300.0,
+          "idempotent": false,
+          "idempotency_key": null
+        },
+        {
+          "id": "step2",
+          "skill_name": "dummy_skill",
+          "inputs_template": {},
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": null,
+          "description": null,
+          "timeout_seconds": 300.0,
+          "idempotent": false,
+          "idempotency_key": null
+        },
+        {
+          "id": "step3",
+          "skill_name": "dummy_skill",
+          "inputs_template": {},
+          "required_capabilities": [],
+          "critic_required": false,
+          "approval_required": false,
+          "retry_policy": null,
+          "description": null,
+          "timeout_seconds": 300.0,
+          "idempotent": false,
+          "idempotency_key": null
+        }
+      ],
+      "edges": [],
+      "global_risk_level": "low",
+      "deterministic_required": false,
+      "direct_response": null,
+      "created_at": 1772745968.7990735
+    },
+    "step_states": {
+      "step1": {
+        "step_id": "step1",
+        "status": "COMMITTED",
+        "attempts": 1,
+        "tier_used": null,
+        "started_at": 1772745968.810055,
+        "finished_at": 1772745968.9258623,
+        "confidence": 1.0,
+        "failure": null,
+        "output": "success",
+        "history": []
+      },
+      "step2": {
+        "step_id": "step2",
+        "status": "PENDING",
+        "attempts": 0,
+        "tier_used": null,
+        "started_at": null,
+        "finished_at": null,
+        "confidence": 1.0,
+        "failure": null,
+        "output": null,
+        "history": []
+      },
+      "step3": {
+        "step_id": "step3",
+        "status": "PENDING",
+        "attempts": 0,
+        "tier_used": null,
+        "started_at": null,
+        "finished_at": null,
+        "confidence": 1.0,
+        "failure": null,
+        "output": null,
+        "history": []
+      }
+    },
+    "artifacts": {},
+    "skill_outputs": {
+      "step1": "success"
+    },
+    "llm_outputs": {},
+    "critic_reports": [],
+    "repair_history": [],
+    "retry_log": [],
+    "escalation_log": [],
+    "approvals": [],
+    "history": [],
+    "event_log": [
+      {
+        "event_id": "4218876e-23b6-494b-b67f-202655cec093",
+        "type": "PLAN_CREATED",
+        "payload": {
+          "plan_ir": {
+            "id": "0a05e1e5",
+            "steps": [
+              {
+                "id": "step1",
+                "skill_name": "dummy_skill",
+                "inputs_template": {},
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": null,
+                "description": null,
+                "timeout_seconds": 300.0,
+                "idempotent": false,
+                "idempotency_key": null
+              },
+              {
+                "id": "step2",
+                "skill_name": "dummy_skill",
+                "inputs_template": {},
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": null,
+                "description": null,
+                "timeout_seconds": 300.0,
+                "idempotent": false,
+                "idempotency_key": null
+              },
+              {
+                "id": "step3",
+                "skill_name": "dummy_skill",
+                "inputs_template": {},
+                "required_capabilities": [],
+                "critic_required": false,
+                "approval_required": false,
+                "retry_policy": null,
+                "description": null,
+                "timeout_seconds": 300.0,
+                "idempotent": false,
+                "idempotency_key": null
+              }
+            ],
+            "edges": [],
+            "global_risk_level": "low",
+            "deterministic_required": false,
+            "direct_response": null,
+            "created_at": 1772745968.7990735
+          }
+        },
+        "request_id": "e65bbdc3-bde",
+        "timestamp": 1772745968.799753,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "e3411c7b-c958-4195-be2e-b3105f56c643",
+        "type": "EXECUTION_STARTED",
+        "payload": {},
+        "request_id": "e65bbdc3-bde",
+        "timestamp": 1772745968.8076217,
+        "step_id": null,
+        "actor": "kernel"
+      },
+      {
+        "event_id": "35368542-802b-4f2e-8209-fd2e4bf5b902",
+        "type": "STEP_STARTED",
+        "payload": {
+          "attempt": 1
+        },
+        "request_id": "e65bbdc3-bde",
+        "timestamp": 1772745968.810055,
+        "step_id": "step1",
+        "actor": "kernel"
+      },
+      {
+        "event_id": "c60d814b-0a8f-4b65-b64d-4ae4942f90ef",
+        "type": "STEP_COMPLETED",
+        "payload": {
+          "output": "success"
+        },
+        "request_id": "e65bbdc3-bde",
+        "timestamp": 1772745968.9258623,
+        "step_id": "step1",
+        "actor": "kernel"
+      }
+    ],
+    "processed_event_ids": [
+      "35368542-802b-4f2e-8209-fd2e4bf5b902",
+      "e3411c7b-c958-4195-be2e-b3105f56c643",
+      "c60d814b-0a8f-4b65-b64d-4ae4942f90ef",
+      "4218876e-23b6-494b-b67f-202655cec093"
+    ],
+    "checkpoints": [
+      "checkpoints\\e65bbdc3-bde\\1772745968806_plan_created.json"
+    ],
+    "status": "RUNNING",
+    "created_at": 1772745968.799675,
+    "updated_at": 1772745968.9258623,
+    "token_budget": null,
+    "tokens_used": 0,
+    "llm_call_budget": null,
+    "llm_calls_used": 0
+  },
+  "step_id": null,
+  "timestamp": 1772745968.9469445,
+  "reason": "step_completed"
+}

@@ -1,0 +1,67 @@
+{
+    "title": "SGR Kernel Status",
+    "tags": [
+        "sgr-kernel",
+        "metrics"
+    ],
+    "timezone": "browser",
+    "refresh": "5s",
+    "panels": [
+        {
+            "type": "timeseries",
+            "title": "Total Tokens Consumed",
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 12,
+                "h": 8
+            },
+            "targets": [
+                {
+                    "expr": "sum(sgr_kernel_llm_tokens_total) by (agent)",
+                    "legendFormat": "{{agent}}"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "custom": {
+                        "drawStyle": "line"
+                    }
+                }
+            }
+        },
+        {
+            "type": "timeseries",
+            "title": "Agent Handoffs (Rate)",
+            "gridPos": {
+                "x": 12,
+                "y": 0,
+                "w": 12,
+                "h": 8
+            },
+            "targets": [
+                {
+                    "expr": "rate(sgr_kernel_agent_handoffs_total[1m])",
+                    "legendFormat": "{{from_agent}} -> {{to_agent}}"
+                }
+            ]
+        },
+        {
+            "type": "heatmap",
+            "title": "LLM Latency Distribution",
+            "gridPos": {
+                "x": 0,
+                "y": 8,
+                "w": 24,
+                "h": 8
+            },
+            "targets": [
+                {
+                    "expr": "sum(rate(sgr_kernel_llm_latency_seconds_bucket[5m])) by (le)",
+                    "format": "heatmap"
+                }
+            ]
+        }
+    ]
+}

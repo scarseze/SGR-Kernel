@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 import json
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import structlog
 
@@ -21,15 +21,15 @@ class BackgroundReconciler:
         self.scan_interval = scan_interval_seconds
         self.leader_lock = DistributedLock("reconciler_loop", lock_timeout_ms=15000)
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: Optional[asyncio.Task[None]] = None
 
-    def start(self):
+    def start(self) -> None:
         if not self._running:
             self._running = True
             self._task = asyncio.create_task(self._run_loop())
             logger.info("reconciler_started", interval=self.scan_interval)
 
-    async def stop(self):
+    async def stop(self) -> None:
         self._running = False
         if self._task:
             self._task.cancel()
@@ -41,7 +41,7 @@ class BackgroundReconciler:
             await self.leader_lock.release()
         logger.info("reconciler_stopped")
 
-    async def _run_loop(self):
+    async def _run_loop(self) -> None:
         while self._running:
             try:
                 # 1. Attempt Leader Election (to prevent Split-Brain Reconciliations)
@@ -62,7 +62,7 @@ class BackgroundReconciler:
                 
             await asyncio.sleep(self.scan_interval)
 
-    async def _sweep_orphaned_jobs(self):
+    async def _sweep_orphaned_jobs(self) -> None:
         """Scans for jobs stuck in RUNNING state whose lease has expired using DB Source of Truth."""
         ui_memory = Container.get("ui_memory")
         if not ui_memory:
@@ -101,7 +101,7 @@ class BackgroundReconciler:
         except Exception as e:
             logger.error("reconciler_db_sweep_error", error=str(e))
 
-    async def _recover_orphaned_job(self, job_id: str, job_record: dict, ui_memory):
+    async def _recover_orphaned_job(self, job_id: str, job_record: Dict[str, Any], ui_memory: Any) -> None:
         """
         The "Principal-Level Recovery Scenario" (Formal Guarantee G1 preserved)
         If a worker died on RUNNING -> Lease expires -> Reconciliation marks QUEUED -> Re-executed.

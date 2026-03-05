@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\heroku\chat\transformation.py
+# hypothesis_version: 6.151.9
+
+['/v1/chat/completions', 'HEROKU_API_BASE', 'HEROKU_API_KEY']

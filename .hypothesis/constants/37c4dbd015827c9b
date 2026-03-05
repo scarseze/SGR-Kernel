@@ -1,0 +1,4 @@
+# file: C:\Users\macht\AppData\Roaming\Python\Python313\site-packages\litellm\llms\bedrock\count_tokens\bedrock_token_counter.py
+# hypothesis_version: 6.151.9
+
+[500, 'bedrock_api', 'input_tokens', 'litellm_params', 'messages', 'model']
