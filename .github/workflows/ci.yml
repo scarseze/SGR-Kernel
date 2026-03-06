@@ -21,7 +21,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install pytest pytest-asyncio hypothesis sqlalchemy
+        pip install pytest pytest-asyncio hypothesis sqlalchemy structlog
         
     - name: Run Pytest
       run: |
@@ -39,10 +39,10 @@ jobs:
         
     - name: Run Garak/PyRIT Adversarial Suite
       run: |
-        pip install garak pytest sqlalchemy
+        pip install garak pytest sqlalchemy structlog
         export LITELLM_LOG="DEBUG"
         # Simulate local LLM gateway for testing
-        garak --model_type openai --model_name gpt-3.5-turbo --probes garak.probes.prompt_injection -g 1
+        garak --model_name openai/gpt-3.5-turbo --probes prompt_injection -g 1
         
         # Run specific injection unit tests
         pytest tests/adversarial/ -v
@@ -59,7 +59,7 @@ jobs:
         
     - name: Install Linting Tools
       run: |
-        pip install ruff mypy sqlalchemy
+        pip install ruff mypy sqlalchemy structlog
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         
     - name: Lint with Ruff
