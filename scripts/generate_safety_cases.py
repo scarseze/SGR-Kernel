@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import os
 import sys
@@ -59,6 +58,8 @@ async def test_safety_case_{{ scenario_clean_id }}():
         # To avoid unused variable warning temporarily:
         assert messages is not None
         assert mock_llm is not None
+        assert engine is not None
+        assert agent is not None
 """
 
 async def generate_offline_tests():

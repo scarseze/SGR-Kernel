@@ -38,6 +38,8 @@ async def test_safety_case_job_offline_test_123():
         # To avoid unused variable warning temporarily:
         assert messages is not None
         assert mock_llm is not None
+        assert engine is not None
+        assert agent is not None
         
         # Execute Swarm
         # res, _, _ = await engine.execute(starting_agent=agent, messages=messages, max_turns=3)
