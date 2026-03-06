@@ -4,7 +4,7 @@ Evaluates step outputs against requirements using LLM-based analysis.
 """
 
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
@@ -20,7 +20,7 @@ class CriticEngine:
         self.llm = llm_service
 
     async def evaluate(
-        self, step_id: str, skill_name: str, inputs: Dict[str, Any], output: Any, requirements: str = "", metrics: List[Any] = None
+        self, step_id: str, skill_name: str, inputs: Dict[str, Any], output: Any, requirements: str = "", metrics: Optional[List[Any]] = None
     ) -> Tuple[bool, str]:  # (Passed, Reason)
         """
         Run a Critic pass on the output using EvaluationMetrics.
@@ -59,7 +59,7 @@ class CriticEngine:
             return True, f"Fallback pass (Error during evaluation): {e}"
 
     async def evaluate_plan(
-        self, agent_name: str, tool_calls_data: List[Dict[str, Any]], history: List[Dict[str, Any]], requirements: str = "", metrics: List[Any] = None
+        self, agent_name: str, tool_calls_data: List[Dict[str, Any]], history: List[Dict[str, Any]], requirements: str = "", metrics: Optional[List[Any]] = None
     ) -> Tuple[bool, str]:  # (Passed, Reason)
         """
         Evaluate an LLM's proposed plan (tool calls) before execution using EvaluationMetrics.

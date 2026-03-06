@@ -4,17 +4,18 @@ from typing import Any, Tuple
 
 logger = logging.getLogger("core.metrics")
 
+
 class EvaluationMetric(ABC):
-    def __init__(self, name: str, threshold: float = 1.0):
+    def __init__(self, name: str, threshold: float = 1.0) -> None:
         self.name = name
         self.threshold = threshold
 
     @abstractmethod
-    async def measure(self, **kwargs) -> float:
+    async def measure(self, **kwargs: Any) -> float:
         """Returns a score between 0.0 and 1.0."""
         pass
 
-    async def passes(self, **kwargs) -> Tuple[bool, str, float]:
+    async def passes(self, **kwargs: Any) -> Tuple[bool, str, float]:
         """Returns (passed, reason, score)"""
         try:
             score = await self.measure(**kwargs)
@@ -25,25 +26,27 @@ class EvaluationMetric(ABC):
             logger.error(f"Metric {self.name} evaluation failed: {e}")
             return False, f"[{self.name}] Error during evaluation: {e}", 0.0
 
+
 class CostLimitMetric(EvaluationMetric):
-    def __init__(self, max_cost_usd: float):
+    def __init__(self, max_cost_usd: float) -> None:
         super().__init__("CostLimit", threshold=1.0)
         self.max_cost_usd = max_cost_usd
 
-    async def measure(self, current_cost_usd: float = 0.0, **kwargs) -> float:
+    async def measure(self, current_cost_usd: float = 0.0, **kwargs: Any) -> float:
         if current_cost_usd <= self.max_cost_usd:
             return 1.0
         return 0.0
 
+
 class FaithfulnessMetric(EvaluationMetric):
-    def __init__(self, llm_service: Any, threshold: float = 0.7):
+    def __init__(self, llm_service: Any, threshold: float = 0.7) -> None:
         super().__init__("Faithfulness", threshold=threshold)
         self.llm = llm_service
 
-    async def measure(self, output: str = "", context: str = "", **kwargs) -> float:
+    async def measure(self, output: str = "", context: str = "", **kwargs: Any) -> float:
         if not context:
             return 1.0  # If no context, cannot be unfaithful to it
-            
+
         system_prompt = (
             "You are an objective evaluator scoring Faithfulness.\n"
             "Compare the OUTPUT to the provided CONTEXT.\n"
@@ -52,7 +55,7 @@ class FaithfulnessMetric(EvaluationMetric):
             "Return ONLY a float number, no other text."
         )
         user_prompt = f"--- CONTEXT ---\n{context}\n\n--- OUTPUT ---\n{output}\n"
-        
+
         try:
             result, _ = await self.llm.generate(system_prompt=system_prompt, user_prompt=user_prompt, temperature=0.0)
             return float(result.strip())
@@ -63,15 +66,16 @@ class FaithfulnessMetric(EvaluationMetric):
             logger.error(f"FaithfulnessMetric error: {e}")
             return 0.0
 
+
 class AnswerRelevancyMetric(EvaluationMetric):
-    def __init__(self, llm_service: Any, threshold: float = 0.7):
+    def __init__(self, llm_service: Any, threshold: float = 0.7) -> None:
         super().__init__("AnswerRelevancy", threshold=threshold)
         self.llm = llm_service
 
-    async def measure(self, output: str = "", query: str = "", **kwargs) -> float:
+    async def measure(self, output: str = "", query: str = "", **kwargs: Any) -> float:
         if not query:
             return 1.0
-            
+
         system_prompt = (
             "You are an objective metric scoring Answer Relevancy.\n"
             "Score how relevant the OUTPUT is to the original QUERY on a scale from 0.0 to 1.0.\n"
@@ -79,7 +83,7 @@ class AnswerRelevancyMetric(EvaluationMetric):
             "Return ONLY a float number, no other text."
         )
         user_prompt = f"--- QUERY ---\n{query}\n\n--- OUTPUT ---\n{output}\n"
-        
+
         try:
             result, _ = await self.llm.generate(system_prompt=system_prompt, user_prompt=user_prompt, temperature=0.0)
             return float(result.strip())
@@ -90,14 +94,15 @@ class AnswerRelevancyMetric(EvaluationMetric):
             logger.error(f"AnswerRelevancyMetric error: {e}")
             return 0.0
 
+
 class RequirementsMetric(EvaluationMetric):
     """Fallback metric to represent the old string-based requirements evaluation"""
-    def __init__(self, llm_service: Any, requirements: str):
+    def __init__(self, llm_service: Any, requirements: str) -> None:
         super().__init__("RequirementsMatch", threshold=1.0)
         self.llm = llm_service
         self.requirements = requirements
 
-    async def measure(self, output: str = "", **kwargs) -> float:
+    async def measure(self, output: str = "", **kwargs: Any) -> float:
         if not self.requirements:
             return 1.0
 
@@ -108,7 +113,7 @@ class RequirementsMetric(EvaluationMetric):
             "Return ONLY a float number."
         )
         user_prompt = f"--- REQUIREMENTS ---\n{self.requirements}\n\n--- OUTPUT ---\n{output}\n"
-        
+
         try:
             result, _ = await self.llm.generate(system_prompt=system_prompt, user_prompt=user_prompt, temperature=0.0)
             return float(result.strip())
