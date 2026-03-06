@@ -20,12 +20,12 @@ class TokenLedger:
         self.total_completion_tokens = 0
         self.total_cost_usd = 0.0
 
-    def add_usage(self, model_name: str, prompt_tokens: int, completion_tokens: int):
+    def add_usage(self, model_name: str, prompt_tokens: int, completion_tokens: int) -> None:
         self.total_prompt_tokens += prompt_tokens
         self.total_completion_tokens += completion_tokens
         
         # Determine pricing tier
-        tier = self.PRICING.get("default")
+        tier = self.PRICING.get("default", {"prompt": 0.01, "completion": 0.02})
         for key, rates in self.PRICING.items():
             if key in model_name.lower():
                 tier = rates
@@ -52,7 +52,7 @@ class BudgetGuard:
         self.max_cost_usd = max_cost_usd
         self.max_tokens = max_tokens
 
-    def check_budget(self, ledger: TokenLedger):
+    def check_budget(self, ledger: TokenLedger) -> None:
         summary = ledger.get_summary()
         
         if summary["total_tokens"] > self.max_tokens:

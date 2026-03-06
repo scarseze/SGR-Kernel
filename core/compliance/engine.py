@@ -2,8 +2,10 @@ class ComplianceViolationError(Exception):
     """Raised when a regulatory compliance rule is violated before or during execution."""
     pass
 
+from typing import Any, Callable, Dict, List, Tuple
+
 class Rule:
-    def __init__(self, name: str, evaluator: callable):
+    def __init__(self, name: str, evaluator: Callable[[Dict[str, Any]], Tuple[bool, str]]):
         self.name = name
         self.evaluator = evaluator
 
@@ -12,13 +14,13 @@ class ComplianceEngine:
         self.rules = []
         self.audit_log = []
 
-    def register_rule(self, name: str):
-        def decorator(func):
+    def register_rule(self, name: str) -> Callable[[Any], Any]:
+        def decorator(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
             self.rules.append(Rule(name, func))
             return func
         return decorator
 
-    def evaluate(self, session_context: dict):
+    def evaluate(self, session_context: Dict[str, Any]) -> bool:
         """
         Evaluates all registered rules against the given session context.
         Raises ComplianceViolationError if any rule fails.

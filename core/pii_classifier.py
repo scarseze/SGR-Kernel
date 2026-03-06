@@ -67,7 +67,7 @@ class PIIClassifier:
         findings = self._deduplicate_overlaps(findings)
                     
         # Sort findings by start index in reverse to avoid offset shifting when replacing
-        findings.sort(key=lambda x: x["start"], reverse=True)
+        findings.sort(key=lambda x: int(str(x["start"])), reverse=True)
         return findings
 
     @staticmethod

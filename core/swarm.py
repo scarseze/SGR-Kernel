@@ -49,6 +49,7 @@ class SwarmEngine:
         }
         
         # Phase 12: Zero-Downtime Model Swapping
+        self.model_router: Optional[Any] = None
         try:
             from core.routing.model_router import ModelRouter
             self.model_router = ModelRouter()
@@ -56,7 +57,7 @@ class SwarmEngine:
             if "model" in llm_config:
                 self.model_router.register_route("primary", llm_config["model"], 1.0, llm_config.get("max_context_tokens", 128000))
         except ImportError:
-            self.model_router = None
+            pass
 
         try:
             self.redis = Container.get("redis")
@@ -278,7 +279,8 @@ class SwarmEngine:
                         response = litellm.stream_chunk_builder(chunks, messages=history)
 
                         latency_ms = int((time.time() - start_time) * 1000)
-                        tokens_used = response.usage.total_tokens if hasattr(response, "usage") and response.usage else 0  # type: ignore[union-attr]
+                        usage = getattr(response, "usage", None)
+                        tokens_used = getattr(usage, "total_tokens", 0) if usage else 0
                         
                         try:
                             call_cost = litellm.completion_cost(completion_response=response)
@@ -289,8 +291,8 @@ class SwarmEngine:
                         except Exception:
                             pass # Unknown model for litellm cost estimator
                             
-                        if ledger and hasattr(response, "usage") and response.usage:
-                            ledger.add_usage(model_name, response.usage.prompt_tokens, response.usage.completion_tokens)
+                        if ledger and usage:
+                            ledger.add_usage(model_name, getattr(usage, "prompt_tokens", 0), getattr(usage, "completion_tokens", 0))
                         
                         if llm_span:
                             llm_span.set_attribute("llm.tokens", tokens_used)
@@ -308,17 +310,17 @@ class SwarmEngine:
                         parent_span.record_exception(e)
                     return f"Error connecting to LLM: {str(e)}", current_agent, transfer_count
 
-                msg = response.choices[0].message  # type: ignore[union-attr]
-                history.append(msg.model_dump(exclude_none=True))
+                resp_msg = response.choices[0].message  # type: ignore[union-attr]
+                history.append(resp_msg.model_dump(exclude_none=True))
 
                 # 2. Check for tool calls
-                if not msg.tool_calls:
+                if not resp_msg.tool_calls:
                     # Phase 10: Formal Output Verification
                     output_spec = getattr(current_agent, 'output_spec', None)
-                    if output_spec and msg.content:
+                    if output_spec and resp_msg.content:
                         try:
                             from core.verification.output_spec import OutputSpecViolation
-                            certificate = output_spec.validate(msg.content)
+                            certificate = output_spec.validate(resp_msg.content)
                             logger.info(f"✅ OutputSpec '{output_spec.name}' passed. Certificate: {certificate.output_hash[:16]}...")
                         except OutputSpecViolation as spec_err:
                             logger.warning(f"OutputSpec violation: {spec_err}. Injecting correction prompt.")
@@ -327,13 +329,13 @@ class SwarmEngine:
                                 "content": f"Your previous response violated the output specification: {spec_err}. Please correct your response to satisfy ALL constraints."
                             })
                             continue  # Retry the LLM call with correction prompt
-                    return msg.content or "Done", current_agent, transfer_count
+                    return resp_msg.content or "Done", current_agent, transfer_count
 
                 # 3. Plan Critic: Evaluate the entire sequence of tool calls before executing
                 if critic_engine and getattr(current_agent, 'plan_requirements', None):
                     # Extract tool call data for the critic
                     tool_calls_data = []
-                    for tc in msg.tool_calls:
+                    for tc in resp_msg.tool_calls:
                         tool_calls_data.append({
                             "tool": tc.function.name,
                             "args": tc.function.arguments
@@ -373,7 +375,7 @@ class SwarmEngine:
                 last_summary = None
                 current_agent_name = current_agent.name
                 
-                for tool_call in msg.tool_calls:
+                for tool_call in resp_msg.tool_calls:
                     func_name = tool_call.function.name
                     args_str = tool_call.function.arguments
                     

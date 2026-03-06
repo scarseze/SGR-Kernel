@@ -46,7 +46,7 @@ class ContextDehydrator:
         if system_prompt:
             budget -= len(str(system_prompt.get("content", ""))) // 4
             
-        tail_messages = []
+        tail_messages: List[Dict[str, Any]] = []
         for msg in reversed(history[1:]):
             msg_tokens = len(str(msg.get("content", ""))) // 4
             if budget - msg_tokens > 0:

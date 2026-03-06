@@ -108,7 +108,7 @@ class SecurityGuardian:
             
         return output
 
-    def _flatten_values(self, obj, depth: int = 0) -> list:
+    def _flatten_values(self, obj: Any, depth: int = 0) -> List[str]:
         """Recursively extract string values from nested dicts/lists (max depth 5)."""
         if depth > 5:
             return []

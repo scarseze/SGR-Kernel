@@ -25,15 +25,15 @@ class ModelRouter:
         }
         self.current_route = "primary"
 
-    def register_route(self, route_id: str, model_name: str, cost: float, context: int, local: bool = False):
+    def register_route(self, route_id: str, model_name: str, cost: float, context: int, local: bool = False) -> None:
         self.registry[route_id] = ModelRoute(model_name, cost, context, local)
 
-    def mark_down(self, route_id: str):
+    def mark_down(self, route_id: str) -> None:
         if route_id in self.registry:
             self.registry[route_id].status = "down"
             logger.warning(f"Router: Model route '{route_id}' marked DOWN.")
 
-    def mark_up(self, route_id: str):
+    def mark_up(self, route_id: str) -> None:
         if route_id in self.registry:
             self.registry[route_id].status = "up"
             logger.info(f"Router: Model route '{route_id}' marked UP.")
