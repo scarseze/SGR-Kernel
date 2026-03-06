@@ -13,13 +13,10 @@ from core.execution import (
     StepStatus,
 )
 from core.execution.policy import StepResult
-from core.governance import (
-    GovernanceHooksBus,
-)
+from core.governance import GovernanceHooksBus
 from core.reliability import ReliabilityEngine
 from core.repair import RepairEngine
 from core.skill_interface import SkillContext, SkillRuntimeAdapter
-
 
 logger = logging.getLogger(__name__)
 
