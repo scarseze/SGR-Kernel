@@ -43,6 +43,16 @@ jobs_table = Table(
     Column('updated_at', DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
 )
 
+failed_scenarios_table = Table(
+    'failed_scenarios', metadata_obj,
+    Column('scenario_id', String, primary_key=True),
+    Column('job_id', String, nullable=False, index=True),
+    Column('org_id', String, default="default_org", index=True),
+    Column('reason', String),
+    Column('context_payload', Text),
+    Column('created_at', DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+)
+
 class UIMemory:
     def __init__(self, db_url: Optional[str] = None):
         import os
@@ -70,6 +80,7 @@ class UIMemory:
         self.metadata = metadata_obj
         self.sessions = sessions_table
         self.jobs = jobs_table
+        self.failed_scenarios = failed_scenarios_table
         
         # self.init_db() cannot be called in __init__ as it is async now.
         # It should be called explicitly during startup.
@@ -532,6 +543,61 @@ Summary:"""
                 return jobs
         except Exception as e:
             logger.error("failed_to_fetch_stale_jobs_via_db_time", error=str(e))
+            return []
+
+    async def get_failed_jobs(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """Returns jobs that failed, used by the Reconciler to generate safety cases."""
+        try:
+            from sqlalchemy import select
+            async with self.engine.connect() as conn:
+                stmt = select(self.jobs).where(self.jobs.c.status == 'FAILED').order_by(self.jobs.c.updated_at.desc()).limit(limit)
+                result = await conn.execute(stmt)
+                return [dict(row._mapping) for row in result]
+        except Exception as e:
+            logger.error("failed_to_fetch_failed_jobs", error=str(e))
+            return []
+
+    async def save_failed_scenario(self, scenario_id: str, job_id: str, org_id: str, reason: str, context_payload: str) -> bool:
+        """Saves a failed context scenario to the database for offline testing."""
+        try:
+            async with self.engine.begin() as conn:
+                await self._enforce_tenant_residency(org_id)
+                await self._apply_rls_context(conn, org_id)
+
+                if self.engine.name == 'postgresql':
+                    stmt = pg_insert(self.failed_scenarios).values(
+                        scenario_id=scenario_id,
+                        job_id=job_id,
+                        org_id=org_id,
+                        reason=reason,
+                        context_payload=context_payload
+                    ).on_conflict_do_nothing()
+                else:
+                    stmt = sqlite_insert(self.failed_scenarios).values(
+                        scenario_id=scenario_id,
+                        job_id=job_id,
+                        org_id=org_id,
+                        reason=reason,
+                        context_payload=context_payload
+                    ).on_conflict_do_nothing()
+                    
+                await conn.execute(stmt)
+            logger.info("failed_scenario_saved", scenario_id=scenario_id, job_id=job_id)
+            return True
+        except Exception as e:
+            logger.error("failed_to_save_scenario", scenario_id=scenario_id, error=str(e))
+            return False
+
+    async def get_unresolved_scenarios(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Used by the code generator script to build offline tests."""
+        try:
+            from sqlalchemy import select
+            async with self.engine.connect() as conn:
+                stmt = select(self.failed_scenarios).order_by(self.failed_scenarios.c.created_at.desc()).limit(limit)
+                result = await conn.execute(stmt)
+                return [dict(row._mapping) for row in result]
+        except Exception as e:
+            logger.error("failed_to_fetch_scenarios", error=str(e))
             return []
 
     async def check_health(self) -> bool:

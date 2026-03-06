@@ -54,6 +54,7 @@ class BackgroundReconciler:
 
                 # We are the Leader. Run the sweep.
                 await self._sweep_orphaned_jobs()
+                await self._extract_safety_cases()
 
             except asyncio.CancelledError:
                 break
@@ -129,3 +130,50 @@ class BackgroundReconciler:
                 }
                 await redis.rpush("sgr:peftlab:jobs", json.dumps(job_payload_msg))
                 logger.info("orphaned_job_requeued", job_id=job_id)
+
+    async def _extract_safety_cases(self) -> None:
+        """
+        Dynamic Safety Cases (Offline Testing):
+        Scans for FAILED jobs and extracts their context into the failed_scenarios table
+        for offline test generation.
+        """
+        ui_memory = Container.get("ui_memory")
+        if not ui_memory:
+            return
+
+        try:
+            failed_jobs = await ui_memory.get_failed_jobs(limit=10)
+            for job in failed_jobs:
+                job_id = job.get("job_id")
+                org_id = job.get("org_id", "default_org")
+                
+                # Check if we already processed this scenario (deduplication)
+                # We use the job_id as the scenario_id for 1:1 mapping of job failures
+                scenario_id = f"scenario_{job_id}"
+                
+                # Extract reason from payload if possible, otherwise generic
+                reason = "Unknown Execution Failure"
+                context_payload = job.get("payload", "{}")
+                
+                try:
+                    payload_data = json.loads(context_payload)
+                    # Often errors are attached to the job payload or status detail
+                    if "error" in payload_data:
+                        reason = payload_data["error"]
+                except json.JSONDecodeError:
+                    pass
+
+                # Save the scenario for offline generator
+                saved = await ui_memory.save_failed_scenario(
+                    scenario_id=scenario_id,
+                    job_id=job_id,
+                    org_id=org_id,
+                    reason=reason,
+                    context_payload=context_payload
+                )
+                
+                if saved:
+                    logger.info("safety_case_extracted", job_id=job_id, scenario_id=scenario_id)
+                    
+        except Exception as e:
+            logger.error("reconciler_safety_case_extraction_error", error=str(e))
