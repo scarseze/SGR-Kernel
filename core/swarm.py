@@ -245,7 +245,41 @@ class SwarmEngine:
                 if not msg.tool_calls:
                     return msg.content or "Done", current_agent, transfer_count
 
-                # 3. Handle Tool Calls
+                # 3. Plan Critic: Evaluate the entire sequence of tool calls before executing
+                if critic_engine and getattr(current_agent, 'plan_requirements', None):
+                    # Extract tool call data for the critic
+                    tool_calls_data = []
+                    for tc in msg.tool_calls:
+                        tool_calls_data.append({
+                            "tool": tc.function.name,
+                            "args": tc.function.arguments
+                        })
+                    
+                    plan_passed, plan_reason = await critic_engine.evaluate_plan(
+                        agent_name=current_agent.name,
+                        tool_calls_data=tool_calls_data,
+                        history=history,
+                        requirements=current_agent.plan_requirements
+                    )
+                    
+                    if not plan_passed:
+                        consecutive_critic_failures += 1
+                        if consecutive_critic_failures <= max_internal_retries:
+                            logger.warning(f"Plan Critic rejected proposed plan. Retry {consecutive_critic_failures}/{max_internal_retries}. Reason: {plan_reason}")
+                            rejection_msg = f"Plan Critic Evaluation Failed: {plan_reason}. Please revise your plan (tool calls) and try again."
+                            history.append({
+                                "role": "system",
+                                "content": rejection_msg
+                            })
+                            continue # Skip tool execution, go to next LLM turn to self-correct
+                        else:
+                            logger.error(f"Plan Critic rejected plan. Max retries ({max_internal_retries}) reached. Aborting.")
+                            return f"Error: Plan Critic rejected the agent's proposed plan completely. Reason: {plan_reason}", current_agent, transfer_count
+                            
+                # Reset failure count if plan passed or no critic
+                consecutive_critic_failures = 0
+                
+                # 4. Handle Tool Calls
                 agent_swapped = False
                 last_summary = None
                 current_agent_name = current_agent.name

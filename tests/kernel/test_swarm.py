@@ -197,3 +197,68 @@ async def test_swarm_multi_turn_critic(mock_safe_call_llm, mock_stream_builder, 
     assert len(critic_calls) == 2
     assert critic_calls[0].kwargs['inputs'] == {'action': 'attempt_1'}
     assert critic_calls[1].kwargs['inputs'] == {'action': 'attempt_2'}
+
+@pytest.mark.asyncio
+@patch('core.swarm.litellm.completion_cost', return_value=0.0)
+@patch('core.swarm.litellm.stream_chunk_builder')
+@patch('core.swarm.SwarmEngine._safe_call_llm', new_callable=AsyncMock)
+async def test_swarm_plan_critic(mock_safe_call_llm, mock_stream_builder, mock_cost, test_agent):
+    """
+    Tests Agentic Reasoning (Plan Critic).
+    The agent proposes a plan (tool calls). The Plan Critic rejects it BEFORE execution.
+    The agent revises the plan. The Plan Critic accepts it. Tool runs.
+    """
+    mock_critic = AsyncMock()
+    # Turn 1: Plan Critic says False. Turn 2: Plan Critic says True (and Tool Critic says True)
+    mock_critic.evaluate_plan.side_effect = [(False, "Plan uses unsafe arguments"), (True, "Plan is safe")]
+    mock_critic.evaluate.return_value = (True, "Tool output is good")
+    
+    test_agent.plan_requirements = "Must use safe actions"
+    mock_swarm_engine = SwarmEngine(llm_config={"model": "test-model"})
+    
+    # 1. First llm call returns a BAD proposed plan (tool call)
+    fake_tool_call_bad = MagicMock()
+    fake_tool_call_bad.id = "bad_call"
+    fake_tool_call_bad.function.name = "test_tool"
+    fake_tool_call_bad.function.arguments = '{"action": "rm -rf"}'
+    response_turn_1 = FakeResponse(FakeMessage(content=None, tool_calls=[fake_tool_call_bad]))
+    
+    # 2. Second llm call returns a GOOD proposed plan (tool call)
+    fake_tool_call_good = MagicMock()
+    fake_tool_call_good.id = "good_call"
+    fake_tool_call_good.function.name = "test_tool"
+    fake_tool_call_good.function.arguments = '{"action": "list_files"}'
+    response_turn_2 = FakeResponse(FakeMessage(content=None, tool_calls=[fake_tool_call_good]))
+    
+    # 3. Third llm call returns final success message
+    response_final = FakeResponse(FakeMessage(content="Task completed safely."))
+
+    mock_stream_builder.side_effect = [response_turn_1, response_turn_2, response_final]
+    
+    mock_execute = MagicMock(return_value="executed_mock")
+    test_agent.skills[0].execute = mock_execute
+
+    def llm_side_effect(*args, **kwargs):
+        return create_async_chunk_generator([MagicMock(choices=None)])
+    mock_safe_call_llm.side_effect = llm_side_effect
+
+    res, _, _ = await mock_swarm_engine.execute(
+        starting_agent=test_agent,
+        messages=[{"role": "user", "content": "Do a task."}],
+        max_turns=5,
+        critic_engine=mock_critic
+    )
+
+    assert res == "Task completed safely."
+    
+    # Plan Critic evaluated 2 plans
+    assert mock_critic.evaluate_plan.call_count == 2
+    
+    plan_calls = mock_critic.evaluate_plan.call_args_list
+    assert "rm -rf" in plan_calls[0].kwargs['tool_calls_data'][0]['args']
+    assert "list_files" in plan_calls[1].kwargs['tool_calls_data'][0]['args']
+    
+    # Tool execute should ONLY have been called ONCE (the bad plan was intercepted)
+    assert mock_execute.call_count == 1
+    # Tool Critic evaluate should ONLY have been called ONCE (for the good output)
+    assert mock_critic.evaluate.call_count == 1

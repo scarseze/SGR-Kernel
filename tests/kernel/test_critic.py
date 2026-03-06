@@ -97,3 +97,68 @@ async def test_critic_evaluate_fallback_fail(critic, mock_llm):
     
     assert passed is False
     assert "Fallback fail" in reason
+
+@pytest.mark.asyncio
+async def test_critic_evaluate_plan_no_requirements(critic):
+    passed, reason = await critic.evaluate_plan(
+        agent_name="TestAgent",
+        tool_calls_data=[{"tool": "action_a", "args": "{}"}],
+        history=[],
+        requirements=""
+    )
+    assert passed is True
+    assert reason == "No specific plan requirements."
+    critic.llm.generate_structured.assert_not_called()
+
+@pytest.mark.asyncio
+async def test_critic_evaluate_plan_llm_pass(critic, mock_llm):
+    mock_response = MagicMock()
+    mock_response.passed = True
+    mock_response.reason = "Logical plan"
+    mock_llm.generate_structured.return_value = (mock_response, {"total_tokens": 15})
+
+    passed, reason = await critic.evaluate_plan(
+        agent_name="TestAgent",
+        tool_calls_data=[{"tool": "fetch_data", "args": "{\"source\": \"db\"}"}],
+        history=[{"role": "user", "content": "Get the data"}],
+        requirements="Must only use safe read endpoints."
+    )
+    
+    assert passed is True
+    assert reason == "Logical plan"
+    mock_llm.generate_structured.assert_called_once()
+    args, kwargs = mock_llm.generate_structured.call_args
+    assert "Must only use safe read endpoints." in kwargs["user_prompt"]
+    assert "fetch_data" in kwargs["user_prompt"]
+
+@pytest.mark.asyncio
+async def test_critic_evaluate_plan_llm_fail(critic, mock_llm):
+    mock_response = MagicMock()
+    mock_response.passed = False
+    mock_response.reason = "Unsafe endpoint used."
+    mock_llm.generate_structured.return_value = (mock_response, {"total_tokens": 15})
+
+    passed, reason = await critic.evaluate_plan(
+        agent_name="TestAgent",
+        tool_calls_data=[{"tool": "delete_db", "args": "{}"}],
+        history=[],
+        requirements="Must only use safe read endpoints."
+    )
+    
+    assert passed is False
+    assert reason == "Unsafe endpoint used."
+
+@pytest.mark.asyncio
+async def test_critic_evaluate_plan_llm_exception_fallback(critic, mock_llm):
+    mock_llm.generate_structured.side_effect = Exception("API Offline")
+    
+    passed, reason = await critic.evaluate_plan(
+        agent_name="TestAgent",
+        tool_calls_data=[{"tool": "fetch_data"}],
+        history=[],
+        requirements="Check read only"
+    )
+    
+    # For evaluate_plan we fallback to True on exception if not strict
+    assert passed is True
+    assert "Fallback pass" in reason

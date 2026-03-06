@@ -4,7 +4,7 @@ Evaluates step outputs against requirements using LLM-based analysis.
 """
 
 import logging
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
 from pydantic import BaseModel, Field
 
@@ -63,3 +63,43 @@ class CriticEngine:
                 return True, f"Fallback pass: {len(matched)}/{len(requirement_keywords)} keywords found."
             else:
                 return False, f"Fallback fail: only {len(matched)}/{len(requirement_keywords)} keywords."
+
+    async def evaluate_plan(
+        self, agent_name: str, tool_calls_data: List[Dict[str, Any]], history: List[Dict[str, Any]], requirements: str = ""
+    ) -> Tuple[bool, str]:  # (Passed, Reason)
+        """
+        Evaluate an LLM's proposed plan (tool calls) before execution.
+        """
+        if not requirements:
+            return True, "No specific plan requirements."
+
+        system_prompt = (
+            "You are a strict, objective Plan Critic in the SGR Kernel architecture. "
+            "Your job is to evaluate whether the proposed action sequence (tool calls) is logical, "
+            "safe, and satisfies the given requirements. Be extremely rigorous."
+        )
+        
+        # Keep history concise for the critic to avoid context bloat
+        condensed_history = history[-5:] if len(history) > 5 else history
+        
+        user_prompt = (
+            f"Agent Name: {agent_name}\n"
+            f"Requirements: {requirements}\n\n"
+            f"--- PROPOSED PLAN (TOOL CALLS) ---\n{tool_calls_data}\n--------------------------\n\n"
+            f"--- RECENT CONTEXT ---\n{condensed_history}\n--------------------------\n"
+        )
+
+        try:
+            logger.debug(f"Plan Critic evaluating proposed tool calls from agent {agent_name}...")
+            result, usage = await self.llm.generate_structured(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                response_model=CriticResponse,
+                temperature=0.0
+            )
+            return result.passed, result.reason
+        except Exception as e:
+            logger.error(f"Plan Critic LLM evaluation failed: {e}. Defaulting to safe (pass).")
+            # If the critic LLM fails, we don't want to block progress completely unless strictly configured.
+            # In a production distributed setting, this might route to a human approval queue.
+            return True, "Fallback pass: Critic LLM unavailable."
