@@ -5,6 +5,7 @@ import time
 from typing import Any, Dict, List
 
 from core.metrics import EvaluationMetric
+from evals.slices import tag_slices
 
 # Setup basic logging for the runner
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -49,6 +50,10 @@ class BatchEvaluator:
                 if not line.strip():
                     continue
                 data = json.loads(line)
+
+                # Apply dynamic slicing logic based on content
+                tag_slices(data)
+
                 records.append(EvaluationRecord(
                     sample_id=data.get("id", "unknown"),
                     input_data=data.get("input", {}),

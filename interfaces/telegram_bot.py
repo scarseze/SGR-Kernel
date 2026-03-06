@@ -92,12 +92,13 @@ async def send_response(message: types.Message, response_text: str):
 
             # Use text as caption if it fits and exists
             caption = clean_text if clean_text and len(clean_text) < 1000 else "📂 Ваш файл"
-
-            # If we use text as caption, we don't need to send it separately
-            if caption == clean_text:
-                clean_text = None
+            used_text_as_caption = caption == clean_text
 
             await message.bot.send_document(message.chat.id, file_input, caption=caption, parse_mode="Markdown")
+
+            # Only clear text AFTER successful send to avoid data loss
+            if used_text_as_caption:
+                clean_text = None
         except Exception as e:
             await message.answer(f"❌ Ошибка отправки файла: {e}")
 
@@ -113,6 +114,9 @@ async def send_response(message: types.Message, response_text: str):
 @dp.message(Command("metrics"))
 async def handle_metrics(message: types.Message):
     """Shows RAG metrics for the last request."""
+    # WARNING: get_last_trace() is not thread-safe in a multi-user bot.
+    # It returns the globally last trace, not per-user. A proper fix requires
+    # per-session trace storage in the kernel architecture.
     trace = engine.tracer.get_last_trace()
     if not trace:
         await message.answer("❌ Нет данных о последних запросах.")
@@ -189,8 +193,10 @@ async def handle_voice(message: types.Message):
             return
 
         # 3. Process with Agent
+        # Truncate preview to avoid Telegram message length limits (4096 chars)
+        preview_text = (transcribed_text[:50] + "...") if len(transcribed_text) > 50 else transcribed_text
         await bot.edit_message_text(
-            f'🧠 Думаю: "{transcribed_text}"', chat_id=message.chat.id, message_id=status_msg.message_id
+            f'🧠 Думаю: "{preview_text}"', chat_id=message.chat.id, message_id=status_msg.message_id
         )
 
         # Engine run might be slow, so we keep the "Thinking" status or typing action
