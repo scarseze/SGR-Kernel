@@ -39,7 +39,7 @@ jobs:
         
     - name: Run Garak/PyRIT Adversarial Suite
       run: |
-        pip install garak pytest
+        pip install garak pytest sqlalchemy
         export LITELLM_LOG="DEBUG"
         # Simulate local LLM gateway for testing
         garak --model_type openai --model_name gpt-3.5-turbo --probes garak.probes.prompt_injection -g 1

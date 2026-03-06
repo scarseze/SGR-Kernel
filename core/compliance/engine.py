@@ -1,9 +1,9 @@
+from typing import Any, Callable, Dict, Tuple
+
+
 class ComplianceViolationError(Exception):
     """Raised when a regulatory compliance rule is violated before or during execution."""
     pass
-
-from typing import Any, Callable, Dict, List, Tuple
-
 class Rule:
     def __init__(self, name: str, evaluator: Callable[[Dict[str, Any]], Tuple[bool, str]]):
         self.name = name
