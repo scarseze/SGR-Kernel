@@ -8,11 +8,11 @@ Requirements:
   docker compose -f docker-compose.yml -f docker-compose.chaos.yml up -d
 """
 import asyncio
-import pytest
+
 import httpx
+import pytest
 
 from tests.chaos.conftest import ToxiproxyClient
-
 
 QDRANT_PROXY_URL = "http://localhost:26333"
 

@@ -1,10 +1,12 @@
-import pytest
-import json
 from unittest.mock import AsyncMock, MagicMock, patch
-from core.swarm import SwarmEngine
-from core.agent import Agent
-from skills.base import BaseSkill
+
+import pytest
 from pydantic import BaseModel
+
+from core.agent import Agent
+from core.swarm import SwarmEngine
+from skills.base import BaseSkill
+
 
 class FakeMessage:
     def __init__(self, content, role="assistant", tool_calls=None):

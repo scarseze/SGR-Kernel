@@ -2,9 +2,13 @@ import asyncio
 import hashlib
 import os
 import tempfile
+
 import pytest
-from hypothesis import given, settings, strategies as st
-from core.artifacts import LocalArtifactStore, ArtifactRef
+from hypothesis import given, settings
+from hypothesis import strategies as st
+
+from core.artifacts import ArtifactRef, LocalArtifactStore
+
 
 @pytest.mark.asyncio
 @given(

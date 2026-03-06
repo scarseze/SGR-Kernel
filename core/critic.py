@@ -3,9 +3,10 @@ Critic Engine for SGR Kernel.
 Evaluates step outputs against requirements using LLM-based analysis.
 """
 
-from typing import Any, Dict, Tuple
-from pydantic import BaseModel, Field
 import logging
+from typing import Any, Dict, Tuple
+
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger("core.critic")
 

@@ -8,11 +8,11 @@ Requirements:
   docker compose -f docker-compose.yml -f docker-compose.chaos.yml up -d
 """
 import asyncio
+
 import pytest
 import redis.asyncio as aioredis
 
 from tests.chaos.conftest import ToxiproxyClient
-
 
 REDIS_PROXY_URL = "redis://localhost:26379/0"
 

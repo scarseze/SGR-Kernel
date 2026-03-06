@@ -8,9 +8,10 @@ Usage:
 Tests are automatically SKIPPED if Toxiproxy is not reachable (local dev without Docker).
 """
 import os
-import pytest
-import httpx
 from typing import Any, Dict, Generator
+
+import httpx
+import pytest
 
 TOXIPROXY_API = os.getenv("TOXIPROXY_API", "http://localhost:8474")
 

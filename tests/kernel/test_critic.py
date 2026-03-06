@@ -1,6 +1,9 @@
-import pytest
-from core.critic import CriticEngine, CriticResponse
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from core.critic import CriticEngine
+
 
 @pytest.fixture
 def mock_llm():

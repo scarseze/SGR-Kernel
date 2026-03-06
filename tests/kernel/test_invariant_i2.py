@@ -1,13 +1,16 @@
-import asyncio
 import uuid
-import pytest
-from hypothesis import given, settings, strategies as st
-from datetime import datetime, timezone, timedelta
-from core.ui_memory import UIMemory
-from core.reconciler import BackgroundReconciler
-from core.container import Container
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock
+
+import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from sqlalchemy import select
+
+from core.container import Container
+from core.reconciler import BackgroundReconciler
+from core.ui_memory import UIMemory
+
 
 @pytest.mark.asyncio
 @given(
@@ -36,7 +39,7 @@ async def test_at_least_once_delivery(crash_indices):
     
     jobs = []
     
-    for i in range(10):
+    for _ in range(10):
         job_id = f"job-{uuid.uuid4()}"
         await mem.create_job(job_id, "org-1", {"task": "test"})
         jobs.append(job_id)
