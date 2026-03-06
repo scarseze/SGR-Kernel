@@ -24,18 +24,22 @@ class OllamaEmbeddingProvider(EmbeddingProvider):
         if not self.model:
             raise ValueError("EMBEDDING_MODEL must be provided.")
 
-    async def embed(self, text: str) -> List[float]:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(f"{self.base_url}/api/embeddings", json={"model": self.model, "prompt": text})
-            response.raise_for_status()
-            return response.json()["embedding"]
+    async def embed(self, text: str, client: httpx.AsyncClient | None = None) -> List[float]:
+        if client:
+            return await self._do_embed(client, text)
+        async with httpx.AsyncClient() as new_client:
+            return await self._do_embed(new_client, text)
+
+    async def _do_embed(self, client: httpx.AsyncClient, text: str) -> List[float]:
+        response = await client.post(f"{self.base_url}/api/embeddings", json={"model": self.model, "prompt": text})
+        response.raise_for_status()
+        return response.json()["embedding"]
 
     async def embed_batch(self, texts: List[str]) -> List[List[float]]:
-        # Ollama doesn't always support batch well, loop for now or usage specific endpoint if available
-        # n.b. efficient implementation would use gather
         import asyncio
-
-        return await asyncio.gather(*[self.embed(t) for t in texts])
+        
+        async with httpx.AsyncClient() as client:
+            return await asyncio.gather(*[self.embed(t, client=client) for t in texts])
 
 
 class OpenAIEmbeddingProvider(EmbeddingProvider):

@@ -12,6 +12,7 @@ from core.execution import RetryPolicy, SemanticFailureType
 class RecoveryAction(str, Enum):
     RETRY = "RETRY"
     REPAIR = "REPAIR"
+    ESCALATE = "ESCALATE"
     IGNORE = "IGNORE"
     ABORT = "ABORT"
 
@@ -36,6 +37,9 @@ class ExecutionPolicy:
 
         if failure_type == SemanticFailureType.TIMEOUT:
             return RecoveryAction.RETRY
+
+        if failure_type == SemanticFailureType.LOW_CONFIDENCE:
+            return RecoveryAction.ESCALATE
 
         if failure_type in [SemanticFailureType.SCHEMA_FAIL, SemanticFailureType.CRITIC_FAIL]:
             return RecoveryAction.REPAIR

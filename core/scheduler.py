@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 import time
 from typing import Any, Dict, List, Optional
 
@@ -34,6 +35,7 @@ class Scheduler:
     def __init__(self) -> None:
         self.redis = Container.get("redis")
         self.lifecycle = Container.get("lifecycle")
+        self.max_queue_size = int(os.getenv("SGR_MAX_QUEUE_SIZE", "1000"))
         # Initialize QuotaManager for org-level budgeting and rate limiting
         from core.quota import QuotaManager
         self.quota_manager = QuotaManager(self.redis)
@@ -49,7 +51,6 @@ class Scheduler:
         # 1. Split Local vs Remote (For now, all Local if Redis missing, or specific policy)
         # Phase 5: Try Remote First if Redis is connected
         # Check if redis is enabled via Env
-        import os
         use_redis = self.redis is not None and os.getenv("REDIS_HOST") not in ["mock_redis", None, ""]
         
         if use_redis:
@@ -89,12 +90,11 @@ class Scheduler:
         request_id = tasks[0].request_id # Assuming same request_id for batch
         
         # 1. Push all tasks
-        MAX_QUEUE_SIZE = 1000
         for task in tasks:
             # Backpressure: Check global queue limit
             queue_len = await self.redis.llen("sgr:tasks")
-            if queue_len >= MAX_QUEUE_SIZE:
-                logger.error(f"SGR Queue Overloaded! (Limits: {MAX_QUEUE_SIZE}). Dropping Task: {task.step_id}")
+            if queue_len >= self.max_queue_size:
+                logger.error(f"SGR Queue Overloaded! (Limit: {self.max_queue_size}). Dropping Task: {task.step_id}")
                 event = KernelEvent(type=EventType.STEP_FAILED, request_id=task.request_id, step_id=task.step_id, payload={"error": "429 System Overloaded (Queue Full)"})
                 results_map = {t.step_id: StepResult(success=False, events=[event]) for t in tasks}
                 return list(results_map.values())

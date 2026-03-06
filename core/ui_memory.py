@@ -81,6 +81,7 @@ class UIMemory:
         self.sessions = sessions_table
         self.jobs = jobs_table
         self.failed_scenarios = failed_scenarios_table
+        self.max_partition_contention = int(os.environ.get("SGR_MAX_PARTITION_CONTENTION", "50"))
         
         # self.init_db() cannot be called in __init__ as it is async now.
         # It should be called explicitly during startup.
@@ -525,8 +526,7 @@ Summary:"""
                         active_leases = result.scalar() or 0
                         
                         # Hard structurally bounded contention $C$ per partition
-                        MAX_PARTITION_CONTENTION = 50 
-                        if active_leases >= MAX_PARTITION_CONTENTION:
+                        if active_leases >= self.max_partition_contention:
                             logger.error("g2_livelock_prevention_rejected_lease", job_id=job_id, partition=org_id, active=active_leases)
                             # By returning False here, the worker treats it as a CAS loss,
                             # triggering exponential backoff + jitter without hitting the DB's serialization lock manager.

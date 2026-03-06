@@ -40,9 +40,6 @@ class QdrantAdapter(VectorStoreAdapter):
     async def search(
         self, collection: str, vector: List[float], limit: int = 5, score_threshold: float = 0.0
     ) -> List[VectorSearchResult]:
-        # Check if client is async
-        import inspect
-
         args = {
             "collection_name": collection,
             "query_vector": vector,
@@ -60,10 +57,8 @@ class QdrantAdapter(VectorStoreAdapter):
 
     async def upsert(self, collection: str, points: List[Any]):
         # Implementation depends on PointStruct format
-        if hasattr(self.client, "upsert_async"):  # older async clients
+        if inspect.iscoroutinefunction(self.client.upsert):
             await self.client.upsert(collection_name=collection, points=points)
-        elif hasattr(self.client, "upsert"):
-            if inspect.iscoroutinefunction(self.client.upsert):
-                await self.client.upsert(collection_name=collection, points=points)
-            else:
-                self.client.upsert(collection_name=collection, points=points)
+        else:
+            # Sync client
+            self.client.upsert(collection_name=collection, points=points)

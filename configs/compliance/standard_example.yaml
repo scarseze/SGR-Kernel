@@ -3,9 +3,12 @@
 
 compliance_level: standard
 pii_patterns:
-  email: "[\\w.-]+@[\\w.-]+\\.\\w+"
+  email: "[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}"
   phone: "\\+?\\d[\\d\\s\\-\\(\\)]{7,}\\d"
   api_key: "(sk-[a-zA-Z0-9]{20,})"
+
+audit_requirements:
+  log_retention_days: 90
 
 memory:
   db_url: "sqlite:///swarm_chat_history.db"

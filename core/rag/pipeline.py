@@ -64,101 +64,102 @@ class RAGPipeline(RAGInterface):
         critique_passed = None
         strategy_used = None
 
-        while attempt <= (self.max_retries + 1):
-            try:
-                # 1. Rewrite (Escalate if attempt > 1)
-                rewrite_llm = None
-                if attempt > 1 and self.model_pool:
-                    # RAG Escalation: Fast -> Mid
-                    # If we have a model pool, switch to mid tier for better rewriting
-                    # We assume rewriter acts on FAST tier by default
-                    rewrite_llm = self.model_pool.mid
-
-                rewritten_query = await self.rewriter.rewrite(current_query, llm=rewrite_llm)
-
-                # 2. Expand
-                queries = await self.expander.expand(rewritten_query)
-
-                # 3. Route
-                routed = self.router.route(rewritten_query)
-                if domain != "default" and domain not in routed:
-                    routed.append(domain)
-                used_domains = routed
-
-                # 4. Multi-Retrieve
-                all_docs = []
-                for q in queries:
-                    for d in used_domains:
-                        docs = await self.retriever.retrieve(q, collection=d)
-                        all_docs.extend(docs)
-
-                found_docs_count = len(all_docs)
-
-                # Deduplicate
-                seen = set()
-                unique_docs = []
-                for d in all_docs:
-                    h = hash(d.content)
-                    if h not in seen:
-                        seen.add(h)
-                        unique_docs.append(d)
-
-                # 5. Rerank (with Policy Threshold)
-                reranked = self.reranker.rerank(unique_docs, threshold=self.rerank_threshold)
-
-                # 6. Filter (with Policy Threshold)
-                filtered = self.filterer.filter(reranked, min_score=self.min_score)
-
-                # 7. Compress/Format
-                compressed = self.context_builder.compress(filtered, max_tokens=self.max_tokens)
-                formatted_context = self.context_builder.format(compressed)
-
-                # 8. CRITIQUE (Repair Loop)
-                if self.critic and self.repair_strategy and attempt <= self.max_retries:
-                    is_good = await self.critic.critique(query, formatted_context)
-                    if is_good:
-                        critique_passed = True
-                        final_context = formatted_context
-                        final_docs = compressed
-                        break  # Good enough
-                    else:
-                        critique_passed = False
-                        # Apply Repair
-                        current_query = self.repair_strategy.suggest_fix(query, attempt)
-                        strategy_used = current_query
-                        attempt += 1
-                        continue
-
-                # Default success or max retries reached
-                final_context = formatted_context
-                final_docs = compressed
-                break
-
-            except Exception as e:
-                # If error, maybe break or log?
-                # For now, let's break to avoid infinite loops on error
-                raise e
-
-        # Trace Recording
         try:
-            trace = current_step_trace.get()
-            if trace:
-                trace.rag_queries.append(
-                    RAGQueryTrace(
-                        query=query,
-                        rewritten_query=rewritten_query,
-                        domains=used_domains,
-                        latency_ms=(time.time() - start_time) * 1000,
-                        found_docs=found_docs_count,
-                        used_docs=len(final_docs),
-                        sources=[d.source for d in final_docs],
-                        attempt=attempt,
-                        critique_passed=critique_passed,
-                        repair_strategy=strategy_used,
+            while attempt <= (self.max_retries + 1):
+                try:
+                    # 1. Rewrite (Escalate if attempt > 1)
+                    rewrite_llm = None
+                    if attempt > 1 and self.model_pool:
+                        # RAG Escalation: Fast -> Mid
+                        # If we have a model pool, switch to mid tier for better rewriting
+                        # We assume rewriter acts on FAST tier by default
+                        rewrite_llm = self.model_pool.mid
+
+                    rewritten_query = await self.rewriter.rewrite(current_query, llm=rewrite_llm)
+
+                    # 2. Expand
+                    queries = await self.expander.expand(rewritten_query)
+
+                    # 3. Route
+                    routed = self.router.route(rewritten_query)
+                    if domain != "default" and domain not in routed:
+                        routed.append(domain)
+                    used_domains = routed
+
+                    # 4. Multi-Retrieve
+                    all_docs = []
+                    for q in queries:
+                        for d in used_domains:
+                            docs = await self.retriever.retrieve(q, collection=d)
+                            all_docs.extend(docs)
+
+                    found_docs_count = len(all_docs)
+
+                    # Deduplicate
+                    seen = set()
+                    unique_docs = []
+                    for d in all_docs:
+                        h = hash(d.content)
+                        if h not in seen:
+                            seen.add(h)
+                            unique_docs.append(d)
+
+                    # 5. Rerank (with Policy Threshold)
+                    reranked = self.reranker.rerank(unique_docs, threshold=self.rerank_threshold)
+
+                    # 6. Filter (with Policy Threshold)
+                    filtered = self.filterer.filter(reranked, min_score=self.min_score)
+
+                    # 7. Compress/Format
+                    compressed = self.context_builder.compress(filtered, max_tokens=self.max_tokens)
+                    formatted_context = self.context_builder.format(compressed)
+
+                    # 8. CRITIQUE (Repair Loop)
+                    if self.critic and self.repair_strategy and attempt <= self.max_retries:
+                        is_good = await self.critic.critique(query, formatted_context)
+                        if is_good:
+                            critique_passed = True
+                            final_context = formatted_context
+                            final_docs = compressed
+                            break  # Good enough
+                        else:
+                            critique_passed = False
+                            # Apply Repair
+                            current_query = self.repair_strategy.suggest_fix(query, attempt)
+                            strategy_used = current_query
+                            attempt += 1
+                            continue
+
+                    # Default success or max retries reached
+                    final_context = formatted_context
+                    final_docs = compressed
+                    break
+
+                except Exception as e:
+                    # If error, maybe break or log?
+                    # For now, let's break to avoid infinite loops on error
+                    raise e
+        finally:
+            # Trace Recording
+            try:
+                trace = current_step_trace.get()
+                if trace:
+                    trace.rag_queries.append(
+                        RAGQueryTrace(
+                            query=query,
+                            rewritten_query=rewritten_query,
+                            domains=used_domains,
+                            latency_ms=(time.time() - start_time) * 1000,
+                            found_docs=found_docs_count,
+                            used_docs=len(final_docs),
+                            sources=[d.source for d in final_docs],
+                            attempt=attempt,
+                            critique_passed=critique_passed,
+                            repair_strategy=strategy_used,
+                        )
                     )
-                )
-        except Exception:
-            pass
+            except Exception:
+                pass
 
         return final_context, final_docs
 
