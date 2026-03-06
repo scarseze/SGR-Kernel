@@ -49,14 +49,16 @@ async def test_safety_case_{{ scenario_clean_id }}():
     # 4. Mock the LLM to reproduce the failure condition or test the fix
     # TODO: Developer must adjust this mock to properly simulate the failure
     with patch('core.swarm.SwarmEngine._safe_call_llm', new_callable=AsyncMock) as mock_llm:
-        # Mock behavior here...
-        pass
+        mock_llm.return_value = "Safe response"
         
-    # Execute Swarm
-    # res, _, _ = await engine.execute(starting_agent=agent, messages=messages, max_turns=3)
-    
-    # 5. Assertions
-    # assert "Error" not in res # Make sure it recovers now
+        # 5. Execute Swarm
+        # Uncomment and adjust below to run the test
+        # res, _, _ = await engine.execute(starting_agent=agent, messages=messages, max_turns=3)
+        # assert "Error" not in res
+        
+        # To avoid unused variable warning temporarily:
+        assert messages is not None
+        assert mock_llm is not None
 """
 
 async def generate_offline_tests():
