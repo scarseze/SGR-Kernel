@@ -267,6 +267,11 @@ class SwarmEngine:
                         if consecutive_critic_failures <= max_internal_retries:
                             logger.warning(f"Plan Critic rejected proposed plan. Retry {consecutive_critic_failures}/{max_internal_retries}. Reason: {plan_reason}")
                             rejection_msg = f"Plan Critic Evaluation Failed: {plan_reason}. Please revise your plan (tool calls) and try again."
+                            
+                            if consecutive_critic_failures >= 2 and getattr(current_agent, 'dynamic_guardrails', None):
+                                logger.warning(f"Activating Dynamic Guardrails for agent {current_agent.name}")
+                                rejection_msg += f"\n\n[DYNAMIC GUARDRAILS ACTIVATED - STRICT COMPLIANCE REQUIRED]:\n{current_agent.dynamic_guardrails}"
+                                
                             history.append({
                                 "role": "system",
                                 "content": rejection_msg
@@ -330,6 +335,10 @@ class SwarmEngine:
                                         if consecutive_critic_failures <= max_internal_retries:
                                             logger.warning(f"Critic rejected {func_name}. Retry {consecutive_critic_failures}/{max_internal_retries}. Reason: {critic_reason}")
                                             result_str = f"Critic Evaluation Failed: {critic_reason}. Please correct the errors and call the tool again."
+                                            
+                                            if consecutive_critic_failures >= 2 and getattr(current_agent, 'dynamic_guardrails', None):
+                                                logger.warning(f"Activating Dynamic Guardrails for agent {current_agent.name}")
+                                                result_str += f"\n\n[DYNAMIC GUARDRAILS ACTIVATED - STRICT COMPLIANCE REQUIRED]:\n{current_agent.dynamic_guardrails}"
                                         else:
                                             logger.error(f"Critic rejected {func_name}. Max retries ({max_internal_retries}) reached.")
                                             result_str = f"Critic Evaluation Failed completely: {critic_reason}. Move on."

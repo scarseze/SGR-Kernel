@@ -262,3 +262,69 @@ async def test_swarm_plan_critic(mock_safe_call_llm, mock_stream_builder, mock_c
     assert mock_execute.call_count == 1
     # Tool Critic evaluate should ONLY have been called ONCE (for the good output)
     assert mock_critic.evaluate.call_count == 1
+
+@pytest.mark.asyncio
+@patch('core.swarm.litellm.completion_cost', return_value=0.0)
+@patch('core.swarm.litellm.stream_chunk_builder')
+@patch('core.swarm.SwarmEngine._safe_call_llm', new_callable=AsyncMock)
+async def test_swarm_dynamic_guardrails(mock_safe_call_llm, mock_stream_builder, mock_cost, test_agent):
+    """
+    Tests Proactive Feedback Loops (Dynamic Guardrails).
+    If the Plan Critic rejects the plan twice, the SwarmEngine should inject
+    the dynamic_guardrails instructions into the rejection message for the 3rd attempt.
+    """
+    mock_critic = AsyncMock()
+    # Reject 3 times to trigger the max_internal_retries and the guardrail injection on the 2nd failure
+    mock_critic.evaluate_plan.side_effect = [
+        (False, "Failed attempt 1"), 
+        (False, "Failed attempt 2"), 
+        (True, "Passed attempt 3")
+    ]
+    
+    test_agent.plan_requirements = "Must use safe actions"
+    test_agent.dynamic_guardrails = "CRITICAL: You MUST use list_files only."
+    
+    mock_swarm_engine = SwarmEngine(llm_config={"model": "test-model"})
+    
+    # Tool call responses for each turn
+    fake_tool_call = MagicMock()
+    fake_tool_call.id = "bad_call"
+    fake_tool_call.function.name = "test_tool"
+    fake_tool_call.function.arguments = '{"action": "rm -rf"}'
+    
+    response_turn = FakeResponse(FakeMessage(content=None, tool_calls=[fake_tool_call]))
+    response_final = FakeResponse(FakeMessage(content="Task completed safely.", tool_calls=None))
+
+    # Turn 1: Propose bad plan -> Rejected (Failure 1)
+    # Turn 2: Propose bad plan -> Rejected (Failure 2) -> Inject Guardrails
+    # Turn 3: Propose bad plan -> Passed (Failure 0)
+    # Turn 4: Final message
+    mock_stream_builder.side_effect = [response_turn, response_turn, response_turn, response_final]
+    
+    mock_execute = MagicMock(return_value="executed_mock")
+    test_agent.skills[0].execute = mock_execute
+
+    def llm_side_effect(*args, **kwargs):
+        # We need to capture the history passed to LLM to verify injection
+        history = kwargs.get('messages', [])
+        # Check if guardrails were injected at any point in the history
+        for msg in history:
+            if msg.get('role') == 'system' and "DYNAMIC GUARDRAILS ACTIVATED" in msg.get('content', ''):
+                mock_safe_call_llm.inject_found = True
+        return create_async_chunk_generator([MagicMock(choices=None)])
+        
+    mock_safe_call_llm.side_effect = llm_side_effect
+    mock_safe_call_llm.inject_found = False
+
+    await mock_swarm_engine.execute(
+        starting_agent=test_agent,
+        messages=[{"role": "user", "content": "Do a task."}],
+        max_turns=5,
+        critic_engine=mock_critic
+    )
+
+    # Verify that the Plan Critic was called 3 times
+    assert mock_critic.evaluate_plan.call_count == 3
+    
+    # Verify the guardrails string was injected into the LLM history
+    assert mock_safe_call_llm.inject_found is True

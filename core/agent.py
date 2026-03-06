@@ -35,6 +35,11 @@ class Agent(BaseModel):
         default_factory=lambda: ["text"],
         description="List of supported modalities, e.g., ['text', 'image', 'audio']"
     )
+    
+    dynamic_guardrails: Optional[str] = Field(
+        default=None,
+        description="Strict fallback instructions to dynamically inject if the agent repeatedly fails Critic evaluation."
+    )
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
