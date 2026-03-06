@@ -1,5 +1,4 @@
-import pytest
-from core.routing.model_router import ModelRouter, ModelRoute
+from core.routing.model_router import ModelRouter
 from core.routing.state_sync import ContextDehydrator
 
 
@@ -51,7 +50,7 @@ def test_context_dehydrator_truncates_middle():
     # Construct a massive history
     history = [{"role": "system", "content": "You are a helpful assistant."}]
     # 50 messages, each ~250 tokens (1000 chars)
-    for i in range(50):
+    for _i in range(50):
         history.append({"role": "user", "content": "A" * 1000})
         
     # Total tokens approx 50 * 250 = 12500. 

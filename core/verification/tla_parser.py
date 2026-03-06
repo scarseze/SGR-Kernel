@@ -1,10 +1,10 @@
-import re
 import ast
-import operator
 import functools
 import inspect
-from typing import Callable, Any, Dict, Optional
 import logging
+import operator
+import re
+from typing import Any, Callable, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class SafeInvariantEvaluator:
         try:
             return ast.literal_eval(token)
         except (ValueError, SyntaxError):
-            raise ValueError(f"Cannot resolve token '{token}' — not in context and not a literal.")
+            raise ValueError(f"Cannot resolve token '{token}' — not in context and not a literal.") from None
 
     @classmethod
     def evaluate(cls, expression: str, context: Dict[str, Any]) -> bool:
@@ -85,7 +85,7 @@ class TLAParser:
                 raw_logic = match.group(1).strip()
                 # Convert TLA+ `=` to Python `==` if it's an equality check (heuristic)
                 if " = " in raw_logic and "==" not in raw_logic:
-                     raw_logic = raw_logic.replace(" = ", " == ")
+                    raw_logic = raw_logic.replace(" = ", " == ")
                 return raw_logic
             return None
         except FileNotFoundError:

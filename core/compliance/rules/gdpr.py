@@ -1,5 +1,6 @@
 from core.compliance.engine import compliance_engine
 
+
 @compliance_engine.register_rule(name="gdpr_data_minimization")
 def gdpr_no_unnecessary_pii(session_context: dict):
     """

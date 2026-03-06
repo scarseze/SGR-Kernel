@@ -1,10 +1,12 @@
-import pytest
-import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from core.events import EventType, KernelEvent
-from core.execution import ExecutionState, StepNode, StepStatus, SemanticFailureType, FailureRecord, RetryPolicy
-from core.orchestrator import ExecutionOrchestrator
+
+import pytest
+
 from core.container import Container
+from core.events import EventType, KernelEvent
+from core.execution import ExecutionState, FailureRecord, RetryPolicy, SemanticFailureType, StepNode, StepStatus
+from core.orchestrator import ExecutionOrchestrator
+
 
 @pytest.fixture
 def mock_events():

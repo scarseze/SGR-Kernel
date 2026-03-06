@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\telemetry.py
+# hypothesis_version: 6.151.9
+
+[1000.0, 8001, '0.1', 'agent', 'core.telemetry', 'from_agent', 'http://jaeger:4317', 'model', 'service.name', 'sgr-kernel', 'to_agent']

@@ -1,7 +1,10 @@
-import pytest
 import datetime
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
+
+import pytest
+
 from core.memory import PersistentMemory
+
 
 @pytest.fixture
 def mock_vector_store():

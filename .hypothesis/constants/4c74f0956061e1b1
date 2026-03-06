@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\orchestrator.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1.0, '1', 'Automatic Retry', 'CRITIC_FAIL', 'N/A', 'Orchestrator_DAG', 'RUNNING', 'approval_callback', 'cost_usd', 'error', 'event_bus', 'failure', 'failure_type', 'lifecycle', 'max_attempts', 'phase', 'reason', 'redis', 'retry_policy', 'status', 'step_id', 'steps_taken']

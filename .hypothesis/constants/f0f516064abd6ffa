@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\reconciler.py
+# hypothesis_version: 6.151.9
+
+[120, 15000, 'CREATED', 'QUEUED', 'REQUEUE', 'apply_time_decay', 'created_at', 'default', 'default_org', 'error', 'execution_spec', 'history', 'job_id', 'memory', 'org_id', 'payload', 'reconciler_action', 'reconciler_loop', 'reconciler_started', 'reconciler_stopped', 'redis', 'session_id', 'sgr:peftlab:jobs', 'status', 'tenant_id', 'ui_memory', '{}']

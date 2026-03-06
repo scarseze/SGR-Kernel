@@ -1,6 +1,8 @@
-import pytest
 import os
-from core.verification.tla_parser import TLAParser, enforce_invariant, InvariantViolationError
+
+import pytest
+
+from core.verification.tla_parser import InvariantViolationError, TLAParser, enforce_invariant
 
 # Create a temporary mock TLA file for testing
 MOCK_TLA_PATH = "mock_spec.tla"

@@ -87,6 +87,7 @@ class CoreEngine:
         
         self.ui_memory = UIMemory()
         Container.register("ui_memory", self.ui_memory)
+        self._approval_callback = approval_callback
         Container.register("approval_callback", self._approval_callback)
 
         # 2. Wire up Event Subscribers (Observability)
@@ -124,7 +125,6 @@ class CoreEngine:
         # State tracking
         self.active_executions: Dict[str, ExecutionState] = {}
         self.last_requests: Dict[str, str] = {}
-        self._approval_callback = approval_callback
 
     async def _on_any_event(self, event: KernelEvent):
         """Global event subscriber for state management and logging."""

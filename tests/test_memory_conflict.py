@@ -1,7 +1,10 @@
+from unittest.mock import AsyncMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock
-from core.memory_manager import MemoryManager
+
 from core.memory import Message
+from core.memory_manager import MemoryManager
+
 
 @pytest.fixture
 def mock_memory():

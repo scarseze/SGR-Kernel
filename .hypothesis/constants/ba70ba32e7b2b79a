@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\execution\__init__.py
+# hypothesis_version: 6.151.9
+
+[1.0, 300.0, 'ABORTED', 'APPROVAL', 'CAPABILITY_VIOLATION', 'COMMITTED', 'COMPLETED', 'CONSTRAINT_VIOLATION', 'CREATED', 'CRITIC', 'CRITIC_FAIL', 'ESCALATING', 'FAILED', 'LOW_CONFIDENCE', 'PAUSED_APPROVAL', 'PENDING', 'PLANNED', 'POLICY_VIOLATION', 'READY', 'REPAIR', 'REPAIRING', 'RETRY_WAIT', 'RUNNING', 'SCHEMA_FAIL', 'TIMEOUT', 'TOOL_ERROR', 'UNKNOWN', 'VALIDATING', 'fast', 'hard', 'heavy', 'low', 'mid']

@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\runtime.py
+# hypothesis_version: 6.151.9
+
+[300.0, 6379, '2.0.0-alpha1', 'Manual Abort', 'REDIS_HOST', 'REDIS_PORT', 'aggressive', 'approval_callback', 'assistant', 'budget_ok', 'check_budget', 'checkpoints', 'event_bus', 'idempotent', 'lifecycle', 'llm_config', 'localhost', 'metadata', 'mock_redis', 'none', 'plan_ir', 'redis', 'skill_retry_count', 'skill_success_count', 'telemetry', 'ui_memory', 'user', 'value']

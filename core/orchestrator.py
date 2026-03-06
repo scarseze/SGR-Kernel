@@ -191,7 +191,7 @@ class ExecutionOrchestrator:
 
         # Phase 13: Emit Federated Learning Signal
         try:
-            from core.learning.federated import global_aggregator, DifferentialPrivacyFilter, LearningPayload
+            from core.learning.federated import DifferentialPrivacyFilter, LearningPayload, global_aggregator
             dp_filter = DifferentialPrivacyFilter(epsilon=1.0)
             
             # Extract basic metric for learning (e.g. how many steps it took to succeed vs fail)

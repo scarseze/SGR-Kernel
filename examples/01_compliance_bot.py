@@ -14,10 +14,11 @@ import sys
 # Add parent dir to path to find core modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.swarm import SwarmEngine
 from core.agent import Agent
 from core.execution import ExecutionPlan, PlanStep
+from core.swarm import SwarmEngine
 from core.verification.output_spec import OutputSpec
+
 
 async def main():
     print("🛡️ Starting Compliance Bot Demo (152-FZ)")

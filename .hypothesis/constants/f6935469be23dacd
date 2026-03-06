@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\routing\model_router.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.1, 1.0, 4000, 8000, 16000, 128000, 'down', 'fallback', 'fallback-none', 'gpt-3.5-turbo', 'gpt-4-turbo', 'inf', 'ollama/qwen2.5', 'primary', 'secure_local', 'up']

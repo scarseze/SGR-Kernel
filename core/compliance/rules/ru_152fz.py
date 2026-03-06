@@ -1,5 +1,6 @@
 from core.compliance.engine import compliance_engine
 
+
 @compliance_engine.register_rule(name="ru_152fz_data_locality")
 def personal_data_never_leaves_ru(session_context: dict):
     """

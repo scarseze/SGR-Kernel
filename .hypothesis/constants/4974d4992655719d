@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\metrics.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.5, 0.7, 1.0, ',', 'AnswerRelevancy', 'CostLimit', 'Faithfulness', 'RequirementsMatch', 'core.metrics']

@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\scheduler.py
+# hypothesis_version: 6.151.9
+
+[0.0, 300.0, 600, '1000', '429 Quota Exceeded', 'REDIS_HOST', 'SGR_MAX_QUEUE_SIZE', 'default', 'error', 'events', 'lifecycle', 'mock_redis', 'redis', 'sgr:tasks', 'step_id', 'success']

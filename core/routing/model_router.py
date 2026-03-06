@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class ModelRouter:
     def get_best_route(self, requires_local: bool = False, max_cost: float = float('inf')) -> ModelRoute:
         """Find the next best available model route based on constraints."""
         candidates = []
-        for route_id, route in self.registry.items():
+        for _route_id, route in self.registry.items():
             if route.status != "up":
                 continue
             if requires_local and not route.is_local:

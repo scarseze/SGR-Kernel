@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\swarm.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.8, 1.0, 1000, 3600, 8000, 128000, 'Budget exceeded', 'Done', 'Max turns reached', 'agent.name', 'agent_start', 'api_key', 'args', 'base_url', 'content', 'deepseek-chat', 'default', 'description', 'detail', 'dummy', 'dynamic_guardrails', 'error', 'error.message', 'extra_body', 'fast_model', 'function', 'llm.acompletion', 'llm.cost_usd', 'llm.latency_ms', 'llm.lora_adapter', 'llm.model', 'llm.tokens', 'llm_config', 'lora_name', 'max_context_tokens', 'model', 'name', 'output_spec', 'parameters', 'plan_requirements', 'primary', 'redis', 'requires_local', 'role', 'skill.name', 'sub_swarm_config', 'subswarm_depth', 'swarm', 'swarm.depth', 'system', 'to_agent', 'token', 'tool', 'tool_call', 'tool_call_id', 'tool_calls', 'transfer', 'transfer_audit', 'type', 'usage', 'user']

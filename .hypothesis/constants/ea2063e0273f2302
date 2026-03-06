@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\economics\ledger.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.0015, 0.002, 0.01, 0.02, 0.03, 0.06, 0.5, 1000.0, 100000, 'completion', 'completion_tokens', 'default', 'estimated_cost_usd', 'gpt-3.5-turbo', 'gpt-4', 'ollama', 'prompt', 'prompt_tokens', 'total_tokens']

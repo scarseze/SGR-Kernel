@@ -25,8 +25,8 @@ def safe_retry(func: Callable[..., Any]) -> Callable[..., Any]:
     return func
 
 from core.container import Container  # noqa: E402
+from core.economics.ledger import BudgetExceededError, BudgetGuard, TokenLedger  # noqa: E402
 from core.quota import QuotaManager  # noqa: E402
-from core.economics.ledger import TokenLedger, BudgetGuard, BudgetExceededError  # noqa: E402
 
 try:
     from core.compliance.engine import ComplianceViolationError

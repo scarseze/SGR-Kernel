@@ -1,5 +1,7 @@
 import pytest
+
 from core.compliance.engine import ComplianceEngine, ComplianceViolationError
+
 
 # We use a fresh engine per test (not the global singleton) to avoid rule bleed
 def make_engine_with_152fz():

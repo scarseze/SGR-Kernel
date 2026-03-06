@@ -1,7 +1,9 @@
-import pytest
 import json
-from core.verification.output_spec import OutputSpec, OutputSpecViolation
+
+import pytest
+
 from core.verification.certificate import ProofCertificate
+from core.verification.output_spec import OutputSpec, OutputSpecViolation
 
 
 def test_requires_json_passes():

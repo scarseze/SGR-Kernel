@@ -1,5 +1,7 @@
 import pytest
-from core.economics.ledger import TokenLedger, BudgetGuard, BudgetExceededError
+
+from core.economics.ledger import BudgetExceededError, BudgetGuard, TokenLedger
+
 
 def test_token_ledger_tracking():
     ledger = TokenLedger()

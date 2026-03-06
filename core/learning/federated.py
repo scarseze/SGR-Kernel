@@ -1,8 +1,8 @@
+import logging
 import math
 import random
 from dataclasses import dataclass
 from typing import Dict, List, Optional
-import logging
 
 logger = logging.getLogger(__name__)
 

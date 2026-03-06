@@ -1,6 +1,6 @@
-import pytest
-from core.debugging.causal_analyzer import CausalAnalyzer, RootCause
+from core.debugging.causal_analyzer import CausalAnalyzer
 from core.execution import ExecutionState, StepState, StepStatus
+
 
 # Mock Failure object to simulate step errors
 class MockFailure:

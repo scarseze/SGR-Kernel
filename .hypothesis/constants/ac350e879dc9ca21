@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\rag\vector_store.py
+# hypothesis_version: 6.151.9
+
+[0.0, 'collection_name', 'limit', 'query_vector', 'score_threshold', 'with_payload']

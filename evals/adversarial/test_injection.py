@@ -1,6 +1,9 @@
 import pytest
 
+from core.agent import Agent
 from core.security import InputSanitizationLayer, SecurityViolationError
+from core.swarm import SwarmEngine
+
 
 @pytest.fixture
 def sanitizer():
@@ -33,8 +36,7 @@ class TestInputSanitization:
         with pytest.raises(SecurityViolationError, match="Adversarial Input Detected"):
             sanitizer.sanitize(payload)
 
-from core.swarm import SwarmEngine
-from core.agent import Agent
+
 
 @pytest.mark.asyncio
 async def test_swarm_integration_blocks_injection():

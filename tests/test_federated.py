@@ -1,5 +1,4 @@
-import pytest
-from core.learning.federated import LearningPayload, DifferentialPrivacyFilter, AggregatorNode
+from core.learning.federated import AggregatorNode, DifferentialPrivacyFilter, LearningPayload
 
 
 def test_laplace_noise_injection():
@@ -53,7 +52,7 @@ def test_gradient_noise_injection():
     assert len(anon.gradients) == len(gradients)
     
     # Each gradient should have noise added (extremely unlikely to match original)
-    mismatches = sum(1 for a, b in zip(anon.gradients, gradients) if a != b)
+    mismatches = sum(1 for a, b in zip(anon.gradients, gradients, strict=False) if a != b)
     assert mismatches == len(gradients)
     
     # Agent ID must be anonymized

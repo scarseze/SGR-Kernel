@@ -1,0 +1,4 @@
+# file: C:\Users\macht\sa\sgr_kernel\core\debugging\causal_analyzer.py
+# hypothesis_version: 6.151.9
+
+['BudgetGuard', 'CRITIC_FAIL', 'ComplianceEngine', 'CriticEngine', 'TIMEOUT', 'Unknown', 'budget exceeded', 'compliance violation', 'critic', 'error_message', 'failure_type', 'timeout', 'token limit']
