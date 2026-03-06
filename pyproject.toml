@@ -5,14 +5,14 @@ build-backend = "hatchling.build"
 [project]
 name = "sgr-kernel"
 version = "3.0.0"
-description = "Schema-Guided Reasoning Kernel (RFC v2 Reference Implementation)"
+description = "Schema-Guided Reasoning Kernel (RFC V3 Enterprise Tier)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [
   {name = "scarseze"}
 ]
-keywords = ["agent", "kernel", "sgr", "rfc-v2", "reasoning"]
+keywords = ["agent", "kernel", "sgr", "rfc-v3", "reasoning"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",

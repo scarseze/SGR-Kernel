@@ -87,6 +87,7 @@ class CoreEngine:
         
         self.ui_memory = UIMemory()
         Container.register("ui_memory", self.ui_memory)
+        Container.register("approval_callback", self._approval_callback)
 
         # 2. Wire up Event Subscribers (Observability)
         self.events.subscribe_all(self._on_any_event)
@@ -122,6 +123,7 @@ class CoreEngine:
 
         # State tracking
         self.active_executions: Dict[str, ExecutionState] = {}
+        self.last_requests: Dict[str, str] = {}
         self._approval_callback = approval_callback
 
     async def _on_any_event(self, event: KernelEvent):
@@ -174,6 +176,7 @@ class CoreEngine:
             # 1. Load Context (Memory)
             if session_id:
                 await self.memory_manager.load_context(session_id, state)
+                self.last_requests[session_id] = request_id
             
             self.active_executions[request_id] = state
 

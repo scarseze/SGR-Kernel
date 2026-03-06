@@ -142,13 +142,78 @@ class ExecutionOrchestrator:
                                     payload={"reason": "Automatic Retry"}
                                 )
                                 await self.events.publish(retry_event)
+                            else:
+                                # Max attempts reached. Check for Human-in-the-Loop Escalation
+                                failure = event.payload.get("failure")
+                                failed_type = getattr(failure, "failure_type", None) if failure else None
+                                
+                                # Only escalate on CRITIC_FAIL (semantic failure), not timeouts or tool crashes
+                                if failed_type == "CRITIC_FAIL":
+                                    approval_callback = Container.get("approval_callback")
+                                    if approval_callback:
+                                        logger.warning(f"⏸️ Critic failed {max_attempts} times on step {step_id}. Pausing for human approval.")
+                                        
+                                        # Publish pause event
+                                        pause_event = KernelEvent(
+                                            type=EventType.EXECUTION_PAUSED,
+                                            request_id=state.request_id,
+                                            payload={"step_id": step_id, "reason": "CRITIC_FAIL_ESCALATION"}
+                                        )
+                                        await self.events.publish(pause_event)
+                                        
+                                        # Change state to paused
+                                        state.status = ExecutionStatus.PAUSED_APPROVAL
+                                        
+                                        # Invoke callback
+                                        # The callback should provide context to the human and return a boolean
+                                        context_msg = f"Step '{node.skill_name}' failed critic validation {max_attempts} times.\nReason: {failure.error_message if failure else 'Unknown'}\nApprove partial result?"
+                                        is_approved = await approval_callback(context_msg)
+                                        
+                                        if is_approved:
+                                            logger.info(f"✅ Human approved step {step_id} despite Critic failure. Force committing.")
+                                            state.status = ExecutionStatus.RUNNING
+                                            s_state.status = StepStatus.COMMITTED
+                                            # We need to simulate the success so DAG continues
+                                            state.skill_outputs[step_id] = s_state.output or "Approved by Human Fallback"
+                                        else:
+                                            logger.error(f"❌ Human rejected step {step_id}. Aborting execution.")
+                                            state.status = ExecutionStatus.ABORTED
+                                            break
 
             # Note: We don't need a wait(FIRST_COMPLETED) here because we are doing wave-based dispatch.
             # This is simpler and less prone to race conditions on the 'state' object.
 
         # Finalization
-        if state.status not in [ExecutionStatus.ABORTED, ExecutionStatus.FAILED]:
+        is_success = state.status not in [ExecutionStatus.ABORTED, ExecutionStatus.FAILED]
+        
+        if is_success:
             await self.events.publish(KernelEvent(type=EventType.EXECUTION_COMPLETED, request_id=state.request_id))
+
+        # Phase 13: Emit Federated Learning Signal
+        try:
+            from core.learning.federated import global_aggregator, DifferentialPrivacyFilter, LearningPayload
+            dp_filter = DifferentialPrivacyFilter(epsilon=1.0)
+            
+            # Extract basic metric for learning (e.g. how many steps it took to succeed vs fail)
+            steps_taken = len(state.step_states)
+            raw_payload = LearningPayload(
+                agent_id=state.request_id,
+                task_type="Orchestrator_DAG",
+                success=is_success,
+                metrics={"steps_taken": float(steps_taken), "cost_usd": 0.0} # Placeholder
+            )
+            
+            # Apply Differential Privacy locally before sending to central aggregator
+            anonymized_payload = dp_filter.anonymize_metrics(raw_payload)
+            global_aggregator.receive_payload(anonymized_payload)
+            
+            await self.events.publish(KernelEvent(
+                type=EventType.LEARNING_SIGNAL, 
+                request_id=state.request_id,
+                payload={"status": "dp_filtered_signal_sent"}
+            ))
+        except Exception as e:
+            logger.warning(f"Failed to emit learning signal: {e}")
 
         return self._summarize_result(state)
 
@@ -170,4 +235,23 @@ class ExecutionOrchestrator:
             else:
                 output = state.skill_outputs.get(step_id, "N/A")
             results.append(f"Step {step_id}: {output}")
-        return "\n".join(results)
+
+        summary = "\n".join(results)
+
+        # Phase 11: Automated Root Cause Analysis (RCA)
+        if state.status in (ExecutionStatus.ABORTED, ExecutionStatus.FAILED):
+            try:
+                from core.debugging.causal_analyzer import CausalAnalyzer
+                rca = CausalAnalyzer().find_root_cause(state)
+                rca_block = (
+                    f"\n\n🚨 [AUTOMATED ROOT CAUSE ANALYSIS] 🚨\n"
+                    f"Component: {rca.component}\n"
+                    f"Reason:    {rca.reason}\n"
+                    f"Suggested Fix: {rca.fix_suggestion}\n"
+                )
+                summary += rca_block
+                logger.error(f"Workflow {state.request_id} failed. RCA: {rca.component} -> {rca.reason}")
+            except Exception as e:
+                logger.warning(f"Failed to generate RCA: {e}")
+
+        return summary

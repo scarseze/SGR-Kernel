@@ -27,6 +27,26 @@ jobs:
       run: |
         pytest tests/
         
+  adversarial-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Run Garak/PyRIT Adversarial Suite
+      run: |
+        pip install garak pytest
+        export LITELLM_LOG="DEBUG"
+        # Simulate local LLM gateway for testing
+        garak --model_type openai --model_name gpt-3.5-turbo --probe prompt_injection -g 1
+        
+        # Run specific injection unit tests
+        pytest tests/adversarial/ -v
+        
   lint:
     runs-on: ubuntu-latest
     steps:

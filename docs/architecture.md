@@ -57,6 +57,15 @@ graph TD
     *   **✍️ WriterAgent**: Owns formatting of reporting documents according to GOST 19 and 34.
 *   **🛠️ Skills**: Tools that are bound to a specific Agent. Heavy dependencies (`chromadb`, `optuna`, `torch`) are loaded **lazily** (Lazy Load) so as not to slow down the kernel.
 
+### 🏢 Enterprise Orchestration & Safety
+The underlying execution loop enforces several Enterprise Readiness invariants:
+*   **State Checkpointing**: System state is snapshotted via `CheckpointManager`. Users can invoke a Telegram `/rollback` to restore past Execution States.
+*   **Distributed Observability**: OpenTelemetry tracing propagates `request_id` across remote `sgr-worker` nodes, exposing end-to-end spans to Jaeger.
+*   **Memory Decay & Conflicts**: The `BackgroundReconciler` continuously runs `apply_time_decay()` to purge obsolete vector embeddings. To prevent hallucination, an LLM checks for contradictions between old semantic summaries and new contextual data, prioritizing recent info.
+*   **Human-in-the-Loop (HitL)**: If the `CriticEngine` repeatedly rejects an LLM's output (semantic failures), the DAG halts and transitions to `PAUSED_APPROVAL`, allowing a designated operator to override the critic and force-commit the result.
+*   **V3 Spec-to-Code & Compliance**: Every LLM output is formally verified against an `OutputSpec`. The workflow respects data locality via `Compliance Engine` policies (e.g. 152-FZ).
+*   **V3 Economics & HA**: `TokenLedger` halts executions exceeding organizational budgets. `ModelRouter` dynamically falls back to alternate LLMs during provider outages without losing active conversational context.
+
 ## ⚡ Abstract Execution Flow
 
 ```mermaid
@@ -163,6 +172,15 @@ graph TD
     *   **🔧 PeftAgent**: Владеет машинным обучением (PEFTlab, HPO).
     *   **✍️ WriterAgent**: Владеет форматированием отчетной документации по ГОСТ 19 и 34.
 *   **🛠️ Skills (Навыки)**: Инструменты, которые привязаны к конкретному Агенту. Тяжелые зависимости (`chromadb`, `optuna`, `torch`) загружаются **лениво** (Lazy Load), чтобы не замедлять ядро.
+
+### 🏢 Enterprise Orchestration & Safety (Корпоративная Эксплуатация)
+Базовый цикл выполнения содержит несколько механизмов Enterprise уровня:
+*   **State Checkpointing (Снимки состояния)**: Состояние системы регулярно фиксируется через `CheckpointManager`. Оператор может использовать команду `/rollback` в Telegram для отката состояния.
+*   **Distributed Observability (Распределенная наблюдаемость)**: Трассировка OpenTelemetry пробрасывает `request_id` на удаленные узлы-воркеры (`sgr-worker`), отправляя сквозные спаны в Jaeger.
+*   **Memory Decay & Conflicts (Затухание и конфликты памяти)**: `BackgroundReconciler` непрерывно вызывает `apply_time_decay()` для удаления устаревших векторных эмбеддингов. Чтобы предотвратить галлюцинации базы знаний, специальный LLM-шаг проверяет противоречия между старыми резюме и новыми данными, отдавая приоритет свежей информации.
+*   **Human-in-the-Loop (Эскалация к человеку)**: Если `CriticEngine` алгоритмически бракует ответ LLM максимальное количество раз (семантические сбои), оркестратор останавливается (`PAUSED_APPROVAL`) и запрашивает ручное вмешательство оператора для подтверждения или отмены шага.
+*   **V3 Формальная верификация и Комплаенс**: Вывод LLM проверяется математически (через `OutputSpec`). Соблюдается локализация данных (например, 152-ФЗ) согласно правилам Комплаенс-движка.
+*   **V3 Экономика и HA**: `TokenLedger` блокирует выполнение при превышении бюджета. `ModelRouter` обеспечивает бесшовное переключение на резервные LLM при сбоях провайдеров.
 
 ## ⚡ Абстрактный поток выполнения (Abstract Execution Flow)
 

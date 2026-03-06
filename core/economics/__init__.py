@@ -1,0 +1,1 @@
+"""Make economics a module"""

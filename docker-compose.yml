@@ -29,6 +29,8 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONIOENCODING=utf-8
       - LANG=C.UTF-8
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - OTEL_TRACE_SAMPLE_RATE=1.0
     volumes:
       - ./memory.db:/app/memory.db
       - ./generated_files:/app/generated_files
@@ -69,6 +71,8 @@ services:
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - PYTHONUNBUFFERED=1
       - LANG=C.UTF-8
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - OTEL_TRACE_SAMPLE_RATE=1.0
     volumes:
       - ./memory.db:/app/memory.db
       - ./generated_files:/app/generated_files
@@ -84,6 +88,8 @@ services:
     #     fluentd-async-connect: "true"
     #     tag: "sgr.worker"
     command: [ "python", "run_worker.py" ]
+    ports:
+      - "8002:8002" # Prometheus metrics port for worker
 
   sgr_qdrant:
     image: qdrant/qdrant:latest

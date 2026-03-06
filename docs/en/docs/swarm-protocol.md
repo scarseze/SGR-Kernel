@@ -2,7 +2,7 @@
 **Protocol Version:** 1.0
 
 ## 1. Handoff Protocol
-The SGR Kernel V2 leverages a multi-agent swarm architecture. Agents do not call each other directly via function calls. Instead, they yield a `TransferToAgent` object via the `TransferSkill`.
+The SGR Kernel V3 leverages an enterprise multi-agent swarm architecture. Agents do not call each other directly via function calls. Instead, they yield a `TransferToAgent` object via the `TransferSkill`.
 
 When an Agent yields control, it **must** provide a `context_summary` outlining:
 - The user's original intent.

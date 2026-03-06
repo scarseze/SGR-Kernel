@@ -126,3 +126,43 @@ class SecurityGuardian:
 
 class SecurityViolationError(Exception):
     pass
+
+class InputSanitizationLayer:
+    """
+    Enterprise Defense Layer against Prompt Injections and Malicious Inputs.
+    Acts as an initial heuristic filter before queries reach the LLM.
+    """
+    
+    INJECTION_PATTERNS = [
+        (r"(?i)\bignore\s+(all\s+)?(previous\s+)?(instructions|directions|prompts)\b", "Attempted instruction override"),
+        (r"(?i)\bsystem\s+prompt\b", "Attempted system prompt extraction"),
+        (r"(?i)\byou\s+are\s+now\b", "Attempted roleplay highjacking"),
+        (r"(?i)\btell\s+me\s+your\s+hidden\b", "Attempted secret extraction"),
+        (r"(?i)\bbypass\s+safeguards\b", "Attempted safeguard bypass"),
+        (r"(?i)\bforget\s+everything\b", "Attempted memory wipe"),
+        (r"(?i)\btell\s+me\s+what\s+you\s+were\s+told\b", "Attempted prompt extraction")
+    ]
+    
+    def __init__(self, max_length: int = 15000):
+        self.max_length = max_length
+        
+    def sanitize(self, user_input: str) -> str:
+        """
+        Scans input for common adversarial injection techniques.
+        Raises SecurityViolationError if a high-confidence attack is detected.
+        """
+        if not user_input:
+            return user_input
+            
+        # 1. Length enforcement (Denial of Service protection via large context)
+        if len(user_input) > self.max_length:
+            raise SecurityViolationError(f"Input exceeds maximum allowed length of {self.max_length} characters. (Length: {len(user_input)})")
+            
+        # 2. Heuristic Regex Matching
+        for pattern, reason in self.INJECTION_PATTERNS:
+            if re.search(pattern, user_input):
+                raise SecurityViolationError(f"Adversarial Input Detected: {reason}. Request blocked.")
+                
+        # Future Feature: Add LLM-based classification here if strict mode enabled
+        
+        return user_input

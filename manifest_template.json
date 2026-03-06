@@ -1,5 +1,5 @@
 {
-    "sgr_kernel_version": "v2.0.0-rc1",
+    "sgr_kernel_version": "v3.0.0",
     "orchestration_mode": "swarm",
     "agents": [
         "RouterAgent",
@@ -14,9 +14,9 @@
         "audit_logging": true
     },
     "quad_versioning": {
-        "major": 2,
+        "major": 3,
         "minor": 0,
         "patch": 0,
-        "build": "rc1"
+        "build": "release"
     }
 }

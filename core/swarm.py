@@ -26,6 +26,12 @@ def safe_retry(func: Callable[..., Any]) -> Callable[..., Any]:
 
 from core.container import Container  # noqa: E402
 from core.quota import QuotaManager  # noqa: E402
+from core.economics.ledger import TokenLedger, BudgetGuard, BudgetExceededError  # noqa: E402
+
+try:
+    from core.compliance.engine import ComplianceViolationError
+except ImportError:
+    ComplianceViolationError = None  # type: ignore
  
 logger = get_logger("swarm")
 
@@ -41,6 +47,17 @@ class SwarmEngine:
             "api_key": llm_config.get("api_key", "dummy"),
             "base_url": llm_config.get("base_url")
         }
+        
+        # Phase 12: Zero-Downtime Model Swapping
+        try:
+            from core.routing.model_router import ModelRouter
+            self.model_router = ModelRouter()
+            # Register the default model from config as primary if it exists
+            if "model" in llm_config:
+                self.model_router.register_route("primary", llm_config["model"], 1.0, llm_config.get("max_context_tokens", 128000))
+        except ImportError:
+            self.model_router = None
+
         try:
             self.redis = Container.get("redis")
         except (ValueError, KeyError):
@@ -86,7 +103,11 @@ class SwarmEngine:
         org_id: str = "default",
         event_callback: Optional[Callable[..., Any]] = None,
         critic_engine: Optional[Any] = None,
-        max_internal_retries: int = 2
+        max_internal_retries: int = 2,
+        ledger: Optional[TokenLedger] = None,
+        budget_guard: Optional[BudgetGuard] = None,
+        compliance_engine: Optional[Any] = None,
+        session_context: Optional[Dict[str, Any]] = None
     ) -> Tuple[str, Agent, int]:
         
         current_agent = starting_agent
@@ -106,6 +127,28 @@ class SwarmEngine:
         
         # Deep-copy messages to avoid mutating the caller's session history
         history = [dict(m) for m in messages]
+        
+        # Security Guard: Sanitize all incoming user messages
+        try:
+            from core.security import InputSanitizationLayer, SecurityViolationError
+            sanitizer = InputSanitizationLayer()
+            for msg in history:
+                if msg.get("role") == "user" and isinstance(msg.get("content"), str):
+                    sanitizer.sanitize(msg["content"])
+        except SecurityViolationError as e:
+            logger.error(f"Adversarial input blocked: {e}")
+            return f"Error: {e}", current_agent, transfer_count
+
+        # Compliance Pre-Flight Check (Phase 9)
+        if compliance_engine and session_context:
+            try:
+                compliance_engine.evaluate({
+                    **session_context,
+                    "llm_config": self.llm_config
+                })
+            except Exception as compliance_err:
+                logger.error(f"Compliance check FAILED, refusing execution: {compliance_err}")
+                return f"Error: Compliance Violation. {compliance_err}", current_agent, transfer_count
         
         # Real Data Isolation Guard (Phase 5)
         # Instead of 'System Prompt Enforcement', we validate that the history 
@@ -158,6 +201,16 @@ class SwarmEngine:
                         logger.error(f"Failed to summarize history: {e}")
                         history = [history[0]] + history[-10:]
                 
+                if budget_guard and ledger:
+                    try:
+                        budget_guard.check_budget(ledger)
+                    except BudgetExceededError as e:
+                        logger.error(f"Economic Guard Triggered: {e}")
+                        if parent_span:
+                            parent_span.set_attribute("error", True)
+                            parent_span.set_attribute("error.message", str(e))
+                        return f"Error: Budget Exceeded. {str(e)}", current_agent, transfer_count
+
                 if max_budget_usd > 0 and _current_cost_usd[0] > max_budget_usd:
                     logger.error(f"Budget exceeded! Spent: ${_current_cost_usd[0]:.4f}, Budget: ${max_budget_usd:.4f}")
                     if parent_span:
@@ -177,8 +230,22 @@ class SwarmEngine:
                     import time
                     start_time = time.time()
                     
+                    # Phase 12: Blue-Green AI Route Selection
+                    model_name = current_agent.model or self.llm_config.get("model", "deepseek-chat")
+                    requires_local = session_context.get("requires_local", False) if session_context else False
+                    
+                    if self.model_router:
+                        route = self.model_router.get_best_route(requires_local=requires_local)
+                        model_name = route.name
+                        
+                        # Dehydrate history if target context is smaller
+                        try:
+                            from core.routing.state_sync import ContextDehydrator
+                            history = ContextDehydrator.dehydrate(history, route.max_context)
+                        except ImportError:
+                            pass
+                    
                     with get_telemetry().span("llm.acompletion") as llm_span:
-                        model_name = current_agent.model or self.llm_config.get("model", "deepseek-chat")
                         if llm_span:
                             llm_span.set_attribute("llm.model", model_name)
                             if current_agent.lora_adapter:
@@ -221,6 +288,9 @@ class SwarmEngine:
                                     llm_span.set_attribute("llm.cost_usd", call_cost)
                         except Exception:
                             pass # Unknown model for litellm cost estimator
+                            
+                        if ledger and hasattr(response, "usage") and response.usage:
+                            ledger.add_usage(model_name, response.usage.prompt_tokens, response.usage.completion_tokens)
                         
                         if llm_span:
                             llm_span.set_attribute("llm.tokens", tokens_used)
@@ -243,6 +313,20 @@ class SwarmEngine:
 
                 # 2. Check for tool calls
                 if not msg.tool_calls:
+                    # Phase 10: Formal Output Verification
+                    output_spec = getattr(current_agent, 'output_spec', None)
+                    if output_spec and msg.content:
+                        try:
+                            from core.verification.output_spec import OutputSpecViolation
+                            certificate = output_spec.validate(msg.content)
+                            logger.info(f"✅ OutputSpec '{output_spec.name}' passed. Certificate: {certificate.output_hash[:16]}...")
+                        except OutputSpecViolation as spec_err:
+                            logger.warning(f"OutputSpec violation: {spec_err}. Injecting correction prompt.")
+                            history.append({
+                                "role": "system",
+                                "content": f"Your previous response violated the output specification: {spec_err}. Please correct your response to satisfy ALL constraints."
+                            })
+                            continue  # Retry the LLM call with correction prompt
                     return msg.content or "Done", current_agent, transfer_count
 
                 # 3. Plan Critic: Evaluate the entire sequence of tool calls before executing
@@ -373,7 +457,9 @@ class SwarmEngine:
                                                 _global_transfer_count=_global_transfer_count,
                                                 max_budget_usd=max_budget_usd,
                                                 _current_cost_usd=_current_cost_usd,
-                                                org_id=org_id
+                                                org_id=org_id,
+                                                ledger=ledger,
+                                                budget_guard=budget_guard
                                             )
 
                                             transfer_count += sub_transfers

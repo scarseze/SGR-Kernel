@@ -157,6 +157,31 @@ async def handle_metrics(message: types.Message):
     await message.answer(txt, parse_mode="Markdown")
 
 
+@dp.message(Command("rollback"))
+async def handle_rollback(message: types.Message):
+    """Rolls back the execution state to a previous checkpoint."""
+    args = message.text.split()
+    session_id = str(message.chat.id)
+    
+    # Check if a specific request_id was provided
+    request_id = args[1] if len(args) > 1 else engine.last_requests.get(session_id)
+    
+    if not request_id:
+        await message.answer("❌ Нет данных о предыдущем запросе для восстановления. Укажите ID: `/rollback <id>`", parse_mode="Markdown")
+        return
+        
+    await message.answer(f"⏪ Запускаю откат состояния для запроса `{request_id[:8]}`...", parse_mode="Markdown")
+    
+    try:
+        response = await engine.replay(request_id)
+        # Update last request to the new execution to allow successive rollbacks/forks
+        # engine.replay doesn't change request_id but resumes it, so it's fine.
+        await send_response(message, f"**✅ Состояние восстановлено:**\n\n{response}")
+    except Exception as e:
+        logging.error(f"Rollback Error: {e}")
+        await message.answer(f"❌ Ошибка отката: {e}")
+
+
 @dp.message(F.voice)
 async def handle_voice(message: types.Message):
     """

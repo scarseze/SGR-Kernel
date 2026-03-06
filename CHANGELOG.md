@@ -3,7 +3,7 @@
 Все значимые изменения в этом проекте будут задокументированы в этом файле.
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
-## [v3.0.0] - 2026-03-01 — SGR Kernel v3.0 & PEFTlab v2.9.0 Enterprise
+## [v3.0.0] - 2026-03-06 — SGR Kernel v3.0 & PEFTlab v2.9.0 Enterprise
 ### Added (Добавлено)
 - **Иерархические рои (Hierarchical Swarms)** (`SubSwarmAgent`, `TransferToSubSwarm`): агенты теперь могут порождать вложенные рои для бесконечной глубины рассуждений.
 - **152-ФЗ Комплаенс**: `UIMemory` теперь контролирует размещение баз данных в зоне `.ru`, блокирует зарубежные соединения и генерирует защищенные от подделки аудиторские логи (HMAC).
@@ -48,7 +48,7 @@
 All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [v3.0.0] - 2026-03-01 — SGR Kernel v3.0 & PEFTlab v2.9.0 Enterprise
+## [v3.0.0] - 2026-03-06 — SGR Kernel v3.0 & PEFTlab v2.9.0 Enterprise
 ### Added
 - **Hierarchical Swarms** (`SubSwarmAgent`, `TransferToSubSwarm`): agents can now spawn nested swarms for infinite reasoning depth.
 - **152-FZ Compliance**: `UIMemory` now enforces `.ru` DB residency, blocks foreign connections, and emits tamper-proof audit logs (HMAC).

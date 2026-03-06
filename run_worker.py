@@ -12,11 +12,20 @@ from core.logging_config import setup_logging
 logger = setup_logging("worker", host="sgr_fluent_bit")
 
 from core.runtime import CoreEngine  # noqa: E402
+from core.telemetry import get_telemetry  # noqa: E402
 
 
 async def main():
     logger.info("👷 Worker Node Initialized (Standby Mode)")
     
+    # Start Prometheus metrics server for worker (port 8002)
+    metrics_port = int(os.getenv("METRICS_PORT", 8002))
+    get_telemetry().start_metrics_server(metrics_port)
+    
+    # Init OpenTelemetry for worker tracing
+    from core.telemetry import init_telemetry
+    init_telemetry("sgr-worker")
+
     engine = None
     try:
         engine = CoreEngine()

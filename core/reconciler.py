@@ -56,6 +56,7 @@ class BackgroundReconciler:
                 await self._sweep_orphaned_jobs()
                 await self._extract_safety_cases()
                 await self._reflect_old_memories()
+                await self._decay_memory_embeddings()
 
             except asyncio.CancelledError:
                 break
@@ -201,3 +202,16 @@ class BackgroundReconciler:
                 
         except Exception as e:
             logger.error("reconciler_memory_reflection_error", error=str(e))
+
+    async def _decay_memory_embeddings(self) -> None:
+        """
+        Periodically drops very old episodic memories from the vector DB to prevent
+        unbounded growth and irrelevant context retrieval.
+        """
+        try:
+            memory = Container.get("memory")
+            if memory and hasattr(memory, "apply_time_decay"):
+                # Default decay older than 30 days
+                await memory.apply_time_decay(older_than_days=30)
+        except Exception as e:
+            logger.error("reconciler_memory_decay_error", error=str(e))

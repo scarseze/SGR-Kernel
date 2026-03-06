@@ -23,6 +23,10 @@ class VectorStoreAdapter(ABC):
     async def upsert(self, collection: str, points: List[Any]):
         pass
 
+    @abstractmethod
+    async def delete_by_payload_filter(self, collection: str, key: str, value_lt: Any):
+        pass
+
 
 class QdrantAdapter(VectorStoreAdapter):
     def __init__(self, host: str, port: int, api_key: Optional[str] = None):
@@ -56,9 +60,25 @@ class QdrantAdapter(VectorStoreAdapter):
         return [VectorSearchResult(id=str(hit.id), score=hit.score, payload=hit.payload or {}) for hit in results]
 
     async def upsert(self, collection: str, points: List[Any]):
-        # Implementation depends on PointStruct format
         if inspect.iscoroutinefunction(self.client.upsert):
             await self.client.upsert(collection_name=collection, points=points)
         else:
             # Sync client
             self.client.upsert(collection_name=collection, points=points)
+
+    async def delete_by_payload_filter(self, collection: str, key: str, value_lt: Any):
+        from qdrant_client.http import models
+
+        filter = models.Filter(
+            must=[
+                models.FieldCondition(
+                    key=key,
+                    range=models.Range(lt=value_lt),
+                )
+            ]
+        )
+        
+        if inspect.iscoroutinefunction(self.client.delete):
+            await self.client.delete(collection_name=collection, points_selector=filter)
+        else:
+            self.client.delete(collection_name=collection, points_selector=filter)

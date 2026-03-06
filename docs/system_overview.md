@@ -1,7 +1,7 @@
 # System Overview
 
 **Project**: SGR Kernel  
-**Version**: 2.0.0-rc1 (Multi-Agent Swarm)  
+**Version**: 3.0.0 (Enterprise Swarm Tier)  
 **Status**: Production-Ready  
 **License**: MIT  
 
@@ -62,6 +62,17 @@ The **SGR Kernel** is a specialized Agentic Operating System. Originally a legac
 
 ### ✅ What is in Scope (Что входит)
 *   **Swarm Core**: Conversational orchestration, LLM interfacing, and `TransferToAgent` mechanisms.
+*   **Enterprise Reliability Layer**: 
+    * OTel Tracing & Metrics (Prometheus/Jaeger).
+    * HitL execution pausing on Critic failures.
+    * Active state checkpointing and memory timeline decay.
+*   **V3 Enterprise Safeguards**:
+    * Formal Output Verification (Proof Certificates).
+    * Compliance Engine (152-FZ, GDPR data routing).
+    * Economic Token Ledger & Budget Guards.
+    * ModelRouter for Blue-Green HA swapping.
+    * Automated Root Cause Analysis (RCA).
+    * Privacy-Preserving Federated Learning.
 *   **Agent Ecosystem**: Pre-configured Personas armed with specific capabilities.
 *   **PEFT Lab**: Specialized stack for LoRA training, HPO, and exotic backends (Mamba/RWKV).
 *   **Knowledge Base**: Decoupled RAG implementations.
@@ -105,7 +116,7 @@ The hands of the system.
 # Обзор Системы (System Overview)
 
 **Проект**: SGR Kernel  
-**Версия**: 2.0 (Multi-Agent Swarm)  
+**Версия**: 3.0 (Enterprise Swarm Tier)  
 **Статус**: Production-Ready  
 
 ## 🎯 Назначение (Purpose)
@@ -123,6 +134,17 @@ The hands of the system.
 
 ### ✅ Что Входит (In Scope)
 *   **Swarm Ядро**: Движок передачи контекста (`TransferToAgent`) и ведения истории.
+*   **Enterprise Reliability Layer**: 
+    * Телеметрия OTel (Prometheus/Jaeger).
+    * Приостановка графа (HitL) при сбоях ИИ-Критика.
+    * Активное сохранение стейтов и затухание устаревшей памяти (Decay).
+*   **V3 Корпоративные Предохранители**:
+    * Формальная верификация вывода (OutputSpec).
+    * Комплаенс-маршрутизация (152-ФЗ, GDPR).
+    * Экономический предохранитель бюджетов (Token Ledger).
+    * Бесшовная подмена моделей (ModelRouter/Blue-Green).
+    * Автоматический Root Cause Analysis (RCA).
+    * Федеративное обучение с дифференциальной приватностью.
 *   **Персоналии Агентов**: Готовые Агенты с настроенными системными промптами.
 *   **PEFT Lab**: Стек для LoRA файн-тюнинга, HPO и работы с Mamba/RWKV.
 

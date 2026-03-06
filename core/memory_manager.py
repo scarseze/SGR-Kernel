@@ -93,9 +93,25 @@ class MemoryManager:
                 # Get previous summary to merge
                 prev_summary = await self.memory.get_last_summary(user_id)
 
-                # Create synthetic message for previous summary if exists
+                # Create synthetic message for previous summary if exists, with conflict detection
                 if prev_summary:
-                    msgs_to_compress.insert(0, Message(role="system", content=f"Previous Summary: {prev_summary}"))
+                    new_contexts = "\n".join([f"{m.role}: {m.content}" for m in msgs_to_compress])
+                    conflict_prompt = f"""Does the NEW CONVERSATION contradict or update facts in the PREVIOUS SUMMARY?
+PREVIOUS SUMMARY: {prev_summary}
+NEW CONVERSATION: {new_contexts}
+Answer ONLY with 'YES' or 'NO'."""
+                    is_conflict = False
+                    try:
+                        resp = await self.summarizer.llm.generate(conflict_prompt)
+                        is_conflict = "YES" in resp.upper()
+                    except Exception as e:
+                        logger.warning(f"Conflict detection failed: {e}")
+                        
+                    if is_conflict:
+                        logger.info("Memory conflict detected: prioritizing newer context.")
+                        msgs_to_compress.insert(0, Message(role="system", content=f"Previous Summary (Notice: Some facts may be contradicted by the new conversation, prioritize new conversation): {prev_summary}"))
+                    else:
+                        msgs_to_compress.insert(0, Message(role="system", content=f"Previous Summary: {prev_summary}"))
 
                 # Generate new summary
                 new_summary = await self.summarizer.summarize(msgs_to_compress)

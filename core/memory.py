@@ -166,6 +166,27 @@ class PersistentMemory:
             logger.error(f"Search history failed: {e}")
             return []
 
+    async def apply_time_decay(self, older_than_days: int = 30) -> bool:
+        """Remove episodic memory embeddings older than the specified threshold."""
+        if not self.vector_store:
+            return False
+            
+        try:
+            import datetime
+            cutoff_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=older_than_days)
+            cutoff_iso = cutoff_date.isoformat()
+            
+            await self.vector_store.delete_by_payload_filter(
+                collection=self.collection_name, 
+                key="timestamp", 
+                value_lt=cutoff_iso
+            )
+            logger.info(f"Applied time decay to embeddings older than {cutoff_iso}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to apply time decay: {e}")
+            return False
+
     async def save_summary(self, user_id: str, content: str):
         """Save a new summary."""
         session = session_context.get()
