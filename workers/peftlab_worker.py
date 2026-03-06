@@ -91,7 +91,7 @@ class PEFTLabWorker:
         
         # --- TOP 1% PRINCIPAL: FENCING TOKENS (CAS) ---
         lease_version = payload.get("lease_version", 0)
-        expiry = datetime.datetime.now(datetime.UTC) + datetime.timedelta(seconds=60)
+        expiry = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=60)
         
         cas_success = self.ui_memory.update_job_status(
             job_id, "RUNNING", lease_owner=self.worker_id, lease_expiry=expiry, expected_version=lease_version
@@ -113,7 +113,7 @@ class PEFTLabWorker:
                 while True:
                     await asyncio.sleep(20)
                     await self.redis.pexpire(lease_key, 60000)
-                    new_expiry = datetime.datetime.now(datetime.UTC) + datetime.timedelta(seconds=60)
+                    new_expiry = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=60)
                     success = self.ui_memory.update_job_status(
                         job_id, "RUNNING", lease_owner=self.worker_id, lease_expiry=new_expiry, expected_version=current_version
                     )
@@ -182,7 +182,7 @@ class PEFTLabWorker:
                     
                     # --- L8 DISTINGUISHED: Commit Marker Pattern + Garbage Collection ---
                     # Instead of RENAME ( COPY + DELETE ), we use Versioned Pointers
-                    version_id = f"v_{int(datetime.datetime.now(datetime.UTC).timestamp())}_{current_version}"
+                    version_id = f"v_{int(datetime.datetime.now(datetime.timezone.utc).timestamp())}_{current_version}"
                     
                     # Step 1: Write raw data to a uniquely versioned path
                     versioned_uri = f"s3://sgr-artifacts-bucket/{tenant_id}/peftlab/{job_id}/{version_id}/results.json"
@@ -194,7 +194,7 @@ class PEFTLabWorker:
                         "version_id": version_id,
                         "canonical_uri": versioned_uri,
                         "checksum_sha256": checksum,
-                        "timestamp": datetime.datetime.now(datetime.UTC).isoformat()
+                        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
                     }
                     
                     # Write the pointer atomically. Downstream readers ONLY poll for this file.

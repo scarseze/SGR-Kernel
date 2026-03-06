@@ -25,8 +25,8 @@ sessions_table = Table(
     Column('history_json', Text),
     Column('active_agent_name', String),
     Column('transfer_count', Integer, default=0),
-    Column('created_at', DateTime, default=lambda: datetime.datetime.now(datetime.UTC)),
-    Column('updated_at', DateTime, default=lambda: datetime.datetime.now(datetime.UTC), onupdate=lambda: datetime.datetime.now(datetime.UTC))
+    Column('created_at', DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc)),
+    Column('updated_at', DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
 )
 
 jobs_table = Table(
@@ -39,8 +39,8 @@ jobs_table = Table(
     Column('lease_expiry', DateTime, nullable=True),
     Column('lease_version', Integer, default=0),
     Column('artifact_uri', String, nullable=True),
-    Column('created_at', DateTime, default=lambda: datetime.datetime.now(datetime.UTC)),
-    Column('updated_at', DateTime, default=lambda: datetime.datetime.now(datetime.UTC), onupdate=lambda: datetime.datetime.now(datetime.UTC))
+    Column('created_at', DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc)),
+    Column('updated_at', DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
 )
 
 class UIMemory:
@@ -222,7 +222,7 @@ Summary:"""
                 await self.audit_logger.log_event_async("PII_MASKED", session_id, {"action": "Data masked before async saving"})
                 
             history_json = json.dumps(masked_history, ensure_ascii=False)
-            now = datetime.datetime.now(datetime.UTC)
+            now = datetime.datetime.now(datetime.timezone.utc)
 
             # Upsert logic depends on dialect
             stmt_params = {
@@ -301,7 +301,7 @@ Summary:"""
     async def cleanup_expired_sessions(self, ttl_days: int = 30):
         try:
             from sqlalchemy import delete
-            limit_date = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=ttl_days)
+            limit_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=ttl_days)
             async with self.engine.begin() as conn:
                 stmt = delete(self.sessions).where(self.sessions.c.updated_at < limit_date)
                 result = await conn.execute(stmt)
@@ -457,7 +457,7 @@ Summary:"""
                             # triggering exponential backoff + jitter without hitting the DB's serialization lock manager.
                             return False
 
-                values = {"status": status, "updated_at": datetime.datetime.now(datetime.UTC)}
+                values = {"status": status, "updated_at": datetime.datetime.now(datetime.timezone.utc)}
                 if lease_owner is not self._UNSET:
                     values["lease_owner"] = lease_owner
                 if lease_expiry is not self._UNSET:

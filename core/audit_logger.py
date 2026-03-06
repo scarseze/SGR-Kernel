@@ -25,7 +25,7 @@ class ComplianceAuditLogger:
         return h.hexdigest()
 
     def log_event(self, event_type: str, session_id: str, details: Dict[str, Any]):
-        timestamp = datetime.datetime.now(datetime.UTC).isoformat()
+        timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
         
         payload = {
             "timestamp": timestamp,
