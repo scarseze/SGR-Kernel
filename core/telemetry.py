@@ -98,7 +98,7 @@ class TelemetryManager:
             logger.error(f"Failed to initialize Prometheus metrics: {e}")
             self.prom_enabled = False
 
-    def start_metrics_server(self, port: int = 8001):
+    def start_metrics_server(self, port: int = 8001) -> None:
         if self.prom_enabled:
             try:
                 from prometheus_client import start_http_server
@@ -107,17 +107,17 @@ class TelemetryManager:
             except Exception as e:
                 logger.error(f"Failed to start Prometheus metrics server: {e}")
 
-    def record_llm_call(self, agent: str, model: str, tokens: int, latency_ms: float):
+    def record_llm_call(self, agent: str, model: str, tokens: int, latency_ms: float) -> None:
         if self.prom_enabled:
             self.token_counter.labels(agent=agent, model=model).inc(tokens)
             self.latency_histogram.labels(agent=agent, model=model).observe(latency_ms / 1000.0)
 
-    def record_handoff(self, from_agent: str, to_agent: str):
+    def record_handoff(self, from_agent: str, to_agent: str) -> None:
         if self.prom_enabled:
             self.handoff_counter.labels(from_agent=from_agent, to_agent=to_agent).inc()
 
     @contextmanager
-    def span(self, name: str, attributes: dict[str, Any] | None = None):
+    def span(self, name: str, attributes: dict[str, Any] | None = None) -> Any:
         """Context manager for creating a span. 
         Note: Error-based sampling requires Tail-Based Sampling at the OTel Collector level.
         The current Head-Based Sampler (TraceIdRatioBasedSampler) decides sampling at span start.
@@ -137,18 +137,18 @@ class TelemetryManager:
                 span.record_exception(e)
                 raise
 
-    def log_metric(self, name: str, value: float, attributes: dict[str, Any] | None = None):
+    def log_metric(self, name: str, value: float, attributes: dict[str, Any] | None = None) -> None:
         """Log a metric (Counter/Gauge placeholder)."""
         if not self.enabled:
             return
         logger.info(f"[METRIC] {name}={value} {attributes or {}}")
 
-    def record_metric(self, name: str, value: float, attributes: dict[str, Any] | None = None):
+    def record_metric(self, name: str, value: float, attributes: dict[str, Any] | None = None) -> None:
         """Alias for log_metric — used by SwarmEngine for subswarm_depth tracking."""
         self.log_metric(name, value, attributes)
 
 
-def init_telemetry(service_name: str = "sgr-kernel"):
+def init_telemetry(service_name: str = "sgr-kernel") -> TelemetryManager:
     global _telemetry_instance
     if _telemetry_instance:
         return _telemetry_instance

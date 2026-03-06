@@ -20,13 +20,13 @@ class Container:
     _providers: Dict[str, Any] = {}
 
     @classmethod
-    def register(cls, name: str, service: Any):
+    def register(cls, name: str, service: Any) -> None:
         """Register a pre-instantiated service."""
         cls._services[name] = service
         logger.debug(f"Service registered: {name}")
 
     @classmethod
-    def register_provider(cls, name: str, provider: Any):
+    def register_provider(cls, name: str, provider: Any) -> None:
         """Register a provider function/class for lazy instantiation."""
         cls._providers[name] = provider
         logger.debug(f"Provider registered: {name}")

@@ -31,7 +31,7 @@ class ExecutionPolicy:
 
     @staticmethod
     def decide(policy: RetryPolicy, failure_type: SemanticFailureType, attempts: int) -> RecoveryAction:
-        if attempts >= policy.max_retries:
+        if attempts >= policy.max_attempts:
             return RecoveryAction.ABORT
 
         if failure_type == SemanticFailureType.TIMEOUT:

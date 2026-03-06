@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 try:
     from core.artifacts import ArtifactRef
 except ImportError:
-    ArtifactRef = Any
+    ArtifactRef = Any  # type: ignore
 from core.events import KernelEvent
 
 # --- Enums (RFC v2 Spec) ---
@@ -222,7 +222,7 @@ class ExecutionState(BaseModel):
     llm_call_budget: Optional[int] = None
     llm_calls_used: int = 0
 
-    def initialize_step(self, step_id: str):
+    def initialize_step(self, step_id: str) -> None:
         if step_id not in self.step_states:
             self.step_states[step_id] = StepState(step_id=step_id)
         self.updated_at = time.time()

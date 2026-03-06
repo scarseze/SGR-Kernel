@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ class QuotaManager:
     The window is a simple sliding counter that resets every minute.
     """
 
-    def __init__(self, redis_client, default_budget: float = 10.0, rate_limit: int = 1000, window_seconds: int = 60):
+    def __init__(self, redis_client: Any, default_budget: float = 10.0, rate_limit: int = 1000, window_seconds: int = 60) -> None:
         self.redis = redis_client
         self.default_budget = default_budget
         self.rate_limit = rate_limit
@@ -22,7 +23,7 @@ class QuotaManager:
     def _rate_key(self, org_id: str) -> str:
         return f"{org_id}:rate"
 
-    def init_org(self, org_id: str):
+    def init_org(self, org_id: str) -> None:
         """Create budget and rate keys for a new org if they do not exist."""
         budget_key = self._budget_key(org_id)
         rate_key = self._rate_key(org_id)
