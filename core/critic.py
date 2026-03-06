@@ -20,86 +20,84 @@ class CriticEngine:
         self.llm = llm_service
 
     async def evaluate(
-        self, step_id: str, skill_name: str, inputs: Dict[str, Any], output: Any, requirements: str = ""
+        self, step_id: str, skill_name: str, inputs: Dict[str, Any], output: Any, requirements: str = "", metrics: List[Any] = None
     ) -> Tuple[bool, str]:  # (Passed, Reason)
         """
-        Run a Critic pass on the output using an LLM to judge.
+        Run a Critic pass on the output using EvaluationMetrics.
+        Maintains backward compatibility by converting `requirements` into a `RequirementsMetric`.
         """
-        if not requirements:
-            return True, "No specific requirements."
-
-        system_prompt = (
-            "You are a strict, objective Critic in the SGR Kernel architecture. "
-            "Your job is to evaluate whether a skill's output meets the specified requirements. "
-            "Be extremely rigorous."
-        )
+        from core.metrics import RequirementsMetric
         
-        user_prompt = (
-            f"Step ID: {step_id}\n"
-            f"Skill Executed: {skill_name}\n"
-            f"Skill Inputs: {inputs}\n"
-            f"Requirements: {requirements}\n\n"
-            f"--- OUTPUT TO EVALUATE ---\n{output}\n--------------------------\n"
-        )
+        eval_metrics = metrics or []
+        if requirements:
+            eval_metrics.append(RequirementsMetric(self.llm, requirements))
+
+        if not eval_metrics:
+            return True, "No specific requirements or metrics."
+
+        logger.debug(f"Critic evaluating step {step_id} against {len(eval_metrics)} metrics...")
+        reasons = []
+        
+        # Prepare standard kwargs for metrics
+        kwargs = {
+            "output": str(output),
+            "context": str(inputs),
+            "query": str(inputs.get("query", "")) or str(inputs),
+            "requirements": requirements
+        }
 
         try:
-            logger.debug(f"Critic evaluating step {step_id} via LLM...")
-            result, usage = await self.llm.generate_structured(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                response_model=CriticResponse,
-                temperature=0.0
-            )
-            return result.passed, result.reason
+            for metric in eval_metrics:
+                passed, reason, score = await metric.passes(**kwargs)
+                reasons.append(reason)
+                if not passed:
+                    return False, f"Failed metric: {reason}"
+                    
+            return True, "All metrics passed: " + "; ".join(reasons)
         except Exception as e:
-            logger.error(f"Critic LLM evaluation failed: {e}. Falling back to simple keyword match.")
-            # Fallback to basic keyword matching
-            output_str = str(output).lower()
-            requirement_keywords = [w.strip().lower() for w in requirements.split(",") if w.strip()]
-            matched = [kw for kw in requirement_keywords if kw in output_str]
-            match_ratio = len(matched) / len(requirement_keywords) if requirement_keywords else 1.0
-            
-            if match_ratio >= 0.5:
-                return True, f"Fallback pass: {len(matched)}/{len(requirement_keywords)} keywords found."
-            else:
-                return False, f"Fallback fail: only {len(matched)}/{len(requirement_keywords)} keywords."
+            logger.error(f"Critic evaluation failed: {e}. Defaulting to fallback pass.")
+            return True, f"Fallback pass (Error during evaluation): {e}"
 
     async def evaluate_plan(
-        self, agent_name: str, tool_calls_data: List[Dict[str, Any]], history: List[Dict[str, Any]], requirements: str = ""
+        self, agent_name: str, tool_calls_data: List[Dict[str, Any]], history: List[Dict[str, Any]], requirements: str = "", metrics: List[Any] = None
     ) -> Tuple[bool, str]:  # (Passed, Reason)
         """
-        Evaluate an LLM's proposed plan (tool calls) before execution.
+        Evaluate an LLM's proposed plan (tool calls) before execution using EvaluationMetrics.
         """
-        if not requirements:
-            return True, "No specific plan requirements."
-
-        system_prompt = (
-            "You are a strict, objective Plan Critic in the SGR Kernel architecture. "
-            "Your job is to evaluate whether the proposed action sequence (tool calls) is logical, "
-            "safe, and satisfies the given requirements. Be extremely rigorous."
-        )
+        from core.metrics import RequirementsMetric
         
-        # Keep history concise for the critic to avoid context bloat
+        eval_metrics = metrics or []
+        
+        if requirements:
+            # Wrap the old Plan Critic system prompt logic into a requirements metric format
+            plan_requirements = (
+                f"Evaluate whether the proposed action sequence is logical, safe, and satisfies: {requirements}.\n"
+                f"Agent Name: {agent_name}"
+            )
+            eval_metrics.append(RequirementsMetric(self.llm, plan_requirements))
+
+        if not eval_metrics:
+            return True, "No specific plan requirements or metrics."
+
+        # Keep history concise for context
         condensed_history = history[-5:] if len(history) > 5 else history
         
-        user_prompt = (
-            f"Agent Name: {agent_name}\n"
-            f"Requirements: {requirements}\n\n"
-            f"--- PROPOSED PLAN (TOOL CALLS) ---\n{tool_calls_data}\n--------------------------\n\n"
-            f"--- RECENT CONTEXT ---\n{condensed_history}\n--------------------------\n"
-        )
+        kwargs = {
+            "output": str(tool_calls_data),
+            "context": str(condensed_history),
+            "query": str(condensed_history[-1] if condensed_history else "")
+        }
 
         try:
             logger.debug(f"Plan Critic evaluating proposed tool calls from agent {agent_name}...")
-            result, usage = await self.llm.generate_structured(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                response_model=CriticResponse,
-                temperature=0.0
-            )
-            return result.passed, result.reason
+            reasons = []
+            for metric in eval_metrics:
+                passed, reason, score = await metric.passes(**kwargs)
+                reasons.append(reason)
+                if not passed:
+                    return False, f"Plan failed metric: {reason}"
+
+            return True, "Plan passed all metrics: " + "; ".join(reasons)
         except Exception as e:
             logger.error(f"Plan Critic LLM evaluation failed: {e}. Defaulting to safe (pass).")
-            # If the critic LLM fails, we don't want to block progress completely unless strictly configured.
-            # In a production distributed setting, this might route to a human approval queue.
             return True, "Fallback pass: Critic LLM unavailable."

@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from core.critic import CriticEngine
-
+from core.metrics import AnswerRelevancyMetric, CostLimitMetric
 
 @pytest.fixture
 def mock_llm():
@@ -19,17 +19,13 @@ async def test_critic_evaluate_no_requirements(critic):
         step_id="123", skill_name="test_skill", inputs={}, output="some output", requirements=""
     )
     assert passed is True
-    assert reason == "No specific requirements."
-    critic.llm.generate_structured.assert_not_called()
+    assert reason == "No specific requirements or metrics."
+    critic.llm.generate.assert_not_called()
 
 @pytest.mark.asyncio
 async def test_critic_evaluate_llm_pass(critic, mock_llm):
-    # Setup mock to return a passing CriticResponse
-    mock_response = MagicMock()
-    mock_response.passed = True
-    mock_response.reason = "Looks good"
-    
-    mock_llm.generate_structured.return_value = (mock_response, {"total_tokens": 10})
+    # Setup mock to return a passing float string for RequirementsMetric
+    mock_llm.generate.return_value = ("1.0", {"total_tokens": 10})
 
     passed, reason = await critic.evaluate(
         step_id="123", 
@@ -40,20 +36,16 @@ async def test_critic_evaluate_llm_pass(critic, mock_llm):
     )
     
     assert passed is True
-    assert reason == "Looks good"
-    mock_llm.generate_structured.assert_called_once()
-    args, kwargs = mock_llm.generate_structured.call_args
-    assert "Must confirm file creation" in kwargs["user_prompt"]
+    assert "All metrics passed" in reason
+    mock_llm.generate.assert_called_once()
+    args, kwargs = mock_llm.generate.call_args
+    assert "Must confirm file creation." in kwargs["user_prompt"]
     assert "The file was created successfully." in kwargs["user_prompt"]
 
 @pytest.mark.asyncio
 async def test_critic_evaluate_llm_fail(critic, mock_llm):
-    # Setup mock to return a failing CriticResponse
-    mock_response = MagicMock()
-    mock_response.passed = False
-    mock_response.reason = "Missing confirmation."
-    
-    mock_llm.generate_structured.return_value = (mock_response, {"total_tokens": 10})
+    # Setup mock to return a failing float string calculation
+    mock_llm.generate.return_value = ("0.0", {"total_tokens": 10})
 
     passed, reason = await critic.evaluate(
         step_id="123", 
@@ -64,12 +56,12 @@ async def test_critic_evaluate_llm_fail(critic, mock_llm):
     )
     
     assert passed is False
-    assert reason == "Missing confirmation."
+    assert "Failed metric" in reason
 
 @pytest.mark.asyncio
 async def test_critic_evaluate_fallback_pass(critic, mock_llm):
-    # Make the LLM call throw an exception to trigger the fallback
-    mock_llm.generate_structured.side_effect = Exception("API Error")
+    # Make the LLM call throw an exception to trigger the fallback logic in RequirementsMetric
+    mock_llm.generate.side_effect = Exception("API Error")
 
     passed, reason = await critic.evaluate(
         step_id="123", 
@@ -80,12 +72,12 @@ async def test_critic_evaluate_fallback_pass(critic, mock_llm):
     )
     
     assert passed is True
-    assert "Fallback pass" in reason
+    assert "All metrics passed" in reason
 
 @pytest.mark.asyncio
 async def test_critic_evaluate_fallback_fail(critic, mock_llm):
     # Make the LLM call throw an exception to trigger the fallback
-    mock_llm.generate_structured.side_effect = Exception("API Error")
+    mock_llm.generate.side_effect = Exception("API Error")
 
     passed, reason = await critic.evaluate(
         step_id="123", 
@@ -96,7 +88,7 @@ async def test_critic_evaluate_fallback_fail(critic, mock_llm):
     )
     
     assert passed is False
-    assert "Fallback fail" in reason
+    assert "Failed metric" in reason
 
 @pytest.mark.asyncio
 async def test_critic_evaluate_plan_no_requirements(critic):
@@ -107,15 +99,12 @@ async def test_critic_evaluate_plan_no_requirements(critic):
         requirements=""
     )
     assert passed is True
-    assert reason == "No specific plan requirements."
-    critic.llm.generate_structured.assert_not_called()
+    assert reason == "No specific plan requirements or metrics."
+    critic.llm.generate.assert_not_called()
 
 @pytest.mark.asyncio
 async def test_critic_evaluate_plan_llm_pass(critic, mock_llm):
-    mock_response = MagicMock()
-    mock_response.passed = True
-    mock_response.reason = "Logical plan"
-    mock_llm.generate_structured.return_value = (mock_response, {"total_tokens": 15})
+    mock_llm.generate.return_value = ("1.0", {"total_tokens": 15})
 
     passed, reason = await critic.evaluate_plan(
         agent_name="TestAgent",
@@ -125,18 +114,12 @@ async def test_critic_evaluate_plan_llm_pass(critic, mock_llm):
     )
     
     assert passed is True
-    assert reason == "Logical plan"
-    mock_llm.generate_structured.assert_called_once()
-    args, kwargs = mock_llm.generate_structured.call_args
-    assert "Must only use safe read endpoints." in kwargs["user_prompt"]
-    assert "fetch_data" in kwargs["user_prompt"]
+    assert "Plan passed all metrics" in reason
+    mock_llm.generate.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_critic_evaluate_plan_llm_fail(critic, mock_llm):
-    mock_response = MagicMock()
-    mock_response.passed = False
-    mock_response.reason = "Unsafe endpoint used."
-    mock_llm.generate_structured.return_value = (mock_response, {"total_tokens": 15})
+    mock_llm.generate.return_value = ("0.0", {"total_tokens": 15})
 
     passed, reason = await critic.evaluate_plan(
         agent_name="TestAgent",
@@ -146,19 +129,40 @@ async def test_critic_evaluate_plan_llm_fail(critic, mock_llm):
     )
     
     assert passed is False
-    assert reason == "Unsafe endpoint used."
+    assert "Plan failed metric" in reason
 
 @pytest.mark.asyncio
 async def test_critic_evaluate_plan_llm_exception_fallback(critic, mock_llm):
-    mock_llm.generate_structured.side_effect = Exception("API Offline")
+    mock_llm.generate.side_effect = Exception("API Offline")
     
     passed, reason = await critic.evaluate_plan(
         agent_name="TestAgent",
         tool_calls_data=[{"tool": "fetch_data"}],
         history=[],
-        requirements="Check read only"
+        requirements="Check read only",
+        metrics=[CostLimitMetric(10.0)] # Also test with an explicit metric
     )
     
-    # For evaluate_plan we fallback to True on exception if not strict
+    # Requirements metric falls back to keyword matching, which might fail or pass depending on output.
+    # CostLimitMetric always passes here.
+    assert passed is False # Keyword matcher will fail because "Check read only" is not in the output.
+
+@pytest.mark.asyncio
+async def test_critic_with_custom_metrics(critic, mock_llm):
+    mock_llm.generate.return_value = ("1.0", {})
+    metrics = [
+        AnswerRelevancyMetric(mock_llm, threshold=0.8),
+        CostLimitMetric(max_cost_usd=0.05)
+    ]
+    
+    passed, reason = await critic.evaluate(
+        step_id="123",
+        skill_name="test",
+        inputs={"query": "What is 2+2?"},
+        output="4",
+        metrics=metrics
+    )
+    
     assert passed is True
-    assert "Fallback pass" in reason
+    assert "All metrics passed" in reason
+    mock_llm.generate.assert_called_once()

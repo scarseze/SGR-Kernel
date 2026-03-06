@@ -55,6 +55,7 @@ class BackgroundReconciler:
                 # We are the Leader. Run the sweep.
                 await self._sweep_orphaned_jobs()
                 await self._extract_safety_cases()
+                await self._reflect_old_memories()
 
             except asyncio.CancelledError:
                 break
@@ -177,3 +178,26 @@ class BackgroundReconciler:
                     
         except Exception as e:
             logger.error("reconciler_safety_case_extraction_error", error=str(e))
+
+    async def _reflect_old_memories(self) -> None:
+        """
+        Memory Optimization Worker:
+        Periodically digs out old, inactive chat sessions with long message histories
+        and condenses them into smaller semantic summaries (embeddings/short context) 
+        to keep the context window trim while preserving global history.
+        """
+        ui_memory = Container.get("ui_memory")
+        if not ui_memory:
+            return
+
+        try:
+            unreflected = await ui_memory.get_unreflected_sessions(limit=5, inactive_hours=1)
+            for session in unreflected:
+                session_id = session["session_id"]
+                org_id = session["org_id"]
+                history = session["history"]
+                
+                await ui_memory.reflect_session(session_id, history, org_id)
+                
+        except Exception as e:
+            logger.error("reconciler_memory_reflection_error", error=str(e))

@@ -1,0 +1,5 @@
+{"id":"sample_1","input":{"query":"What is the capital of France?","type":"general","slices":["all","geo"]},"ground_truth":{"content":"Paris"}}
+{"id":"sample_2","input":{"query":"Calculate 2 + 2","type":"math","slices":["all","math"]},"ground_truth":{"content":"4"}}
+{"id":"sample_3","input":{"query":"Translate 'Hello' to Spanish","type":"translation","slices":["all","lang"]},"ground_truth":{"content":"Hola"}}
+{"id":"sample_4","input":{"query":"What is the speed of light?","type":"physics","slices":["all","science"]},"ground_truth":{"content":"299,792,458 m/s"}}
+{"id":"sample_5","input":{"query":"Respond with exactly 'ACK'. Do not say anything else.","type":"instruction","slices":["all","strict"]},"ground_truth":{"content":"ACK"}}

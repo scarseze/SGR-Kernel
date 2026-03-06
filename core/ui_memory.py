@@ -309,6 +309,70 @@ Summary:"""
             logger.error(f"Failed to load session for {session_id}: {str(e)}")
             return [], None, 0
 
+    async def get_unreflected_sessions(self, limit: int = 50, inactive_hours: int = 1) -> List[Dict[str, Any]]:
+        """
+        Finds sessions that haven't been updated recently and might have long histories.
+        """
+        from sqlalchemy import select
+        now = datetime.datetime.now(datetime.timezone.utc)
+        threshold_time = now - datetime.timedelta(hours=inactive_hours)
+        
+        try:
+            async with self.engine.begin() as conn:
+                stmt = select(
+                    self.sessions.c.session_id,
+                    self.sessions.c.org_id,
+                    self.sessions.c.history_json
+                ).where(self.sessions.c.updated_at < threshold_time).limit(limit)
+                
+                result = await conn.execute(stmt)
+                sessions = []
+                for row in result.fetchall():
+                    history = json.loads(row[2])
+                    # Only reflect if the history is long enough to warrant compression
+                    if len(history) > 15:
+                        sessions.append({
+                            "session_id": row[0],
+                            "org_id": row[1],
+                            "history": history
+                        })
+                return sessions
+        except Exception as e:
+            logger.error(f"get_unreflected_sessions_error: {e}")
+            return []
+
+    async def reflect_session(self, session_id: str, history: List[Dict[str, Any]], org_id: str = "default_org") -> bool:
+        """
+        Compresses a session's history and saves it back to the database.
+        """
+        try:
+            logger.info("reflecting_session", session_id=session_id, original_messages=len(history))
+            # Force compression down to 10 messages max
+            compressed_history = await self.async_truncate_history(history, max_messages=10)
+            
+            if len(compressed_history) < len(history):
+                # We actually compressed it, save it back
+                history_json = json.dumps(compressed_history, ensure_ascii=False)
+                now = datetime.datetime.now(datetime.timezone.utc)
+                
+                from sqlalchemy import update
+                async with self.engine.begin() as conn:
+                    await self._enforce_tenant_residency(org_id)
+                    await self._apply_rls_context(conn, org_id)
+                    
+                    stmt = update(self.sessions).where(self.sessions.c.session_id == session_id).values(
+                        history_json=history_json,
+                        updated_at=now # Touch the updated_at so we don't scan it again immediately
+                    )
+                    await conn.execute(stmt)
+                
+                logger.info("session_reflection_complete", session_id=session_id, new_messages=len(compressed_history))
+                return True
+        except Exception as e:
+            logger.error(f"reflect_session_error for {session_id}: {e}")
+            
+        return False
+
     async def cleanup_expired_sessions(self, ttl_days: int = 30):
         try:
             from sqlalchemy import delete
