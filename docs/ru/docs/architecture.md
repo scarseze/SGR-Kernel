@@ -48,41 +48,33 @@ graph TD
     PEFT -.->|Lazy Load| Torch
 ```
 
-## Abstract Execution Flow
+## ⚡ Abstract Execution Flow
 
-```text
-User Message -> WebUI
-     │
-     ▼
-SwarmEngine.execute(active_agent, history)
-     │
-     ▼
-active_agent (e.g. RouterAgent) -> LLM generate
-     │
-     ▼
-LLM returns ToolCall(transfer_to_knowledgeagent)
-     │
-     ▼
-Handoff Skill executes, returns TransferToAgent
-     │
-     ▼
-SwarmEngine updates active_agent = KnowledgeAgent
-SwarmEngine updates history System Prompt
-     │
-     ▼
-KnowledgeAgent -> LLM generate
-     │
-     ▼
-LLM returns ToolCall(knowledge_base_search)
-     │
-     ▼
-KnowledgeBaseSkill dynamically loads VectorDB dependencies
-     │
-     ▼
-Results appended to history
-     │
-     ▼
-KnowledgeAgent generates text response -> User
+```mermaid
+sequenceDiagram
+    actor User
+    participant WebUI as Chainlit UI
+    participant Engine as SwarmEngine
+    participant Router as RouterAgent
+    participant LLM
+    participant KA as KnowledgeAgent
+    participant Skill as KnowledgeBaseSkill
+
+    User->>WebUI: User Message
+    WebUI->>Engine: execute(active_agent, history)
+    Engine->>Router: active_agent initiates generate
+    Router->>LLM: generate
+    LLM-->>Router: ToolCall(transfer_to_knowledgeagent)
+    Router->>Engine: Handoff Skill executes, returns TransferToAgent
+    Engine->>Engine: updates active_agent = KnowledgeAgent
+    Engine->>Engine: updates history System Prompt
+    Engine->>KA: active_agent initiates generate
+    KA->>LLM: generate
+    LLM-->>KA: ToolCall(knowledge_base_search)
+    KA->>Skill: executes
+    Skill->>Skill: dynamically load VectorDB dependencies
+    Skill-->>Engine: Results appended to history
+    KA->>User: generates text response
 ```
 
 ---

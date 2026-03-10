@@ -6,7 +6,7 @@ The SGR Kernel version 3.0 introduces a robust "Enterprise Readiness" tier. It s
 
 Large LLM workflows (such as formatting massive GOST documents or running deep multi-step searches) can crash mid-flight due to external API failures or network timeouts.
 
-The `CheckpointManager` records the serialized state of the execution graph after every major transition into `core/checkpoints/`. If an agent is interacting via the Telegram Bot, operators can use the `/rollback` command to manually resume a broken session from the exact point before the crash without re-triggering expensive LLM calls from the start.
+The `CheckpointManager` records the serialized state of the execution after every major transition into `core/checkpoints/`. If an agent is interacting via the Telegram Bot, operators can use the `/rollback` command to manually resume a broken session from the exact point before the crash without re-triggering expensive LLM calls from the start.
 
 ## 2. Distributed Observability (OpenTelemetry)
 
@@ -20,7 +20,7 @@ Visualizing the execution of asynchronous graphs is critical in production. The 
 Fully autonomous agents are dangerous when dealing with critical logic without guardrails. 
 
 The `CriticEngine` evaluates intermediate LLM outputs mathematically or via a secondary LLM rubrick. If the primary LLM consistently fails the critic's evaluations, the Orchestrator will prevent an infinite looping scenario.
-Instead of aborting immediately, it transitions the DAG to `PAUSED_APPROVAL` and emits an `EXECUTION_PAUSED` event. A human operator can review the partial output, the critic's rejection reason, and choose to manually override the critic to force-commit the step, saving the execution path.
+Instead of aborting immediately, it transitions the session to `PAUSED_APPROVAL` and emits an `EXECUTION_PAUSED` event. A human operator can review the partial output, the critic's rejection reason, and choose to manually override the critic to force-commit the step, saving the execution path.
 
 ## 4. Memory Reflection & Decay
 

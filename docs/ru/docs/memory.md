@@ -23,4 +23,4 @@
 
 ## 5. Deployment (MLOps)
 1. Вливание pull request с новым промптом и весами в `main`.
-2. SGR Kernel обновляет DAG для Production.
+2. SGR Kernel обновляет конфигурацию Swarm для Production.
