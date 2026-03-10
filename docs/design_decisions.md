@@ -40,7 +40,7 @@ We realized that distributed execution is a generic requirement, not specific to
 Use the `RequestTrace` JSON files as the definitive source of truth for persistence and recovery. Save after every step.
 
 ### Why
-We needed a way to recover from crashes without implementing a complex database schema for DAG state. Traces already captureinputs, outputs, and status.
+We needed a way to recover from crashes without implementing a complex database schema for execution state. Traces already captureinputs, outputs, and status.
 
 ### Trade-offs
 *   **Pros**:
@@ -101,7 +101,7 @@ Use Mermaid.js inside Markdown for all architectural diagrams.
 
 ## 002. Trace как WAL (Write-Ahead Log)
 *   **Решение**: Использовать JSON файлы трейсов как источник истины для персистентности.
-*   **Почему**: Проще, чем поддерживать отдельную БД для состояния DAG.
+*   **Почему**: Проще, чем поддерживать отдельную БД для состояния выполнения.
 *   **Trade-off**: IO нагрузка (пишем полный JSON каждый шаг), но зато надежно и читаемо.
 
 ## 003. Docker Sandbox для Кодинга

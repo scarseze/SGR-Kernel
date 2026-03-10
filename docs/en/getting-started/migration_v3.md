@@ -11,8 +11,8 @@ This guide provides a clear path for enterprise clients migrating from SGR Kerne
 
 2. **From Single Agent to SwarmEngine**
    - V2 used a linear execution path.
-   - V3 introduces the `SwarmEngine`, which routes tasks dynamically to specialized agents (`CriticEngine`, `Researcher`, etc.) via DAG (Directed Acyclic Graph) topologies.
-   - *Action*: Update legacy `Kernel.run()` calls to initialize a `SwarmEngine` and submit plans via `orchestrator.execute()`.
+   - V3 introduces the `SwarmEngine`, which routes tasks dynamically to specialized agents (`CriticEngine`, `Researcher`, etc.) based on intent and context.
+   - *Action*: Update legacy `Kernel.run()` calls to initialize a `SwarmEngine` and submit tasks via `engine.execute()`.
 
 3. **Enterprise Safeguards (New in V3)**
    - **Economic Layer**: All LLM calls are now intercepted by the `BudgetGuard`. You must explicitly provide an `economic_budget` in the session context, otherwise execution will fail with `BudgetExceededError`.

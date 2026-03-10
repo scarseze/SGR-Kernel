@@ -62,7 +62,7 @@ The underlying execution loop enforces several Enterprise Readiness invariants:
 *   **State Checkpointing**: System state is snapshotted via `CheckpointManager`. Users can invoke a Telegram `/rollback` to restore past Execution States.
 *   **Distributed Observability**: OpenTelemetry tracing propagates `request_id` across remote `sgr-worker` nodes, exposing end-to-end spans to Jaeger.
 *   **Memory Decay & Conflicts**: The `BackgroundReconciler` continuously runs `apply_time_decay()` to purge obsolete vector embeddings. To prevent hallucination, an LLM checks for contradictions between old semantic summaries and new contextual data, prioritizing recent info.
-*   **Human-in-the-Loop (HitL)**: If the `CriticEngine` repeatedly rejects an LLM's output (semantic failures), the DAG halts and transitions to `PAUSED_APPROVAL`, allowing a designated operator to override the critic and force-commit the result.
+*   **Human-in-the-Loop (HitL)**: If the `CriticEngine` repeatedly rejects an LLM's output (semantic failures), the swarm execution pauses and transitions to `PAUSED_APPROVAL`, allowing a designated operator to override the critic and force-commit the result.
 *   **V3 Spec-to-Code & Compliance**: Every LLM output is formally verified against an `OutputSpec`. The workflow respects data locality via `Compliance Engine` policies (e.g. 152-FZ).
 *   **V3 Economics & HA**: `TokenLedger` halts executions exceeding organizational budgets. `ModelRouter` dynamically falls back to alternate LLMs during provider outages without losing active conversational context.
 
