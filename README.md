@@ -156,6 +156,24 @@ graph LR
 
 ---
 
+## 🎯 System Analyst Portfolio Highlights
+
+Этот проект демонстрирует ключевые навыки **Системного Аналитика**:
+
+| Навык | Артефакт |
+|:------|:---------|
+| **System Decomposition** | 5 изолированных слоёв (Orchestration, State, Skills, Security, Reliability) |
+| **API & Contract Design** | [API Contracts](docs/sa_portfolio/api_contracts.md) — HTTP API, LLM integration, Middleware Pipeline |
+| **Event-Driven Architecture** | [Event Catalog](docs/sa_portfolio/event_catalog.md) — 13 типов событий, State Machine диаграммы |
+| **Data Modeling** | [Data Models](docs/sa_portfolio/data_models.md) — Pydantic-модели, Enums, Class Diagram |
+| **Security Design** | [Security Overview](docs/sa_portfolio/security_overview.md) — Defense-in-Depth, Compliance (152-ФЗ, GDPR) |
+| **Formal Verification** | 6 TLA+ спецификаций, 49 248 верифицированных состояний |
+| **Architecture Decisions** | 7 ADR в [docs/adr/](docs/adr/) |
+
+👉 **[Полный портфолио документ →](docs/sa_portfolio/SA_PORTFOLIO.md)**
+
+---
+
 ## 🇺🇸 English
 
 ### ℹ️ Overview
@@ -286,19 +304,19 @@ chainlit run ui_app.py
 
 ## 🎯 System Analyst Portfolio Highlights
 
-Этот проект демонстрирует ключевые навыки **Системного Аналитика**:
+This project demonstrates key **Systems Analyst** skills:
 
-| Навык | Артефакт |
+| Skill | Artifact |
 |:------|:---------|
-| **System Decomposition** | 5 изолированных слоёв (Orchestration, State, Skills, Security, Reliability) |
+| **System Decomposition** | 5 isolated layers (Orchestration, State, Skills, Security, Reliability) |
 | **API & Contract Design** | [API Contracts](docs/sa_portfolio/api_contracts.md) — HTTP API, LLM integration, Middleware Pipeline |
-| **Event-Driven Architecture** | [Event Catalog](docs/sa_portfolio/event_catalog.md) — 13 типов событий, State Machine диаграммы |
-| **Data Modeling** | [Data Models](docs/sa_portfolio/data_models.md) — Pydantic-модели, Enums, Class Diagram |
-| **Security Design** | [Security Overview](docs/sa_portfolio/security_overview.md) — Defense-in-Depth, Compliance (152-ФЗ, GDPR) |
-| **Formal Verification** | 6 TLA+ спецификаций, 49 248 верифицированных состояний |
-| **Architecture Decisions** | 7 ADR в [docs/adr/](docs/adr/) |
+| **Event-Driven Architecture**| [Event Catalog](docs/sa_portfolio/event_catalog.md) — 13 event types, State Machine diagrams |
+| **Data Modeling** | [Data Models](docs/sa_portfolio/data_models.md) — Pydantic models, Enums, Class Diagram |
+| **Security Design** | [Security Overview](docs/sa_portfolio/security_overview.md) — Defense-in-Depth, Compliance (152-FZ, GDPR) |
+| **Formal Verification** | 6 TLA+ specifications, 49,248 verified states |
+| **Architecture Decisions**| 7 ADRs in [docs/adr/](docs/adr/) |
 
-👉 **[Полный портфолио документ →](docs/sa_portfolio/SA_PORTFOLIO.md)**
+👉 **[Full Portfolio Document →](docs/sa_portfolio/SA_PORTFOLIO.md)**
 
 ---
 

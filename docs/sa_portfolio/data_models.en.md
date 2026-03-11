@@ -1,0 +1,202 @@
+# Data Models — SGR Kernel
+
+> **Version**: 3.0 | **Sources**: [`core/types.py`](file:///c:/Users/macht/SA/sgr_kernel/core/types.py), [`core/agent.py`](file:///c:/Users/macht/SA/sgr_kernel/core/agent.py), [`core/execution/__init__.py`](file:///c:/Users/macht/SA/sgr_kernel/core/execution/__init__.py)
+
+All data models are implemented as **Pydantic BaseModels** ensuring runtime validation, JSON serialization, and auto-generated schemas.
+
+---
+
+## Model Hierarchy
+
+```mermaid
+classDiagram
+    direction TB
+
+    class Agent {
+        +name: str
+        +instructions: str
+        +skills: List~BaseSkill~
+        +model: str
+        +lora_adapter: Optional~str~
+        +supported_modalities: List~Modality~
+        +dynamic_guardrails: Optional~GuardrailSpec~
+        +plan_requirements: Optional~str~
+    }
+
+    class SubSwarmAgent {
+        +sub_swarm_config: Optional~Dict~
+        +is_sub_swarm: bool
+    }
+
+    class BaseSkill {
+        <<abstract>>
+        +name: str*
+        +description: str*
+        +metadata: SkillMetadata*
+        +input_schema: Type~BaseModel~*
+        +execute(params, state)*
+        +is_sensitive(params): bool
+    }
+
+    class SkillMetadata {
+        +name: str
+        +version: str
+        +capabilities: List~Capability~
+        +risk_level: RiskLevel
+        +cost_class: CostClass
+        +retry_policy: RetryPolicy
+        +timeout_sec: float
+        +estimated_cost: float
+        +side_effects: bool
+        +idempotent: bool
+        +requires_sandbox: bool
+        +requires_approval_hint: bool
+    }
+
+    class ExecutionState {
+        +request_id: str
+        +plan_ir: Optional~PlanIR~
+        +step_states: Dict~str, StepState~
+        +status: ExecutionStatus
+        +event_log: List~KernelEvent~
+        +processed_event_ids: Set~str~
+        +token_budget: Optional~int~
+        +tokens_used: int
+    }
+
+    class PlanIR {
+        +id: str
+        +steps: List~StepNode~
+        +edges: List~DependencyEdge~
+        +global_risk_level: str
+    }
+
+    class StepNode {
+        +id: str
+        +skill_name: str
+        +inputs_template: Dict
+        +critic_required: bool
+        +approval_required: bool
+        +retry_policy: Optional~RetryPolicy~
+        +timeout_seconds: float
+    }
+
+    class KernelEvent {
+        +event_id: str
+        +type: EventType
+        +payload: Dict
+        +request_id: str
+        +timestamp: float
+        +span_id: Optional~str~
+    }
+
+    Agent <|-- SubSwarmAgent
+    Agent "1" o-- "*" BaseSkill
+    Agent o-- GuardrailSpec
+    BaseSkill --> SkillMetadata
+    ExecutionState o-- PlanIR
+    ExecutionState o-- "*" KernelEvent
+    PlanIR o-- "*" StepNode
+    PlanIR o-- "*" DependencyEdge
+```
+
+---
+
+## Enums
+
+### ExecutionStatus — Global Execution FSM
+| Value | Description |
+|:------|:------------|
+| `CREATED` | Request received, plan not yet generated |
+| `PLANNED` | Plan IR created, waiting for execution |
+| `RUNNING` | Active DAG execution in progress |
+| `PAUSED_APPROVAL` | Waiting for human-in-the-loop approval |
+| `REPAIRING` | Automatic repair of a failed step |
+| `ESCALATING` | Escalating to a more capable LLM tier |
+| `COMPLETED` | All steps successfully finished |
+| `FAILED` | Unrecoverable failure |
+| `ABORTED` | Manually aborted |
+
+### StepStatus — Individual Step FSM
+| Value | Description |
+|:------|:------------|
+| `PENDING` | Waiting for dependencies |
+| `READY` | Dependencies resolved |
+| `RUNNING` | Actively executing |
+| `VALIDATING` | Output validation in progress |
+| `CRITIC` | Semantic check by CriticEngine |
+| `REPAIR` | Automatic repair via LLM retry |
+| `APPROVAL` | HitL human approval needed |
+| `COMMITTED` | Successfully finished |
+| `FAILED` | Execution failed completely |
+| `RETRY_WAIT` | Pending retry due to transient error |
+
+### SemanticFailureType
+| Value | Description |
+|:------|:------------|
+| `SCHEMA_FAIL` | Output does not match expected JSON schema |
+| `CRITIC_FAIL` | CriticEngine rejected the result |
+| `LOW_CONFIDENCE` | LLM self-reported low confidence |
+| `TIMEOUT` | Time limit exceeded |
+| `TOOL_ERROR` | Error executing tool / skill |
+| `CAPABILITY_VIOLATION` | Skill lacks required capability flag |
+| `CONSTRAINT_VIOLATION` | Business constraint violation |
+| `POLICY_VIOLATION` | Rejected by PolicyEngine |
+
+### Capability
+`REASONING` · `WEB` · `FILESYSTEM` · `DB` · `CODE` · `API` · `LLM` · `PLANNING` · `REPORT_WRITING`
+
+### RiskLevel / CostClass
+`LOW` / `MEDIUM` / `HIGH` — `CHEAP` / `NORMAL` / `EXPENSIVE`
+
+---
+
+## Control Plane ↔ Data Plane Contract
+
+```mermaid
+flowchart LR
+    subgraph CP["Control Plane (Orchestrator)"]
+        O[ExecutionOrchestrator]
+    end
+
+    subgraph DP["Data Plane (Worker)"]
+        W[run_worker.py]
+    end
+
+    O -->|ExecutionSpec| W
+    W -->|KernelEvent| O
+
+    style CP fill:#2563eb,color:white
+    style DP fill:#16a34a,color:white
+```
+
+**ExecutionSpec** — formal task specification generated by the Control Plane:
+
+| Field | Type | Purpose |
+|:------|:-----|:--------|
+| `image_ref` | `str` | Docker/OCI image (`sgr-peftlab:v2.1`) |
+| `resource_limits` | `Dict` | `{cpu: 4, gpu: 1, ram: "16Gi"}` |
+| `input_uri` | `Optional[str]` | Immutable URI for input data |
+| `output_uri` | `Optional[str]` | Deterministic URI for artifacts |
+| `retry_policy` | `Dict` | `{max_retries: 3, backoff: "exponential"}` |
+| `cost_tier` | `str` | `SPOT` or `ONDEMAND` |
+| `trace_context` | `Dict[str, str]` | OpenTelemetry `trace_id` + `span_id` |
+
+---
+
+## Middleware Pipeline Context
+
+**SkillExecutionContext** — object passed throughout the middleware pipeline:
+
+| Field | Type | Purpose |
+|:------|:-----|:--------|
+| `request_id` | `str` | Correlation with global request |
+| `step_id` | `str` | ID of the current running step |
+| `skill_name` | `str` | Skill being executed |
+| `params` | `Dict` | Validated parameter inputs |
+| `state` | `ExecutionState` | Global execution state |
+| `metadata` | `SkillMetadata` | Skill metadata (timeout, risk, etc.) |
+| `trace` | `StepTrace` | Telemetry tracing context |
+| `attempt` | `int` | Attempt number (1-based) |
+| `timeout` | `float` | Handled **exclusively** by `TimeoutMiddleware` |
+| `llm` | `Optional[LLMService]` | Router-selected LLM instance |
