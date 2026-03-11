@@ -16,7 +16,7 @@ SGR Kernel — Минимальный пример Swarm из 2 агентов.
 """
 
 import asyncio
-from typing import Any, Optional, Type
+from typing import Any, Type
 
 from pydantic import BaseModel
 
@@ -24,7 +24,6 @@ from core.agent import Agent, TransferToAgent
 from core.swarm import SwarmEngine
 from core.types import Capability, SkillMetadata
 from skills.base import BaseSkill
-
 
 # ─── 1. Определяем скиллы ──────────────────────────────
 
