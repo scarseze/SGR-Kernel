@@ -83,6 +83,12 @@ nav:
     - 🏛️ Architecture: docs/architecture.md
     - 📑 L8 System Invariants: docs/l8_distinguished_invariants.md
     - ⚖️ L8 Architecture Annex: docs/L8_ARCHITECTURE_ANNEX.md
+  - 🎯 SA Portfolio:
+    - 🛡️ Главная: docs/sa_portfolio/SA_PORTFOLIO.md
+    - 🔌 API Contracts: docs/sa_portfolio/api_contracts.md
+    - 📦 Data Models: docs/sa_portfolio/data_models.md
+    - 🎟️ Event Catalog: docs/sa_portfolio/event_catalog.md
+    - 🔒 Security Overview: docs/sa_portfolio/security_overview.md
     - docs/swarm-protocol.md
     - docs/agents.md
     - docs/memory.md
