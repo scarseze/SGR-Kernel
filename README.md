@@ -1,6 +1,6 @@
-# 🚀 SGR Kernel (Agentic OS)
+# 🚀 SGR Kernel — Middleware & Orchestration Engine for AI Agents
 
-> **Enterprise-Grade Agentic Kernel for Automated Research & Engineering / Ядро корпоративного уровня для автоматизированных исследований и инжиниринга**
+> **Enterprise-Grade Agentic Kernel for Automated Research & Engineering / Ядро корпоративного уровня для оркестрации и автоматизации AI-агентов**
 
 [![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)](https://github.com/scarseze/sgr-kernel)
 [![TLA+ Verified](https://img.shields.io/badge/TLA%2B-49K%20states%20✓-blue)](https://github.com/scarseze/sgr-kernel/tree/main/specs)
@@ -284,10 +284,29 @@ chainlit run ui_app.py
 
 ---
 
+## 🎯 System Analyst Portfolio Highlights
+
+Этот проект демонстрирует ключевые навыки **Системного Аналитика**:
+
+| Навык | Артефакт |
+|:------|:---------|
+| **System Decomposition** | 5 изолированных слоёв (Orchestration, State, Skills, Security, Reliability) |
+| **API & Contract Design** | [API Contracts](docs/sa_portfolio/api_contracts.md) — HTTP API, LLM integration, Middleware Pipeline |
+| **Event-Driven Architecture** | [Event Catalog](docs/sa_portfolio/event_catalog.md) — 13 типов событий, State Machine диаграммы |
+| **Data Modeling** | [Data Models](docs/sa_portfolio/data_models.md) — Pydantic-модели, Enums, Class Diagram |
+| **Security Design** | [Security Overview](docs/sa_portfolio/security_overview.md) — Defense-in-Depth, Compliance (152-ФЗ, GDPR) |
+| **Formal Verification** | 6 TLA+ спецификаций, 49 248 верифицированных состояний |
+| **Architecture Decisions** | 7 ADR в [docs/adr/](docs/adr/) |
+
+👉 **[Полный портфолио документ →](docs/sa_portfolio/SA_PORTFOLIO.md)**
+
+---
+
 ## 📚 Documentation Index / Индекс Документации
 
 | Topic / Тема | English | Русский |
 | :--- | :--- | :--- |
+| **SA Portfolio** | [SA_PORTFOLIO.md](docs/sa_portfolio/SA_PORTFOLIO.md) | — |
 | **Enterprise Features** | [Features](docs/en/enterprise/features.md) | [Функции](docs/ru/enterprise/features.md) |
 | **SLO & Error Budget** | [SLO Contract](docs/en/enterprise/slo.md) | [SLO Контракт](docs/ru/enterprise/slo.md) |
 | **Migration V2 → V3** | [Migration Guide](docs/en/getting-started/migration_v3.md) | [Гайд по миграции](docs/ru/getting-started/migration_v3.md) |
