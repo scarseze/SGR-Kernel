@@ -156,7 +156,7 @@ graph LR
 
 ---
 
-## 🎯 System Analyst Portfolio Highlights
+### 🎯 System Analyst Portfolio Highlights
 
 Этот проект демонстрирует ключевые навыки **Системного Аналитика**:
 
@@ -302,7 +302,7 @@ chainlit run ui_app.py
 
 ---
 
-## 🎯 System Analyst Portfolio Highlights
+### 🎯 System Analyst Portfolio Highlights
 
 This project demonstrates key **Systems Analyst** skills:
 
@@ -324,7 +324,7 @@ This project demonstrates key **Systems Analyst** skills:
 
 | Topic / Тема | English | Русский |
 | :--- | :--- | :--- |
-| **SA Portfolio** | [SA_PORTFOLIO.md](docs/sa_portfolio/SA_PORTFOLIO.md) | — |
+| **SA Portfolio** | [SA_PORTFOLIO.en.md](docs/sa_portfolio/SA_PORTFOLIO.en.md) | [SA_PORTFOLIO.md](docs/sa_portfolio/SA_PORTFOLIO.md) |
 | **Enterprise Features** | [Features](docs/en/enterprise/features.md) | [Функции](docs/ru/enterprise/features.md) |
 | **SLO & Error Budget** | [SLO Contract](docs/en/enterprise/slo.md) | [SLO Контракт](docs/ru/enterprise/slo.md) |
 | **Migration V2 → V3** | [Migration Guide](docs/en/getting-started/migration_v3.md) | [Гайд по миграции](docs/ru/getting-started/migration_v3.md) |
