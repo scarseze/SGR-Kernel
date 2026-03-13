@@ -316,7 +316,7 @@ This project demonstrates key **Systems Analyst** skills:
 | **Formal Verification** | 6 TLA+ specifications, 49,248 verified states |
 | **Architecture Decisions**| 7 ADRs in [docs/adr/](docs/adr/) |
 
-👉 **[Full Portfolio Document →](docs/sa_portfolio/SA_PORTFOLIO.md)**
+👉 **[Full Portfolio Document →](docs/sa_portfolio/SA_PORTFOLIO.en.md)**
 
 ---
 
